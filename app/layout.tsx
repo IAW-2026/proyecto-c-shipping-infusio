@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
+import { Header } from '@/app/ui/header'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 // import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+import './ui/globals.css'
 
 const cormorant = Cormorant_Garamond({ 
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${cormorant.variable} ${dmSans.variable} bg-background`}>
       <body className="font-sans antialiased">
+        <Header />
         {children}
         {/* {process.env.NODE_ENV === 'production' && <Analytics />} */}
         {process.env.NODE_ENV === 'production'}
