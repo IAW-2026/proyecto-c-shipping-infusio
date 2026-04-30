@@ -13,22 +13,22 @@ export function Header() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-serif text-2xl font-medium tracking-tight text-foreground">Infusio</span>
+            <span className="infusio">Infusio</span>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors uppercase">
+          <Link href="/" className="uppernav-component">
             Mis Envíos
           </Link>
-          <Link href="/" className="text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors uppercase">
+          <Link href="/" className="uppernav-component">
             Historial
           </Link>
-          <Link href="/" className="text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors uppercase">
+          <Link href="/" className="uppernav-component">
             Direcciones
           </Link>
-          <Link href="/" className="text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors uppercase">
+          <Link href="/" className="uppernav-component">
             Ayuda
           </Link>
         </div>
@@ -56,16 +56,16 @@ export function Header() {
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background px-6 py-4 space-y-4">
-          <Link href="/" className="block text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground uppercase">
+          <Link href="/" className="uppernav-component">
             Mis Envíos
           </Link>
-          <Link href="/" className="block text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground uppercase">
+          <Link href="/" className="uppernav-component">
             Historial
           </Link>
-          <Link href="/" className="block text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground uppercase">
+          <Link href="/" className="uppernav-component">
             Direcciones
           </Link>
-          <Link href="/" className="block text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground uppercase">
+          <Link href="/" className="uppernav-component">
             Ayuda
           </Link>
           <div className="flex gap-3 pt-4">

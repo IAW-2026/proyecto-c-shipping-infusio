@@ -262,3 +262,26 @@
   width: 2.5rem;
   height: 2.5rem;
 }
+
+/* ---------------- OTHER COMPONENTS ---------------- */
+
+.uppernav-component {
+  display: block;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  letter-spacing: 0.05em; /* tracking-wide */
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+.uppernav-component:hover {
+  color: var(--foreground);
+}
+
+.infusio {
+  font-family: serif; /* font-serif */
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 500; /* font-medium */
+  letter-spacing: -0.025em; /* tracking-tight */
+  color: var(--foreground);
+}
