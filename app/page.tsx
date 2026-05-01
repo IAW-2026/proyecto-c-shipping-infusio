@@ -1,8 +1,6 @@
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* <Header /> */}
-      
+    <div className="min-h-screen bg-background">      
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Decorative curved shape */}
@@ -22,26 +20,12 @@ export default function Home() {
                 Tu pedido, siempre a la vista.
               </h1>
               <p className="mt-6 text-lg text-muted-foreground max-w-lg">
-                Rastrea cada paso de tu pedido de infusiones y accesorios premium. 
-                Desde nuestro almacén hasta tu puerta.
+                Rastrea cada paso de tu compra.
               </p>
               
               {/* <div className="mt-8">
                 <TrackingInput />
               </div> */}
-
-              {/* Stats */}
-              <div className="mt-12 flex gap-12">
-                <div>
-                  <p className="font-serif text-3xl font-medium text-foreground">Rápido</p>
-                </div>
-                <div>
-                  <p className="font-serif text-3xl font-medium text-foreground">Rastreable</p>
-                </div>
-                <div>
-                  <p className="font-serif text-3xl font-medium text-foreground">Gratis</p>
-                </div>
-              </div>
             </div>
 
             {/* Featured Order Card */}
@@ -109,16 +93,16 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-              <span className="font-serif text-xl font-medium text-foreground">Infusio</span>
-              <span className="text-muted-foreground">•</span>
-              <span className="text-sm text-muted-foreground">Shipping</span>
+              <span className="infusio">Infusio</span>
+              <span className="lowernav-component">•</span>
+              <span className="lowernav-component">Shipping</span>
             </div>
             <div className="flex gap-8">
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Términos</a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacidad</a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contacto</a>
+              <a href="#" className="lowernav-component lowernav-component-hover">Términos</a>
+              <a href="#" className="lowernav-component lowernav-component-hover">Privacidad</a>
+              <a href="#" className="lowernav-component lowernav-component-hover">Contacto</a>
             </div>
-            <p className="text-sm text-muted-foreground">© 2026 Infusio. Todos los derechos reservados.</p>
+            <p className="lowernav-component">© 2026 Infusio. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

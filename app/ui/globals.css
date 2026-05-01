@@ -254,13 +254,30 @@
 .uppernav-component {
   display: block;
   font-size: 0.875rem; /* text-sm */
-  font-weight: 500; /* font-medium */
+  font-weight: 400; /* font-medium */
   letter-spacing: 0.05em; /* tracking-wide */
   color: var(--muted-foreground);
   text-transform: uppercase;
 }
 
 .uppernav-component:hover {
+  color: var(--foreground);
+}
+
+.lowernav-component {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+  font-weight: 400; /* o 500 si querés un poquito más */
+  text-decoration: none;
+  transition: color 150ms ease-in-out;
+}
+
+.lowernav-component-hover {
+  transition: color 150ms ease-in-out;
+}
+
+.lowernav-component-hover:hover {
   color: var(--foreground);
 }
 
