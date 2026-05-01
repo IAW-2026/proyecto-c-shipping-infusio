@@ -13,7 +13,7 @@ export default function Home() {
           </svg>
         </div> */}
         
-        <div className="relative mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-6 py-8 sm:py-10 lg:px-8 lg:py-12">
+        <div className="relative mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-6 pt-12 pb-6 sm:pt-16 sm:pb-8 lg:px-8 lg:pt-20 lg:pb-12">
           <div className="w-full">
             <div className="w-full">
               <h1 className="font-serif text-3xl font-medium leading-tight text-foreground text-balance sm:text-4xl md:text-5xl lg:text-6xl">
