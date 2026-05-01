@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Header } from '@/app/ui/header'
+import { Footer } from '@/app/ui/footer'
 import { Inter, Playfair_Display } from 'next/font/google'
 // import { Analytics } from '@vercel/analytics/next'
 import './ui/globals.css'
@@ -49,6 +50,7 @@ export default function RootLayout({
         </main>
         {/* {process.env.NODE_ENV === 'production' && <Analytics />} */}
         {process.env.NODE_ENV === 'production'}
+        <Footer />
       </body>
     </html>
   )

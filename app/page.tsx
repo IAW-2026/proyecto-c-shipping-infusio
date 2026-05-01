@@ -1,5 +1,6 @@
 import { Footer } from "@/app/ui/footer"
 import { TrackingInput } from "@/app/ui/tracking-input"
+import MobileCarousel from "@/app/ui/mobile-carousel"
 
 export default function Home() {
   return (
@@ -26,6 +27,10 @@ export default function Home() {
               <div className="mt-6 w-full sm:mt-8">
                 <TrackingInput />
               </div>
+
+              {/* mobile carousel */}
+              <MobileCarousel />
+
             </div>
 
             {/* Featured Order Card */}
@@ -88,7 +93,7 @@ export default function Home() {
         <QuickActions />
       </section> */}
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   )
 }
