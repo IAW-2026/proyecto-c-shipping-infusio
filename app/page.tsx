@@ -1,20 +1,11 @@
-import { Footer } from "@/app/ui/footer"
-import { TrackingInput } from "@/app/ui/tracking-input"
-import MobileCarousel from "@/app/ui/mobile-carousel"
+import { TrackingInput } from "./ui/tracking-input"
 
 export default function Home() {
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-background">      
       {/* Hero Section */}
-      <section className="relative flex-1 overflow-hidden w-full">
-        {/* Decorative curved shape
-        <div className="absolute inset-0 pointer-events-none">
-          <svg className="absolute right-0 top-0 h-full w-1/2 text-secondary/50" viewBox="0 0 500 800" fill="currentColor">
-            <path d="M200,0 Q500,200 400,400 T500,800 L500,0 Z" />
-          </svg>
-        </div> */}
-        
-        <div className="relative mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-6 pt-12 pb-6 sm:pt-16 sm:pb-8 lg:px-8 lg:pt-20 lg:pb-12">
+      <section className="relative overflow-hidden w-full min-h-[55vh] lg:min-h-[60vh]">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col justify-start px-6 pt-8 pb-6 sm:pt-10 sm:pb-8 lg:px-8 lg:pt-12 lg:pb-12">
           <div className="w-full">
             <div className="w-full">
               <h1 className="font-serif text-3xl font-medium leading-tight text-foreground text-balance sm:text-4xl md:text-5xl lg:text-6xl">
@@ -27,10 +18,6 @@ export default function Home() {
               <div className="mt-6 w-full sm:mt-8">
                 <TrackingInput />
               </div>
-
-              {/* mobile carousel */}
-              <MobileCarousel />
-
             </div>
 
             {/* Featured Order Card */}
@@ -84,16 +71,7 @@ export default function Home() {
         </div>
       </section> */}
 
-      {/* Quick Actions
-      <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
-        <div className="mb-8">
-          <p className="text-sm uppercase tracking-widest text-primary font-medium mb-2">Acciones Rápidas</p>
-          <h2 className="font-serif text-3xl font-medium text-foreground">¿Qué necesitas?</h2>
-        </div>
-        <QuickActions />
-      </section> */}
-
-      {/* <Footer /> */}
+      {/* Quick Actions */}
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Package, User, Menu, X } from "lucide-react"
 import { useState } from "react"
-import { Button } from "@/app/ui/button"
+import { Button } from "./button"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

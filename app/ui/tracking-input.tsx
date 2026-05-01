@@ -1,7 +1,6 @@
 "use client"
 
 import { Search } from "lucide-react"
-import { Button } from "@/app/ui/button"
 
 export function TrackingInput() {
     return (

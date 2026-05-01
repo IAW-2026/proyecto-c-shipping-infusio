@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { Header } from '@/app/ui/header'
-import { Footer } from '@/app/ui/footer'
+import { Header } from './ui/header'
+import { Footer } from './ui/footer'
 import { Inter, Playfair_Display } from 'next/font/google'
 // import { Analytics } from '@vercel/analytics/next'
 import './ui/globals.css'
@@ -43,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable} bg-background`}>
-      <body className="font-sans antialiased min-h-dvh flex flex-col overflow-x-hidden">
+      <body className="font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
         <Header />
         <main className="flex-1 min-h-0 flex flex-col">
           {children}
