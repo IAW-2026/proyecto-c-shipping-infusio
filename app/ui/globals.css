@@ -193,7 +193,8 @@
 }
 
 .btn-secondary:hover {
-  background-color: rgba(var(--secondary-rgb), 0.8);
+  background-color: bg-primary;
+  color: var(--primary-foreground);
 }
 
 /* GHOST */

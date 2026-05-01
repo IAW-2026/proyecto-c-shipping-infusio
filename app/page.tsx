@@ -1,31 +1,31 @@
+import { Footer } from "@/app/ui/footer"
+import { TrackingInput } from "@/app/ui/tracking-input"
+
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">      
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-background">      
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Decorative curved shape */}
+      <section className="relative flex-1 overflow-hidden w-full">
+        {/* Decorative curved shape
         <div className="absolute inset-0 pointer-events-none">
           <svg className="absolute right-0 top-0 h-full w-1/2 text-secondary/50" viewBox="0 0 500 800" fill="currentColor">
             <path d="M200,0 Q500,200 400,400 T500,800 L500,0 Z" />
           </svg>
-        </div>
+        </div> */}
         
-        <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <p className="text-sm uppercase tracking-widest text-primary font-medium mb-4">
-                Seguimiento de Envíos
-              </p>
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium leading-tight text-foreground text-balance">
+        <div className="relative mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-6 py-8 sm:py-10 lg:px-8 lg:py-12">
+          <div className="w-full">
+            <div className="w-full">
+              <h1 className="font-serif text-3xl font-medium leading-tight text-foreground text-balance sm:text-4xl md:text-5xl lg:text-6xl">
                 Tu pedido, siempre a la vista.
               </h1>
-              <p className="mt-6 text-lg text-muted-foreground max-w-lg">
+              <p className="mt-4 max-w-lg text-base text-muted-foreground sm:mt-6 sm:text-lg">
                 Rastrea cada paso de tu compra.
               </p>
               
-              {/* <div className="mt-8">
+              <div className="mt-6 w-full sm:mt-8">
                 <TrackingInput />
-              </div> */}
+              </div>
             </div>
 
             {/* Featured Order Card */}
@@ -88,24 +88,7 @@ export default function Home() {
         <QuickActions />
       </section> */}
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-secondary/30">
-        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <span className="infusio">Infusio</span>
-              <span className="lowernav-component">•</span>
-              <span className="lowernav-component">Shipping</span>
-            </div>
-            <div className="flex gap-8">
-              <a href="#" className="lowernav-component lowernav-component-hover">Términos</a>
-              <a href="#" className="lowernav-component lowernav-component-hover">Privacidad</a>
-              <a href="#" className="lowernav-component lowernav-component-hover">Contacto</a>
-            </div>
-            <p className="lowernav-component">© 2026 Infusio. Todos los derechos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

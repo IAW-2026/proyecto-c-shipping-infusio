@@ -38,7 +38,7 @@ export function Header() {
             <User className="h-4 w-4 mr-2" />
             Cuenta
           </Button>
-          <Button size="sm" className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button variant="secondary" size="sm" className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground">
             <Package className="h-4 w-4 mr-2" />
             Rastrear
           </Button>
