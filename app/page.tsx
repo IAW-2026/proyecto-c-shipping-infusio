@@ -2,6 +2,7 @@ import { TrackingInput } from "./ui/tracking-input"
 import { Truck } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
 import { ShipmentTimeline } from "./ui/shipment-timeline"
+import { QuickActions } from "./ui/quick-actions"
 
 const timelineEvents = [
   {
@@ -103,13 +104,13 @@ export default function ShippingApp() {
       </section>
 
       {/* Quick Actions */}
-      {/* <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
+      <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
         <div className="mb-8">
           <p className="text-sm uppercase tracking-widest text-primary font-medium mb-2">Acciones Rápidas</p>
           <h2 className="font-serif text-3xl font-medium text-foreground">¿Qué necesitas?</h2>
         </div>
         <QuickActions />
-      </section> */}
+      </section>
     </div>
   )
 }
