@@ -4,6 +4,7 @@ import { Footer } from './ui/footer'
 import { Inter, Playfair_Display } from 'next/font/google'
 // import { Analytics } from '@vercel/analytics/next'
 import './ui/globals.css'
+import { ClerkProvider } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({
@@ -44,13 +45,15 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable} bg-background`}>
       <body className="font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
-        <Header />
-        <main className="flex-1 min-h-0 flex flex-col">
-          {children}
-        </main>
-        {/* {process.env.NODE_ENV === 'production' && <Analytics />} */}
-        {process.env.NODE_ENV === 'production'}
-        <Footer />
+        <ClerkProvider>
+          <Header />
+          <main className="flex-1 min-h-0 flex flex-col">
+            {children}
+          </main>
+          {/* {process.env.NODE_ENV === 'production' && <Analytics />} */}
+          {process.env.NODE_ENV === 'production'}
+          <Footer />
+        </ClerkProvider>
       </body>
     </html>
   )
