@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Package, User, Menu, X, ChevronDown, LogOut, CircleUserRound } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { SignInButton, useClerk, useUser } from "@clerk/nextjs"
+import { SignInButton, SignUpButton, useClerk, useUser } from "@clerk/nextjs"
 import { Button } from "./button"
 
 export function Header() {
@@ -75,6 +75,17 @@ export function Header() {
                 Iniciar sesión
               </Button>
             </SignInButton>
+            <SignUpButton mode="modal">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-1 w-full justify-start rounded-xl px-3 py-2 text-left"
+                onClick={() => setAccountMenuOpen(false)}
+              >
+                <CircleUserRound className="h-4 w-4" />
+                Crear cuenta
+              </Button>
+            </SignUpButton>
           </div>
         ) : (
           <div className="p-2">
