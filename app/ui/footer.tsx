@@ -1,4 +1,4 @@
-"use client"
+import Link from "next/link"
 
 export function Footer() {
   return (
@@ -11,9 +11,9 @@ export function Footer() {
             <span className="lowernav-component">Shipping</span>
           </div>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-center md:justify-start md:gap-8">
-            <a href="#" className="lowernav-component lowernav-component-hover">Términos</a>
-            <a href="#" className="lowernav-component lowernav-component-hover">Privacidad</a>
-            <a href="#" className="lowernav-component lowernav-component-hover">Contacto</a>
+            <Link href="#" className="lowernav-component lowernav-component-hover">Términos</Link>
+            <Link href="#" className="lowernav-component lowernav-component-hover">Privacidad</Link>
+            <Link href="#" className="lowernav-component lowernav-component-hover">Contacto</Link>
           </div>
           <p className="lowernav-component">© 2026 Infusio. Todos los derechos reservados.</p>
         </div>
