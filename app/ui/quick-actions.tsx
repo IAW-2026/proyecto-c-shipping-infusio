@@ -1,16 +1,19 @@
 import { MapPin, Clock, HelpCircle, FileText } from "lucide-react"
 import { Card, CardContent } from "./card"
+import Link from "next/link"
 
 const actions = [
   {
     icon: HelpCircle,
     title: "Centro de Ayuda",
-    description: "Preguntas frecuentes y soporte"
+    description: "Preguntas frecuentes y soporte",
+    link: "/help"
   },
   {
     icon: FileText,
     title: "Políticas de Envío",
-    description: "Tiempos y costos de entrega"
+    description: "Tiempos y costos de entrega",
+    link: "/shipping-policies"
   }
 ]
 
@@ -28,7 +31,7 @@ export function QuickActions() {
                 <action.icon className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-medium text-foreground mb-1">{action.title}</h3>
+                <Link href={action.link} className="font-medium text-foreground mb-1">{action.title}</Link>
                 <p className="text-sm text-muted-foreground">{action.description}</p>
               </div>
             </div>

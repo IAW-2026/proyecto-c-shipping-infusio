@@ -131,10 +131,7 @@ export function Header() {
           <Link href="/" className="uppernav-component">
             Historial
           </Link>
-          <Link href="/" className="uppernav-component">
-            Direcciones
-          </Link>
-          <Link href="/" className="uppernav-component">
+          <Link href="/help" className="uppernav-component">
             Ayuda
           </Link>
         </div>
@@ -167,9 +164,6 @@ export function Header() {
           </Link>
           <Link href="/" className="uppernav-component">
             Historial
-          </Link>
-          <Link href="/" className="uppernav-component">
-            Direcciones
           </Link>
           <Link href="/" className="uppernav-component">
             Ayuda
