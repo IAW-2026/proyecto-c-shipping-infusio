@@ -1,20 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/app/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/ui/card"
-import { Clock3, MapPin, Package, Search, Truck } from "lucide-react"
 import { TrackingInput } from "@/app/ui/tracking-input"
 
 export default function TrackingPage() {
-	const [trackingNumber, setTrackingNumber] = useState("")
-	const [submittedTrackingNumber, setSubmittedTrackingNumber] = useState("")
-
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault()
-		setSubmittedTrackingNumber(trackingNumber.trim())
-	}
-
 	return (
 		<div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
               {/* Header */}
