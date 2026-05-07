@@ -15,7 +15,7 @@ export const viewerMenuItems = [
     title: "Historial de envíos",
     description: "Consulta todos tus envíos anteriores",
     icon: History,
-    href: "#",
+    href: "/viewer-refactor/history",
     color: "text-foreground",
     bgColor: "bg-muted/50"
   },
