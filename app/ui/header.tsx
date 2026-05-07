@@ -5,6 +5,7 @@ import { Package, User, Menu, X, ChevronDown, LogOut, CircleUserRound, Map } fro
 import { useEffect, useRef, useState } from "react"
 import { SignInButton, SignUpButton, useClerk, useUser } from "@clerk/nextjs"
 import { Button } from "./button"
+import { SITEMAP } from "@/lib/sitemap-config"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -123,109 +124,39 @@ export function Header() {
   function SitemapMenuContent() {
     if (!sitemapMenuOpen) return null
 
+    const getIcon = (iconType: 'user' | 'package') => {
+      return iconType === 'user' 
+        ? <User className="h-4 w-4 text-primary shrink-0" />
+        : <Package className="h-4 w-4 text-primary shrink-0" />
+    }
+
     return (
       <div
-        className="absolute z-50 mt-4 right-0 w-72 overflow-hidden rounded-2xl border border-border bg-background shadow-lg"
+        className="absolute z-50 mt-4 right-0 w-72 rounded-2xl border border-border bg-background shadow-lg overflow-hidden"
         role="menu"
       >
-        <div className="px-4 pt-6 pb-4 space-y-4">
-          {/* Cuenta Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Cuenta</h3>
-            <div className="space-y-1">
-              <Link
-                href="/user-profile"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <User className="h-4 w-4 text-primary shrink-0" />
-                <span>Mi Perfil</span>
-              </Link>
-              <Link
-                href="/"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <Package className="h-4 w-4 text-primary shrink-0" />
-                <span>Mis Envíos</span>
-              </Link>
+        <div className="max-h-96 overflow-y-auto px-4 pt-6 pb-4 space-y-4">
+          {SITEMAP.map((section, idx) => (
+            <div key={idx}>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">
+                {section.title}
+              </h3>
+              <div className="space-y-1">
+                {section.links.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setSitemapMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+                  >
+                    {getIcon(link.icon)}
+                    <span>{link.label}</span>
+                  </Link>
+                ))}
+              </div>
+              {idx < SITEMAP.length - 1 && <div className="h-px bg-border mt-4" />}
             </div>
-          </div>
-
-          <div className="h-px bg-border" />
-
-          {/* Rastreo Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Rastreo</h3>
-            <div className="space-y-1">
-              <Link
-                href="/viewer-refactor/tracking"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <Package className="h-4 w-4 text-primary shrink-0" />
-                <span>Buscar Envío</span>
-              </Link>
-              <Link
-                href="/viewer-refactor/subscription"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <Package className="h-4 w-4 text-primary shrink-0" />
-                <span>Suscripción a Eventos</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="h-px bg-border" />
-
-          {/* Soporte Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Soporte</h3>
-            <div className="space-y-1">
-              <Link
-                href="/help"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <User className="h-4 w-4 text-primary shrink-0" />
-                <span>Centro de Ayuda</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="h-px bg-border" />
-
-          {/* Información Legal Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Legal</h3>
-            <div className="space-y-1">
-              <Link
-                href="/privacy"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <User className="h-4 w-4 text-primary shrink-0" />
-                <span>Privacidad</span>
-              </Link>
-              <Link
-                href="/terms"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <User className="h-4 w-4 text-primary shrink-0" />
-                <span>Términos de Servicio</span>
-              </Link>
-              <Link
-                href="/shipping-policies"
-                onClick={() => setSitemapMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-              >
-                <Package className="h-4 w-4 text-primary shrink-0" />
-                <span>Políticas de Envío</span>
-              </Link>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     )
@@ -288,98 +219,34 @@ export function Header() {
               <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
             </Button>
             {sitemapMenuOpen && (
-              <div className="mt-4 space-y-4 pl-4 border-t border-border pt-4">
-                {/* Cuenta Section */}
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Cuenta</h3>
-                  <div className="space-y-1">
-                    <Link
-                      href="/user-profile"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <User className="h-4 w-4 shrink-0" />
-                      <span>Mi Perfil</span>
-                    </Link>
-                    <Link
-                      href="/"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <Package className="h-4 w-4 shrink-0" />
-                      <span>Mis Envíos</span>
-                    </Link>
+              <div className="mt-4 max-h-64 overflow-y-auto space-y-4 pl-4 border-t border-border pt-4">
+                {SITEMAP.map((section, idx) => (
+                  <div key={idx}>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">
+                      {section.title}
+                    </h3>
+                    <div className="space-y-1">
+                      {section.links.map((link) => {
+                        const getIcon = (iconType: 'user' | 'package') => {
+                          return iconType === 'user' 
+                            ? <User className="h-4 w-4 shrink-0" />
+                            : <Package className="h-4 w-4 shrink-0" />
+                        }
+                        return (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setSitemapMenuOpen(false)}
+                            className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
+                          >
+                            {getIcon(link.icon)}
+                            <span>{link.label}</span>
+                          </Link>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-
-                {/* Rastreo Section */}
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Rastreo</h3>
-                  <div className="space-y-1">
-                    <Link
-                      href="/viewer-refactor/tracking"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <Package className="h-4 w-4 shrink-0" />
-                      <span>Buscar Envío</span>
-                    </Link>
-                    <Link
-                      href="/viewer-refactor/subscription"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <Package className="h-4 w-4 shrink-0" />
-                      <span>Suscripción a Eventos</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Soporte Section */}
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Soporte</h3>
-                  <div className="space-y-1">
-                    <Link
-                      href="/help"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <User className="h-4 w-4 shrink-0" />
-                      <span>Centro de Ayuda</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Información Legal Section */}
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">Legal</h3>
-                  <div className="space-y-1">
-                    <Link
-                      href="/privacy"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <User className="h-4 w-4 shrink-0" />
-                      <span>Privacidad</span>
-                    </Link>
-                    <Link
-                      href="/terms"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <User className="h-4 w-4 shrink-0" />
-                      <span>Términos de Servicio</span>
-                    </Link>
-                    <Link
-                      href="/shipping-policies"
-                      onClick={() => setSitemapMenuOpen(false)}
-                      className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                    >
-                      <Package className="h-4 w-4 shrink-0" />
-                      <span>Políticas de Envío</span>
-                    </Link>
-                  </div>
-                </div>
+                ))}
               </div>
             )}
           </div>
