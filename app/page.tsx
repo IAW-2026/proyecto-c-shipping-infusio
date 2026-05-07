@@ -10,16 +10,16 @@ export default function ShippingApp() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden">       
-        <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-16 lg:px-8 lg:py-24">
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
             <div>
-              <p className="text-sm uppercase tracking-widest text-primary font-medium mb-4">
+              <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-medium mb-3 sm:mb-4">
                 Seguimiento de Envíos
               </p>
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium leading-tight text-foreground text-balance">
+              <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-medium leading-tight text-foreground text-balance">
                 Tu pedido, siempre a la vista.
               </h1>
-              <p className="mt-6 text-lg text-muted-foreground max-w-lg">
+              <p className="mt-4 sm:mt-6 text-sm sm:text-base lg:text-lg text-muted-foreground max-w-lg">
                 Ingresá a tu cuenta y rastreá cada paso.
               </p>
               
@@ -59,10 +59,10 @@ export default function ShippingApp() {
       </section>
 
       {/* Quick Actions */}
-      <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
-        <div className="mb-8">
-          <p className="text-sm uppercase tracking-widest text-primary font-medium mb-2">Acciones Rápidas</p>
-          <h2 className="font-serif text-3xl font-medium text-foreground">¿Qué necesitás?</h2>
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-8 sm:pb-16 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <p className="text-xs sm:text-sm uppercase tracking-widest text-primary font-medium mb-2">Acciones Rápidas</p>
+          <h2 className="font-serif text-2xl sm:text-3xl font-medium text-foreground">¿Qué necesitás?</h2>
         </div>
         <QuickActions />
       </section>
