@@ -28,9 +28,11 @@ export default function SubscriptionPage() {
             <h1 className="font-serif text-3xl font-medium text-foreground mb-2">Suscripción</h1>
             <p className="text-muted-foreground">Elegí por qué medio te gustaría recibir los avances de tu envío.</p>
         </div>
-        <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-start gap-4">
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Card>
+                <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
                         <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                             <MessageCircle className="h-5 w-5" />
                         </div>
@@ -38,12 +40,12 @@ export default function SubscriptionPage() {
                             <h3 className="font-medium text-foreground mb-1">WhatsApp</h3>
                             <p className="text-sm text-muted-foreground">Mensajes rápidos en tu celular.</p>
                         </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-start gap-4">
+                    </div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
                         <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                             <Mail className="h-5 w-5" />
                         </div>
@@ -51,9 +53,10 @@ export default function SubscriptionPage() {
                             <h3 className="font-medium text-foreground mb-1">Email</h3>
                             <p className="text-sm text-muted-foreground">Recibí avisos detallados en tu casilla.</p>
                         </div>
-                        </div>
-                    </CardContent>
-                </Card>     
+                    </div>
+                </CardContent>
+            </Card>
+        </div>              
     </div>      
   )
 }
