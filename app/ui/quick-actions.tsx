@@ -1,26 +1,14 @@
-import { MapPin, Clock, HelpCircle, FileText } from "lucide-react"
 import { Card, CardContent } from "./card"
 import Link from "next/link"
-
-const actions = [
-  {
-    icon: HelpCircle,
-    title: "Centro de Ayuda",
-    description: "Preguntas frecuentes y soporte",
-    link: "/help"
-  },
-  {
-    icon: FileText,
-    title: "Políticas de Envío",
-    description: "Tiempos y costos de entrega",
-    link: "/shipping-policies"
-  }
-]
+import { quickActions } from "@/lib/quick-actions-data"
 
 export function QuickActions() {
+  const actions = quickActions;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {actions.map((action, index) => (
+        <Link key={index} href={action.link} className="group block h-full">
         <Card 
           key={index} 
           className="group cursor-pointer border-border/50 hover:border-primary/30 hover:shadow-md transition-all bg-card"
@@ -31,12 +19,13 @@ export function QuickActions() {
                 <action.icon className="h-5 w-5" />
               </div>
               <div>
-                <Link href={action.link} className="font-medium text-foreground mb-1">{action.title}</Link>
+                <h3 className="font-medium text-foreground mb-1">{action.title}</h3>
                 <p className="text-sm text-muted-foreground">{action.description}</p>
               </div>
             </div>
           </CardContent>
         </Card>
+      </Link>
       ))}
     </div>
   )

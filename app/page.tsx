@@ -3,52 +3,7 @@ import { Truck } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
 import { ShipmentTimeline } from "./ui/shipment-timeline"
 import { QuickActions } from "./ui/quick-actions"
-
-const timelineEvents = [
-  {
-    status: "Pedido confirmado",
-    location: "Tienda Online Infusio",
-    date: "24 Abril 2026",
-    time: "10:30",
-    completed: true
-  },
-  {
-    status: "Preparando tu pedido",
-    location: "Centro de Distribución - Palermo",
-    date: "24 Abril 2026",
-    time: "14:15",
-    completed: true
-  },
-  {
-    status: "Enviado",
-    location: "Centro de Distribución - Palermo",
-    date: "25 Abril 2026",
-    time: "09:00",
-    completed: true
-  },
-  {
-    status: "En tránsito hacia tu ciudad",
-    location: "Centro Logístico - Bahía Blanca",
-    date: "26 Abril 2026",
-    time: "08:45",
-    completed: true,
-    current: true
-  },
-  {
-    status: "En reparto",
-    location: "Tu zona",
-    date: "Pendiente",
-    time: "--:--",
-    completed: false
-  },
-  {
-    status: "Entregado",
-    location: "Tu dirección",
-    date: "Pendiente",
-    time: "--:--",
-    completed: false
-  }
-]
+import { timelineEvents } from "@/lib/timeline-data"
 
 export default function ShippingApp() {
   return (
@@ -75,7 +30,7 @@ export default function ShippingApp() {
 
             {/* Featured Order Card */}
             <div className="relative">
-              <Card className="border-border/50 shadow-lg bg-card">
+              <Card>
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <CardTitle className="font-serif text-xl">Pedido Activo</CardTitle>
