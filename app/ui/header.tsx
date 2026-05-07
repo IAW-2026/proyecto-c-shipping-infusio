@@ -169,8 +169,8 @@ export function Header() {
               <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
             </Button>
             <SitemapMenuContent />
-            <ClerkInit />
           </div>
+          <ClerkInit />
         </div>
 
         {/* Mobile Menu Button */}
