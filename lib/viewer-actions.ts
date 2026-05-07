@@ -6,7 +6,7 @@ export const viewerMenuItems = [
     title: "Hacer seguimiento",
     description: "Rastrear tu envío en tiempo real",
     icon: Truck,
-    href: "#",
+    href: "/viewer-refactor/tracking",
     color: "text-primary",
     bgColor: "bg-primary/10",
   },
@@ -15,7 +15,7 @@ export const viewerMenuItems = [
     title: "Historial de envíos",
     description: "Consulta todos tus envíos anteriores",
     icon: History,
-    href: "#",
+    href: "/viewer-refactor/history",
     color: "text-foreground",
     bgColor: "bg-muted/50"
   },
@@ -24,30 +24,12 @@ export const viewerMenuItems = [
     title: "Suscripción a eventos",
     description: "Recibe notificaciones de cambios en tu envío",
     icon: Bell,
-    href: "#",
+    href: "/viewer-refactor/subscription",
     color: "text-accent",
     bgColor: "bg-accent/10"
   },
   {
     id: 4,
-    title: "Descargar comprobantes",
-    description: "Obtén PDFs de tus entregas",
-    icon: Download,
-    href: "#",
-    color: "text-primary",
-    bgColor: "bg-primary/5"
-  },
-  {
-    id: 5,
-    title: "Reportar problema",
-    description: "Informa sobre un problema con tu envío",
-    icon: AlertTriangle,
-    href: "#",
-    color: "text-accent",
-    bgColor: "bg-accent/5"
-  },
-  {
-    id: 6,
     title: "Contactar soporte",
     description: "Habla con nuestro equipo de atención",
     icon: HeadphonesIcon,
