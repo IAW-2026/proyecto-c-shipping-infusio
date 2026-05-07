@@ -1,25 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { Package, User, Menu, X, ChevronDown, LogOut, CircleUserRound, Map } from "lucide-react"
+import { Package, User, Menu, X, ChevronDown, Map } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { SignInButton, SignUpButton, useClerk, useUser } from "@clerk/nextjs"
+import { UserButton } from "@clerk/nextjs"
 import { Button } from "./button"
+import ClerkInit from "./clerk-init"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [sitemapMenuOpen, setSitemapMenuOpen] = useState(false)
-  const accountMenuRef = useRef<HTMLDivElement | null>(null)
   const sitemapMenuRef = useRef<HTMLDivElement | null>(null)
-  const { isSignedIn, user } = useUser()
-  const { signOut } = useClerk()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
-        setAccountMenuOpen(false)
-      }
       if (sitemapMenuRef.current && !sitemapMenuRef.current.contains(event.target as Node)) {
         setSitemapMenuOpen(false)
       }
@@ -27,7 +21,6 @@ export function Header() {
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setAccountMenuOpen(false)
         setSitemapMenuOpen(false)
       }
     }
@@ -40,85 +33,6 @@ export function Header() {
       document.removeEventListener("keydown", handleEscape)
     }
   }, [])
-
-  const displayName = user?.fullName || user?.firstName || user?.primaryEmailAddress?.emailAddress || "Cuenta"
-
-  function AccountTrigger({ className = "" }: { className?: string }) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        className={`rounded-full border-foreground/20 hover:bg-secondary ${className}`}
-        onClick={() => setAccountMenuOpen((value) => !value)}
-        aria-haspopup="menu"
-        aria-expanded={accountMenuOpen}
-      >
-        <User className="h-4 w-4 mr-2" />
-        Cuenta
-        <ChevronDown className={`h-4 w-4 transition-transform ${accountMenuOpen ? "rotate-180" : ""}`} />
-      </Button>
-    )
-  }
-
-  function AccountMenuContent({ mobile = false }: { mobile?: boolean }) {
-    if (!accountMenuOpen) return null
-
-    return (
-      <div
-        className={`absolute z-50 mt-3 overflow-hidden rounded-2xl border border-border bg-background shadow-lg ${mobile ? "left-0 w-full" : "right-0 w-72"}`}
-        role="menu"
-      >
-        {!isSignedIn ? (
-          <div className="p-2">
-            <SignInButton mode="modal">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start rounded-xl px-3 py-2 text-left"
-                onClick={() => setAccountMenuOpen(false)}
-              >
-                <CircleUserRound className="h-4 w-4" />
-                Iniciar sesión
-              </Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-1 w-full justify-start rounded-xl px-3 py-2 text-left"
-                onClick={() => setAccountMenuOpen(false)}
-              >
-                <CircleUserRound className="h-4 w-4" />
-                Crear cuenta
-              </Button>
-            </SignUpButton>
-          </div>
-        ) : (
-          <div className="p-2">
-            <Link
-              href="/user-profile"
-              onClick={() => setAccountMenuOpen(false)}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-secondary"
-            >
-              <CircleUserRound className="h-4 w-4" />
-              Mi perfil
-            </Link>
-            <button
-              type="button"
-              onClick={async () => {
-                setAccountMenuOpen(false)
-                await signOut()
-              }}
-              className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-secondary"
-            >
-              <LogOut className="h-4 w-4" />
-              Cerrar sesión
-            </button>
-          </div>
-        )}
-      </div>
-    )
-  }
 
   function SitemapMenuContent() {
     if (!sitemapMenuOpen) return null
@@ -240,7 +154,7 @@ export function Header() {
           </Link>
         </div>
 
-        <div className="hidden md:flex items-center gap-3" ref={accountMenuRef}>
+        <div className="hidden md:flex items-center gap-3">
           <div className="relative" ref={sitemapMenuRef}>
             <Button
               variant="outline"
@@ -255,10 +169,7 @@ export function Header() {
               <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
             </Button>
             <SitemapMenuContent />
-          </div>
-          <div className="relative">
-            <AccountTrigger />
-            <AccountMenuContent />
+            <ClerkInit />
           </div>
         </div>
 
@@ -383,11 +294,8 @@ export function Header() {
               </div>
             )}
           </div>
-          <div className="flex gap-3 pt-4 border-t border-border" ref={accountMenuRef}>
-            <div className="relative flex-1">
-              <AccountTrigger className="w-full flex-1" />
-              <AccountMenuContent mobile />
-            </div>
+          <div className="flex gap-3 pt-4 border-t border-border">
+            <UserButton />
           </div>
         </div>
       )}
