@@ -65,7 +65,7 @@ export default function ShippingApp() {
                 Tu pedido, siempre a la vista.
               </h1>
               <p className="mt-6 text-lg text-muted-foreground max-w-lg">
-                Rastreá cada paso.
+                Ingresá a tu cuenta y rastreá cada paso.
               </p>
               
               <div className="mt-8">
@@ -107,7 +107,7 @@ export default function ShippingApp() {
       <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
         <div className="mb-8">
           <p className="text-sm uppercase tracking-widest text-primary font-medium mb-2">Acciones Rápidas</p>
-          <h2 className="font-serif text-3xl font-medium text-foreground">¿Qué necesitas?</h2>
+          <h2 className="font-serif text-3xl font-medium text-foreground">¿Qué necesitás?</h2>
         </div>
         <QuickActions />
       </section>
