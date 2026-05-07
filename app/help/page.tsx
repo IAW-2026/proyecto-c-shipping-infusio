@@ -6,7 +6,7 @@ export default function HelpPage() {
                     <iframe
                         src="https://webagent.ai/chatbot/embed/5ac63685-72d1-4dc7-9d43-54ea9c6394cd/classic"
                         frameBorder="0"
-                        width="100%"
+                        width="400"
                         height="450"
                         className="h-[68vh] max-h-[560px] min-h-[360px] rounded-lg border border-border shadow-md"
                         title="Chatbot de Soporte"
