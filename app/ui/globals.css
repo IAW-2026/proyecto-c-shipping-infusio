@@ -289,3 +289,29 @@
   letter-spacing: -0.025em; /* tracking-tight */
   color: var(--foreground);
 }
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+  border: 2px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-color: var(--primary) var(--background);
+  scrollbar-width: thin;
+}
