@@ -3,7 +3,7 @@ import { Truck } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
 import { ShipmentTimeline } from "./ui/shipment-timeline"
 import { QuickActions } from "./ui/quick-actions"
-import { timelineEvents } from "@/lib/timeline-data"
+import { timelineEvents } from "@/app/lib/timeline-data"
 
 export default function ShippingApp() {
   return (
