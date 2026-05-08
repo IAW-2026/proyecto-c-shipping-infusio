@@ -50,7 +50,7 @@ export function Header() {
             <Button
               variant="default"
               size="sm"
-              className="rounded-full"
+              className="rounded-full mr-2"
             >
               <User className="h-4 w-4 mr-2" />
               Mi perfil
