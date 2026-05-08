@@ -1,3 +1,7 @@
+"use client"
+
+import Link from "next/link"
+
 interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -7,7 +11,8 @@ interface ButtonProps
     | "outline"
     | "secondary"
     | "ghost"
-    | "link";
+    | "link"
+    | "success";
   size?:
     | "default"
     | "sm"
@@ -15,16 +20,26 @@ interface ButtonProps
     | "icon"
     | "icon-sm"
     | "icon-lg";
+  href?: string;
 }
 
-export function Button({ children, className = "", variant, size, ...rest }: ButtonProps) {
+export function Button({ children, className = "", variant, size, href, ...rest }: ButtonProps) {
   const variantClass = variant ? `btn-${variant}` : 'btn-default';
   const sizeClass = size ? `btn-${size}` : 'btn-md';
+  const classNames = `btn ${variantClass} ${sizeClass} ${className}`;
+
+  if (href) {
+    return (
+      <Link href={href} className={classNames}>
+        {children}
+      </Link>
+    );
+  }
 
   return (
     <button
       {...rest}
-      className={`btn ${variantClass} ${sizeClass} ${className}`}
+      className={classNames}
     >
       {children}
     </button>
