@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { Button } from "./button"
 import ClerkInit from "./clerk-init"
 import { MobileSitemapMenu, SitemapMenuContent } from "./sitemap-menu"
+import { Show } from "@clerk/nextjs"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -44,15 +45,8 @@ export function Header() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <div className="relative" ref={sitemapMenuRef}>
-            <Button
-              variant="default"
-              size="sm"
-              className="rounded-full mr-2"
-            >
-              <User className="h-4 w-4 mr-2" />
-              Mi perfil
-            </Button>
+          <div className="relative flex items-center gap-2" ref={sitemapMenuRef}>
+            <MyProfileButton mobileMenuOpen={mobileMenuOpen} />
             <Button
               variant="outline"
               size="sm"
@@ -83,18 +77,45 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background px-6 py-4 space-y-4">
           <div className="grid grid-cols-1 gap-3">
-            <Link
-              href="/user-profile"
-              className="btn btn-default btn-sm w-full justify-center rounded-full"
-            >
-              <User className="h-4 w-4 mr-2" />
-              Mi perfil
-            </Link>
+            <MyProfileButton mobileMenuOpen={mobileMenuOpen} />
             <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
           </div>
           <ClerkInit />
         </div>
       )}
     </header>
+  )
+}
+
+type MyProfileButtonProps = {
+  mobileMenuOpen: boolean
+}
+
+function MyProfileButton({ mobileMenuOpen }: MyProfileButtonProps) {
+  if (mobileMenuOpen) {
+    return (
+      <Show when="signed-in">
+        <Link
+          href="/user-profile"
+          className="btn btn-default btn-sm w-full justify-center rounded-full"
+        >
+          <User className="h-4 w-4 mr-2" />
+          Mi perfil
+        </Link>
+      </Show>
+    )
+  }
+
+  return (
+    <Show when="signed-in">
+      <Button
+        variant="default"
+        size="sm"
+        className="rounded-full"
+      >
+        <User className="h-4 w-4 mr-2" />
+        Mi perfil
+      </Button>
+    </Show>
   )
 }
