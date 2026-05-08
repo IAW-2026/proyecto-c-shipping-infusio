@@ -48,13 +48,11 @@ export function Header() {
         <div className="hidden md:flex items-center gap-3">
           <div className="relative" ref={sitemapMenuRef}>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
-              className="rounded-full border-foreground/20 hover:bg-secondary"
-              onClick={() => setSitemapMenuOpen((value) => !value)}
-              aria-haspopup="menu"
-              aria-expanded={sitemapMenuOpen}
+              className="rounded-full"
             >
+              <User className="h-4 w-4 mr-2" />
               Mi perfil
             </Button>
             <Button

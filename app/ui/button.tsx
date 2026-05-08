@@ -7,7 +7,8 @@ interface ButtonProps
     | "outline"
     | "secondary"
     | "ghost"
-    | "link";
+    | "link"
+    | "success";
   size?:
     | "default"
     | "sm"

@@ -40,6 +40,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -162,6 +164,7 @@
 }
 
 .btn-default:hover {
+  color: var(--color-brown);
   background-color: rgba(var(--primary-rgb), 0.9);
 }
 
@@ -195,6 +198,17 @@
 .btn-secondary:hover {
   background-color: bg-primary;
   color: var(--primary-foreground);
+}
+
+/* SUCCESS */
+.btn-success {
+  background-color: var(--success);
+  color: var(--success-foreground);
+  border: 1px solid var(--success);
+}
+
+.btn-success:hover {
+  opacity: 0.9;
 }
 
 /* GHOST */
