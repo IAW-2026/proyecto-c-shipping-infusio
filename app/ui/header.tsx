@@ -1,12 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { Package, User, Menu, X, ChevronDown, Map } from "lucide-react"
+import { User, Menu, X, ChevronDown, Map } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "./button"
-import { SITEMAP } from "@/lib/sitemap-config"
 import ClerkInit from "./clerk-init"
-import { SitemapMenuContent } from "./sitemap-menu"
+import { MobileSitemapMenu, SitemapMenuContent } from "./sitemap-menu"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -91,51 +90,7 @@ export function Header() {
               <User className="h-4 w-4 mr-2" />
               Mi perfil
             </Link>
-            <div className="relative" ref={sitemapMenuRef}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-center rounded-full border-foreground/20 hover:bg-secondary"
-                onClick={() => setSitemapMenuOpen((value) => !value)}
-                aria-haspopup="menu"
-                aria-expanded={sitemapMenuOpen}
-              >
-                <Map className="h-4 w-4 mr-2" />
-                Mapa del Sitio
-                <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
-              </Button>
-              {sitemapMenuOpen && (
-                <div className="mt-4 max-h-64 overflow-y-auto space-y-4 pl-4 border-t border-border pt-4">
-                  {SITEMAP.map((section, idx) => (
-                    <div key={idx}>
-                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 px-3">
-                        {section.title}
-                      </h3>
-                      <div className="space-y-1">
-                        {section.links.map((link) => {
-                          const getIcon = (iconType: 'user' | 'package') => {
-                            return iconType === 'user' 
-                              ? <User className="h-4 w-4 shrink-0" />
-                              : <Package className="h-4 w-4 shrink-0" />
-                          }
-                          return (
-                            <Link
-                              key={link.href}
-                              href={link.href}
-                              onClick={() => setSitemapMenuOpen(false)}
-                              className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
-                            >
-                              {getIcon(link.icon)}
-                              <span>{link.label}</span>
-                            </Link>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
           </div>
           <ClerkInit />
         </div>
