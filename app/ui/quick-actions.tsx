@@ -1,6 +1,6 @@
 import { Card, CardContent } from "./card"
 import Link from "next/link"
-import { quickActions } from "@/lib/quick-actions-data"
+import { quickActions } from "@/app/lib/quick-actions-data"
 
 export function QuickActions() {
   const actions = quickActions;
