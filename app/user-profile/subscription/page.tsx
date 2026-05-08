@@ -20,7 +20,7 @@ const channels = [
 
 export default function SubscriptionPage() {
   return (
-    <div className="mr-auto max-w-7xl px-6 py-10 lg:px-8">
+    <div className="mr-auto max-w-7xl px-6 py-10 lg:px-8 w-full">
             <div className="mb-12">
                 <p className="text-sm uppercase tracking-widest text-primary font-medium mb-2">Seguimiento</p>
                 <h1 className="font-serif text-3xl font-medium text-foreground mb-2">Suscripción</h1>
