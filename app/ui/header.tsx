@@ -46,7 +46,7 @@ export function Header() {
 
         <div className="hidden md:flex items-center gap-3">
           <div className="relative flex items-center gap-2" ref={sitemapMenuRef}>
-            <MyProfileButton mobileMenuOpen={mobileMenuOpen} />
+            <MyProfileButton />
             <Button
               variant="outline"
               size="sm"
@@ -77,7 +77,7 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background px-6 py-4 space-y-4">
           <div className="grid grid-cols-1 gap-3">
-            <MyProfileButton mobileMenuOpen={mobileMenuOpen} />
+            <MyProfileButton/>
             <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
           </div>
           <ClerkInit />
@@ -87,35 +87,16 @@ export function Header() {
   )
 }
 
-type MyProfileButtonProps = {
-  mobileMenuOpen: boolean
-}
-
-function MyProfileButton({ mobileMenuOpen }: MyProfileButtonProps) {
-  if (mobileMenuOpen) {
-    return (
-      <Show when="signed-in">
-        <Link
+function MyProfileButton() {
+  return (
+    <Show when="signed-in">
+      <Link
           href="/user-profile"
           className="btn btn-default btn-sm w-full justify-center rounded-full"
         >
           <User className="h-4 w-4 mr-2" />
           Mi perfil
         </Link>
-      </Show>
-    )
-  }
-
-  return (
-    <Show when="signed-in">
-      <Button
-        variant="default"
-        size="sm"
-        className="rounded-full"
-      >
-        <User className="h-4 w-4 mr-2" />
-        Mi perfil
-      </Button>
     </Show>
   )
 }
