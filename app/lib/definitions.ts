@@ -34,6 +34,10 @@ export type User = {
   name: string;
   surname: string;
   email: string;
+};
+
+export type RoleUser = {
+  user_id: string;
   role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller';
 };
 
