@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { assignRoleToUser, removeRoleFromUser } from "@/app/lib/actions";
+import { assignRoleToUser } from "@/app/lib/actions";
+
+const SELF_REGISTRABLE_ROLES = new Set([
+  "rider",
+  "logistic_operator",
+]);
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,8 +27,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const rolesValidos = roles.filter(
+      (role) => typeof role === "string" && SELF_REGISTRABLE_ROLES.has(role)
+    );
+
+    if (rolesValidos.length === 0) {
+      return NextResponse.json(
+        { error: "No hay roles permitidos para auto-registro" },
+        { status: 400 }
+      );
+    }
+
     // Asignar cada rol seleccionado
-    for (const role of roles) {
+    for (const role of rolesValidos) {
       await assignRoleToUser(userId, role);
     }
 
@@ -31,7 +47,7 @@ export async function POST(req: NextRequest) {
       {
         success: true,
         message: "Roles asignados correctamente",
-        roles,
+        roles: rolesValidos,
       },
       { status: 200 }
     );

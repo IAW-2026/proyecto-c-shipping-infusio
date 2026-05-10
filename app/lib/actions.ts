@@ -4,6 +4,13 @@ import postgres from "postgres";
 import { User, RoleUser } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
+const DEFAULT_USER_ROLES = ["buyer", "seller"] as const;
+
+export async function ensureDefaultUserRoles(userId: string) {
+  for (const role of DEFAULT_USER_ROLES) {
+    await assignRoleToUser(userId, role);
+  }
+}
 
 // Crear o actualizar usuario desde Clerk
 export async function syncUserFromClerk(clerkUser: {
@@ -79,6 +86,8 @@ export async function syncUserFromClerk(clerkUser: {
       return inserted[0] as User;
     });
 
+    await ensureDefaultUserRoles(user.id);
+
     return user;
   } catch (error) {
     console.error("Error syncing user:", error);
@@ -106,11 +115,11 @@ export async function assignRoleToUser(userId: string, role: string) {
 // Obtener todos los roles de un usuario
 export async function getUserRoles(userId: string): Promise<string[]> {
   try {
-    const result = await sql`
+    const result = await sql<{ role: string }[]>`
       SELECT role FROM user_role WHERE user_id = ${userId}
     `;
 
-    return result.map((row: any) => row.role);
+    return result.map((row) => row.role);
   } catch (error) {
     console.error("Error getting user roles:", error);
     throw error;
