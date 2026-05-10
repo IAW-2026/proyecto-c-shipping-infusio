@@ -32,7 +32,7 @@ function calculateDistanceKm(
   return R * c;
 }
 
-export function calculatePrize(
+export function calculatePrice(
   lat1: number,
   lon1: number,
   lat2: number,
@@ -43,4 +43,23 @@ export function calculatePrize(
   const basePrice = 10; // precio base por km
   const volumeSurcharge = volume > 1 ? (volume - 1) * 2 : 0; // recargo por volumen adicional
   return distanceKm * basePrice + volumeSurcharge;
+export function calculateShippingCost({
+  originPostalCode,
+  destinationPostalCode,
+  volume,
+}: { originPostalCode: string; destinationPostalCode: string; volume: number }) {
+    const postalCodeScore = (postalCode: string) => {
+    const normalized = postalCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, "")
+    const digits = normalized.replace(/\D/g, "")
+    const letters = normalized.replace(/[^A-Z]/g, "") 
+
+    let score = 0
+    if (digits) {
+      score += Number(digits)
+    } 
+    for (const letter of letters) {
+      score = score * 26 + (letter.charCodeAt(0) - 64)
+    }
+    return score
+  } 
 }
