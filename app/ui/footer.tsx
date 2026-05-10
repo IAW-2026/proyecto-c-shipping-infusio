@@ -13,7 +13,7 @@ export function Footer() {
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-center md:justify-start md:gap-8">
             <Link href="/terms" className="lowernav-component lowernav-component-hover">Términos y condiciones</Link>
             <Link href="/privacy" className="lowernav-component lowernav-component-hover">Privacidad</Link>
-            <Link href="#" className="lowernav-component lowernav-component-hover">Contacto</Link>
+            <Link href="/contact" className="lowernav-component lowernav-component-hover">Contacto</Link>
           </div>
           <p className="lowernav-component">© 2026 Infusio. Todos los derechos reservados.</p>
         </div>
