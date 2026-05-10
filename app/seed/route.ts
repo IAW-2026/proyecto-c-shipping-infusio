@@ -89,7 +89,7 @@ async function seedTrackings(sqlClient: any = sql) {
 export async function GET() {
   try {
     await sql.begin(async (tx) => {
-    //  await createTables(tx);
+      await createTables(tx);
       await seedShipments(tx);
       await seedTrackings(tx);
     });

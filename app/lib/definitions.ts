@@ -47,3 +47,12 @@ export type DeliveryAssignment = {
   rider_id: string;
   operator_id: string;
 };
+
+export const ROLES = {
+  ADMIN: "admin",
+  BUYER: "buyer",
+  SELLER: "seller",
+  LOGISTIC_OPERATOR: "logistic_operator",
+  RIDER: "rider",
+  SHIPPING_ADMIN: "shipping_admin",
+} as const;
