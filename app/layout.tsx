@@ -61,6 +61,7 @@ export default async function RootLayout({
         emailAddresses: user.emailAddresses.map((email) => ({
           emailAddress: email.emailAddress,
         })),
+        publicMetadata: user.publicMetadata as { roles?: unknown } | undefined,
       })
     } catch (error) {
       console.error('Error syncing user from layout:', error)
