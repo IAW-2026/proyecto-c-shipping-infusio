@@ -1,6 +1,6 @@
 "use client"
 
-import { viewerMenuItems } from "@/lib/viewer-actions"
+import { viewerMenuItems } from "@/app/lib/viewer-actions"
 import Link from "next/link"
 import { Card, CardContent } from "./card";
 

@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Package, Truck, Home, Box } from "lucide-react"
+import { CheckCircle2, Circle, Package, Truck, Home, Box, Clock, Cross } from "lucide-react"
 
 interface TimelineEvent {
   status: string
@@ -14,9 +14,13 @@ interface ShipmentTimelineProps {
 }
 
 const getIcon = (status: string) => {
-  if (status.includes("Entregado")) return Home
-  if (status.includes("reparto") || status.includes("Tránsito")) return Truck
-  if (status.includes("Enviado") || status.includes("centro")) return Package
+  if (status.includes("entregado")) return Home
+  if (status.includes("reparto") || status.includes("tránsito") ||
+    status.includes("despachado")) return Truck
+  if (status.includes("enviado") || status.includes("centro") ||
+    (status.includes("preparado"))) return Package
+  if (status.includes("pendiente")) return Clock
+  if (status.includes("cancelado") || status.includes("con incidencia")) return Cross
   return Box
 }
 

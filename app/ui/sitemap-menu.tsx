@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Map, Package, User, ChevronDown } from "lucide-react"
 import type { Dispatch, SetStateAction } from "react"
-import { SITEMAP } from "@/lib/sitemap-config"
+import { SITEMAP } from "@/app/lib/sitemap-config"
 import { Button } from "./button"
 
 type SitemapMenuProps = {
@@ -22,7 +22,7 @@ export function SitemapMenuContent({ sitemapMenuOpen, setSitemapMenuOpen }: Site
 
   return (
     <div
-      className="absolute z-50 mt-4 right-0 w-72 rounded-2xl border border-border bg-background shadow-lg overflow-hidden"
+      className="absolute top-full right-0 z-50 mt-2 w-72 rounded-2xl border border-border bg-background shadow-lg overflow-hidden"
       role="menu"
     >
       <div className="max-h-96 overflow-y-auto px-4 pt-6 pb-4 space-y-4">

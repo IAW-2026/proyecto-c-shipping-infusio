@@ -1,6 +1,6 @@
 export default function HistoryPage() {
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+    <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 w-full">
       {/* Header */}
       <div className="mb-12">
         <p className="text-sm uppercase tracking-widest text-primary font-medium mb-2">Tu cuenta</p>
