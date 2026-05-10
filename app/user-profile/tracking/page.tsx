@@ -1,8 +1,13 @@
 "use client"
 
+import { Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { TrackingInput } from "@/app/ui/tracking-input"
 
-export default function TrackingPage() {
+function TrackingPageContent() {
+	const searchParams = useSearchParams()
+	const code = searchParams.get("code")
+
 	return (
 		<div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 w-full">
     
@@ -12,8 +17,24 @@ export default function TrackingPage() {
         <p className="text-muted-foreground">Ingresá tu número de seguimiento para ver el estado actual del pedido.</p>
       </div>
       <div className="mt-8">
-        <TrackingInput />
+        <TrackingInput initialCode={code || undefined} />
       </div>
     </div>
+	)
+}
+
+export default function TrackingPage() {
+	return (
+		<Suspense fallback={
+			<div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 w-full">
+				<div className="animate-pulse">
+					<div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+					<div className="h-8 w-32 bg-gray-200 rounded mb-4"></div>
+					<div className="h-4 w-96 bg-gray-200 rounded mb-8"></div>
+				</div>
+			</div>
+		}>
+			<TrackingPageContent />
+		</Suspense>
 	)
 }

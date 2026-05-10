@@ -24,7 +24,7 @@ export default function ShippingApp() {
               </p>
               
               <div className="mt-8">
-                <TrackingInput />
+                <TrackingInput redirectOnResult={true} />
               </div>
             </div>
 
