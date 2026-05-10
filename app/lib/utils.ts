@@ -43,6 +43,8 @@ export function calculatePrice(
   const basePrice = 10; // precio base por km
   const volumeSurcharge = volume > 1 ? (volume - 1) * 2 : 0; // recargo por volumen adicional
   return distanceKm * basePrice + volumeSurcharge;
+}
+
 export function calculateShippingCost({
   originPostalCode,
   destinationPostalCode,
