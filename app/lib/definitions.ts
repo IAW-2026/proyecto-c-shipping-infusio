@@ -34,6 +34,10 @@ export type User = {
   name: string;
   surname: string;
   email: string;
+};
+
+export type RoleUser = {
+  user_id: string;
   role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller';
 };
 
@@ -43,3 +47,12 @@ export type DeliveryAssignment = {
   rider_id: string;
   operator_id: string;
 };
+
+export const ROLES = {
+  ADMIN: "admin",
+  BUYER: "buyer",
+  SELLER: "seller",
+  LOGISTIC_OPERATOR: "logistic_operator",
+  RIDER: "rider",
+  SHIPPING_ADMIN: "shipping_admin",
+} as const;
