@@ -1,15 +1,50 @@
 "use client"
 
 import { Search, AlertCircle } from "lucide-react"
-import { useState, FormEvent } from "react"
+import { useState, FormEvent, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
 import { ShipmentTimeline } from "./shipment-timeline"
 import { Card, CardHeader, CardTitle, CardContent } from "./card"
 
-export function TrackingInput() {
-  const [trackingCode, setTrackingCode] = useState("")
+interface TrackingInputProps {
+  redirectOnResult?: boolean
+  initialCode?: string
+}
+
+export function TrackingInput({ redirectOnResult = false, initialCode }: TrackingInputProps) {
+  const router = useRouter()
+  const [trackingCode, setTrackingCode] = useState(initialCode || "")
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // Auto-search if initialCode is provided
+  useEffect(() => {
+    if (initialCode) {
+      searchTracking(initialCode)
+    }
+  }, [initialCode])
+
+  const searchTracking = (code: string) => {
+    const cleanCode = code.trim().toUpperCase()
+
+    if (!cleanCode) {
+      setError("Por favor ingresá un código de seguimiento")
+      return
+    }
+
+    const shipment = SHIPMENTS.find(s => s.id === cleanCode)
+    
+    if (!shipment) {
+      setError("El código de seguimiento no existe")
+      setResult(null)
+      return
+    }
+
+    const trackings = SHIPMENT_TRACKINGS.filter(t => t.shipment_id === cleanCode)
+    setResult({ shipment, trackings })
+    setError(null)
+  }
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -28,9 +63,12 @@ export function TrackingInput() {
       return
     }
 
-    const trackings = SHIPMENT_TRACKINGS.filter(t => t.shipment_id === code)
-    setResult({ shipment, trackings })
-    setError(null)
+    if (redirectOnResult) {
+      router.push(`/user-profile/tracking?code=${code}`)
+      return
+    }
+
+    searchTracking(code)
   }
 
   const getTimelineEvents = () => {
