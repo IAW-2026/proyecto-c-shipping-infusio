@@ -10,8 +10,8 @@ type ProfileRole = "buyer" | "seller" | "rider" | "logistic_operator" | "admin"
 const ROLE_METADATA: Record<ProfileRole, { label: string; href: string }> = {
   buyer: { label: "Comprador", href: "/user-profile" },
   seller: { label: "Vendedor", href: "/user-profile" },
-  rider: { label: "Repartidor", href: "/user-profile/tracking" },
-  logistic_operator: { label: "Operador Logístico", href: "/user-profile/history" },
+  rider: { label: "Repartidor", href: "/user-profile/rider" },
+  logistic_operator: { label: "Operador Logístico", href: "/user-profile/logistics" },
   admin: { label: "Administrador", href: "/admin" },
 }
 
@@ -150,28 +150,32 @@ export function ProfileMenu() {
       </button>
 
       {menuOpen && (
-        <div className="mt-2 w-full md:absolute md:right-0 md:w-80 rounded-2xl border border-border bg-background p-3 shadow-lg z-50">
+        <div className="mt-2 w-full overflow-hidden rounded-2xl border border-border bg-background shadow-lg md:absolute md:right-0 md:top-full md:z-50 md:w-80">
+          <div className="max-h-96 overflow-y-auto px-4 pt-6 pb-4 space-y-4">
           {loadingRoles ? (
-            <p className="text-sm text-muted-foreground px-2 py-1">Cargando roles...</p>
+            <p className="px-3 py-2 text-sm text-muted-foreground">Cargando roles...</p>
           ) : (
             <>
               {hasRoles ? (
-                <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground px-2">Tus roles</p>
+                <div className="space-y-3">
+                  <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tus roles</p>
                   {roleEntries.map((entry) => (
                     <Link
                       key={entry.key}
                       href={entry.href}
-                      className="flex items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-secondary transition-colors"
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
                       onClick={() => setMenuOpen(false)}
                     >
                       <span>{entry.title}</span>
                       <span className="text-xs text-muted-foreground">{entry.subtitle}</span>
                     </Link>
                   ))}
+
+                  <div className="h-px bg-border" />
+
                   <Link
                     href="/user-profile"
-                    className="flex items-center justify-center rounded-xl border border-border px-3 py-2 text-sm hover:bg-secondary transition-colors"
+                    className="flex items-center justify-center rounded-lg border border-border px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
                     onClick={() => setMenuOpen(false)}
                   >
                     Ir al panel de usuario
@@ -179,7 +183,9 @@ export function ProfileMenu() {
 
                   {availableExtraRoles.length > 0 && (
                     <>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground px-2 pt-2">Agregar roles extra</p>
+                      <div className="h-px bg-border" />
+
+                      <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Agregar roles extra</p>
                       {availableExtraRoles.map((role) => {
                         const metadata = ROLE_METADATA[role]
                         const isSaving = savingRole === role
@@ -188,7 +194,7 @@ export function ProfileMenu() {
                           <button
                             key={role}
                             type="button"
-                            className="w-full rounded-xl border border-border px-3 py-2 text-sm text-left hover:bg-secondary transition-colors disabled:opacity-60"
+                            className="w-full rounded-lg border border-border px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-secondary disabled:opacity-60"
                             onClick={() => registerRole(role)}
                             disabled={isSaving || !!savingRole}
                           >
@@ -200,10 +206,13 @@ export function ProfileMenu() {
                   )}
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground px-2">
+                <div className="space-y-3">
+                  <p className="px-3 py-1 text-sm text-muted-foreground">
                     Configurando tus roles base. Si no aparecen, recarga la página.
                   </p>
+
+                  <div className="h-px bg-border" />
+
                   {EXTRA_SELF_REGISTRABLE_ROLES.map((role) => {
                     const metadata = ROLE_METADATA[role]
                     const isSaving = savingRole === role
@@ -212,7 +221,7 @@ export function ProfileMenu() {
                       <button
                         key={role}
                         type="button"
-                        className="w-full rounded-xl border border-border px-3 py-2 text-sm text-left hover:bg-secondary transition-colors disabled:opacity-60"
+                        className="w-full rounded-lg border border-border px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-secondary disabled:opacity-60"
                         onClick={() => registerRole(role)}
                         disabled={isSaving || !!savingRole}
                       >
@@ -223,9 +232,10 @@ export function ProfileMenu() {
                 </div>
               )}
 
-              {error && <p className="text-xs text-red-500 px-2 pt-2">{error}</p>}
+              {error && <p className="px-3 pt-2 text-xs text-red-500">{error}</p>}
             </>
           )}
+          </div>
         </div>
       )}
     </div>
