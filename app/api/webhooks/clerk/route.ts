@@ -7,6 +7,8 @@ type ClerkWebhookUserData = {
 	first_name: string | null;
 	last_name: string | null;
 	email_addresses: Array<{ email_address: string }>;
+	public_metadata?: { roles?: unknown };
+	publicMetadata?: { roles?: unknown };
 };
 
 export async function POST(req: Request) {
@@ -53,6 +55,7 @@ export async function POST(req: Request) {
 				first_name: evt.data.first_name,
 				last_name: evt.data.last_name,
 				emailAddresses,
+				publicMetadata: evt.data.public_metadata ?? evt.data.publicMetadata,
 			});
 		}
 
