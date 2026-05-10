@@ -5,6 +5,8 @@ import { Inter, Playfair_Display } from 'next/font/google'
 // import { Analytics } from '@vercel/analytics/next'
 import './ui/globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
+import { currentUser } from '@clerk/nextjs/server'
+import { syncUserFromClerk } from './lib/actions'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({
@@ -37,11 +39,34 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  let user: Awaited<ReturnType<typeof currentUser>> = null
+
+  try {
+    user = await currentUser()
+  } catch (error) {
+    console.error('Clerk currentUser failed in layout:', error)
+  }
+
+  if (user) {
+    try {
+      await syncUserFromClerk({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        emailAddresses: user.emailAddresses.map((email) => ({
+          emailAddress: email.emailAddress,
+        })),
+      })
+    } catch (error) {
+      console.error('Error syncing user from layout:', error)
+    }
+  }
+
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable} bg-background`}>
       <body className="font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
