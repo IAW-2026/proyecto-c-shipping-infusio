@@ -2,7 +2,7 @@ const SHIPMENTS = [
     {
         id: 'SHIPAA001',
         origin: 'CABA, Buenos Aires, Argentina',
-        destination: 'Bahía Blanca, Buenos Aires, Argentina',
+        destination: 'Zelarrayán 233, Bahía Blanca, Buenos Aires, Argentina',
         origin_datetime: '2024-01-01T10:00:00Z',
         destination_datetime: '2024-01-02T18:00:00Z',
     },
@@ -55,6 +55,14 @@ const SHIPMENT_TRACKINGS = [
         datetime: '2024-01-02T08:45:00Z',
         current_city: 'Centro Logístico - Bahía Blanca',
         next_city: 'Tu zona'
+    },
+    {
+        id: 'TRACK012',
+        shipment_id: 'SHIPAA001',
+        status: 'En reparto',
+        datetime: '2024-01-02T11:10:00Z',
+        current_city: 'Centro de Distribución - Bahía Blanca',
+        next_city: 'Domicilio de entrega'
     },
     // SHIPAA002 - Entregado
     {
