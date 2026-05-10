@@ -1,19 +1,21 @@
 "use server";
 
+import { clerkClient } from "@clerk/nextjs/server";
 import postgres from "postgres";
 import { User, RoleUser } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 const DEFAULT_USER_ROLES = ["buyer", "seller"] as const;
+const EXTRA_USER_ROLES = ["rider", "logistic_operator", "admin"] as const;
+const ALL_USER_ROLES = [...DEFAULT_USER_ROLES, ...EXTRA_USER_ROLES] as const;
 
-export async function ensureDefaultUserRoles(userId: string) {
-  for (const role of DEFAULT_USER_ROLES) {
-    await assignRoleToUser(userId, role);
-  }
-}
+type UserRole = (typeof ALL_USER_ROLES)[number];
 
-// Crear o actualizar usuario desde Clerk
-export async function syncUserFromClerk(clerkUser: {
+type ClerkMetadata = {
+  roles?: unknown;
+};
+
+type ClerkUserLike = {
   id: string;
   first_name?: string | null;
   last_name?: string | null;
@@ -21,7 +23,125 @@ export async function syncUserFromClerk(clerkUser: {
   lastName?: string | null;
   emailAddresses?: Array<{ emailAddress: string }>;
   email_addresses?: Array<{ email_address: string }>;
-}) {
+  publicMetadata?: ClerkMetadata;
+  public_metadata?: ClerkMetadata;
+};
+
+function parseRoles(roles: unknown): UserRole[] {
+  if (!Array.isArray(roles)) {
+    return [];
+  }
+
+  const normalizedRoles = new Set<UserRole>();
+
+  for (const role of roles) {
+    if (typeof role !== "string") {
+      continue;
+    }
+
+    if ((ALL_USER_ROLES as readonly string[]).includes(role)) {
+      normalizedRoles.add(role as UserRole);
+    }
+  }
+
+  return [...normalizedRoles];
+}
+
+function withDefaultRoles(roles: UserRole[]) {
+  return [...new Set<UserRole>([...DEFAULT_USER_ROLES, ...roles])];
+}
+
+function getRolesFromMetadata(metadata?: ClerkMetadata | null) {
+  return parseRoles(metadata?.roles);
+}
+
+async function getClerkClientInstance() {
+  return clerkClient();
+}
+
+async function getClerkUserRoles(userId: string): Promise<UserRole[]> {
+  const clerk = await getClerkClientInstance();
+  const clerkUser = await clerk.users.getUser(userId);
+  const typedUser = clerkUser as ClerkUserLike;
+
+  return parseRoles(
+    typedUser.publicMetadata?.roles ?? typedUser.public_metadata?.roles
+  );
+}
+
+async function setClerkUserRoles(userId: string, roles: UserRole[]) {
+  const clerk = await getClerkClientInstance();
+  const clerkUser = await clerk.users.getUser(userId);
+  const typedUser = clerkUser as ClerkUserLike;
+  const currentMetadata =
+    (typedUser.publicMetadata ?? typedUser.public_metadata ?? {}) as Record<string, unknown>;
+
+  await clerk.users.updateUserMetadata(userId, {
+    publicMetadata: {
+      ...currentMetadata,
+      roles: withDefaultRoles(roles),
+    },
+  });
+}
+
+async function syncDatabaseRoles(userId: string, roles: UserRole[]) {
+  const desiredRoles = withDefaultRoles(roles);
+  const currentRoles = parseRoles(await getUserRoles(userId));
+  const desiredRolesSet = new Set(desiredRoles);
+  const currentRolesSet = new Set(currentRoles);
+
+  for (const role of currentRoles) {
+    if (desiredRolesSet.has(role)) {
+      continue;
+    }
+
+    await sql`
+      DELETE FROM user_role WHERE user_id = ${userId} AND role = ${role}
+    `;
+  }
+
+  for (const role of desiredRoles) {
+    if (currentRolesSet.has(role)) {
+      continue;
+    }
+
+    await sql`
+      INSERT INTO user_role (user_id, role)
+      VALUES (${userId}, ${role})
+      ON CONFLICT (user_id, role) DO NOTHING
+    `;
+  }
+}
+
+async function getCanonicalRoles(userId: string): Promise<UserRole[]> {
+  const clerkRoles = await getClerkUserRoles(userId);
+
+  if (clerkRoles.length > 0) {
+    return withDefaultRoles(clerkRoles);
+  }
+
+  const databaseRoles = parseRoles(await getUserRoles(userId));
+
+  if (databaseRoles.length > 0) {
+    return withDefaultRoles(databaseRoles);
+  }
+
+  return withDefaultRoles([]);
+}
+
+export async function ensureDefaultUserRoles(userId: string) {
+  const clerkRoles = await getClerkUserRoles(userId);
+  const databaseRoles = parseRoles(await getUserRoles(userId));
+  const mergedRoles = withDefaultRoles([...clerkRoles, ...databaseRoles]);
+
+  await setClerkUserRoles(userId, mergedRoles);
+  await syncDatabaseRoles(userId, mergedRoles);
+
+  return mergedRoles;
+}
+
+// Crear o actualizar usuario desde Clerk
+export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
   try {
     const normalizedEmails =
       clerkUser.emailAddresses?.map((email) => email.emailAddress) ??
@@ -86,7 +206,16 @@ export async function syncUserFromClerk(clerkUser: {
       return inserted[0] as User;
     });
 
-    await ensureDefaultUserRoles(user.id);
+    const clerkMetadataRoles = getRolesFromMetadata(
+      clerkUser.publicMetadata ?? clerkUser.public_metadata
+    );
+
+    if (clerkMetadataRoles.length > 0) {
+      await setClerkUserRoles(user.id, clerkMetadataRoles);
+      await syncDatabaseRoles(user.id, clerkMetadataRoles);
+    } else {
+      await ensureDefaultUserRoles(user.id);
+    }
 
     return user;
   } catch (error) {
@@ -98,6 +227,16 @@ export async function syncUserFromClerk(clerkUser: {
 // Asignar rol a un usuario
 export async function assignRoleToUser(userId: string, role: string) {
   try {
+    if (!(ALL_USER_ROLES as readonly string[]).includes(role)) {
+      throw new Error(`Rol no permitido: ${role}`);
+    }
+
+    const canonicalRoles = await getCanonicalRoles(userId);
+    const nextRoles = withDefaultRoles([...canonicalRoles, role as UserRole]);
+
+    await setClerkUserRoles(userId, nextRoles);
+    await syncDatabaseRoles(userId, nextRoles);
+
     const result = await sql`
       INSERT INTO user_role (user_id, role)
       VALUES (${userId}, ${role})
@@ -129,6 +268,18 @@ export async function getUserRoles(userId: string): Promise<string[]> {
 // Eliminar un rol de un usuario
 export async function removeRoleFromUser(userId: string, role: string) {
   try {
+    if (!(ALL_USER_ROLES as readonly string[]).includes(role)) {
+      throw new Error(`Rol no permitido: ${role}`);
+    }
+
+    const canonicalRoles = await getCanonicalRoles(userId);
+    const nextRoles = withDefaultRoles(
+      canonicalRoles.filter((currentRole) => currentRole !== role)
+    );
+
+    await setClerkUserRoles(userId, nextRoles);
+    await syncDatabaseRoles(userId, nextRoles);
+
     await sql`
       DELETE FROM user_role WHERE user_id = ${userId} AND role = ${role}
     `;
