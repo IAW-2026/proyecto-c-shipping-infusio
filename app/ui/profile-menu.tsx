@@ -167,7 +167,7 @@ export function ProfileMenu() {
                       onClick={() => setMenuOpen(false)}
                     >
                       <span>{entry.title}</span>
-                      <span className="text-xs text-muted-foreground">{entry.subtitle}</span>
+                      {/* <span className="text-xs text-muted-foreground">{entry.subtitle}</span> */}
                     </Link>
                   ))}
 
