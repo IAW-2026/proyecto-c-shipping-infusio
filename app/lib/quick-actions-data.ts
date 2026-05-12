@@ -1,4 +1,4 @@
-import { HelpCircle, FileText } from "lucide-react"
+import { HelpCircle, FileText, ShoppingCart, OctagonAlert } from "lucide-react"
 
 export const quickActions = [
   {
@@ -12,5 +12,17 @@ export const quickActions = [
     title: "Políticas de Envío",
     description: "Tiempos y costos de entrega",
     link: "/shipping-policies"
+  },
+  {
+    icon: ShoppingCart,
+    title: "Seguir comprando",
+    description: "¿Te quedaste con ganas de más? Explorá nuestra tienda",
+    link: "https://proyecto-c-buyer-infusio.vercel.app/"
+  },
+  {
+    icon: OctagonAlert,
+    title: "Reportar un problema",
+    description: "¿Tu envío tiene un problema? Contáctanos",
+    link: "/contact"
   }
 ]
