@@ -8,6 +8,8 @@ async function createTables(sqlClient: any = sql) {
 
   await sqlClient`CREATE TABLE IF NOT EXISTS shipment (
       id VARCHAR(255) PRIMARY KEY,
+      buyerId VARCHAR(255) NOT NULL,
+      sellerId VARCHAR(255) NOT NULL,
       origin VARCHAR(255) NOT NULL,
       destination VARCHAR(255) NOT NULL,
       origin_datetime TIMESTAMP NOT NULL,
@@ -62,7 +64,7 @@ async function seedShipments(sqlClient: any = sql) {
   const insertedShipments = await Promise.all(
     SHIPMENTS.map((shipment) =>
       sqlClient`
-        INSERT INTO shipment (id, origin, destination, origin_datetime, destination_datetime)
+        INSERT INTO shipment (id, buyerId, sellerId, origin, destination, origin_datetime, destination_datetime)
         VALUES (${shipment.id}, ${shipment.origin}, ${shipment.destination}, ${shipment.origin_datetime}, ${shipment.destination_datetime})
         ON CONFLICT (id) DO NOTHING;
       `,
@@ -86,12 +88,34 @@ async function seedTrackings(sqlClient: any = sql) {
   return insertedTrackings;
 }
 
+async function seedUsers(sqlClient: any = sql) {
+  await sqlClient`CREATE TABLE IF NOT EXISTS "user" (
+      id VARCHAR(255) PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      surname VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL UNIQUE
+    )`;
+
+  await sqlClient`CREATE TABLE IF NOT EXISTS user_role (
+        user_id VARCHAR(255) NOT NULL REFERENCES "user"(id),
+        role VARCHAR(50) NOT NULL,
+        PRIMARY KEY (user_id, role)
+    )`;
+  }
+
+async function dropTables(sqlClient: any = sql) {
+  await sqlClient`DROP TABLE IF EXISTS user_role`;
+  await sqlClient`DROP TABLE IF EXISTS "user"`;
+}
+
 export async function GET() {
   try {
     await sql.begin(async (tx) => {
-      await createTables(tx);
-      await seedShipments(tx);
-      await seedTrackings(tx);
+      // await createTables(tx);
+      // await seedShipments(tx);
+      // await seedTrackings(tx);
+      // await dropTables(tx);
+      await seedUsers(tx);
     });
 
     return Response.json({ message: 'Database seeded successfully' });
