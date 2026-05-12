@@ -77,25 +77,17 @@ export function MobileSitemapMenu({ sitemapMenuOpen, setSitemapMenuOpen }: Sitem
                   {section.title}
                 </h3>
                 <div className="space-y-1">
-                  {section.links.map((link) => {
-                    const getIcon = (iconType: 'user' | 'package') => {
-                      return iconType === 'user'
-                        ? <User className="h-4 w-4 shrink-0" />
-                        : <Package className="h-4 w-4 shrink-0" />
-                    }
-
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setSitemapMenuOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
-                      >
-                        {getIcon(link.icon)}
-                        <span>{link.label}</span>
-                      </Link>
-                    )
-                  })}
+                  {section.links.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setSitemapMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
+                    >
+                      {link.icon === 'user' ? <User className="h-4 w-4 shrink-0" /> : <Package className="h-4 w-4 shrink-0" />}
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             ))}
