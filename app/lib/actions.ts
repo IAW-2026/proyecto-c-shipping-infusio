@@ -5,8 +5,8 @@ import postgres from "postgres";
 import { User, RoleUser } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
-const DEFAULT_USER_ROLES = ["buyer", "seller"] as const;
-const EXTRA_USER_ROLES = ["rider", "logistic_operator", "admin"] as const;
+const DEFAULT_USER_ROLES = ["viewer"] as const;
+const EXTRA_USER_ROLES = ["rider", "logistic_operator", "admin", "shipping_admin"] as const;
 const ALL_USER_ROLES = [...DEFAULT_USER_ROLES, ...EXTRA_USER_ROLES] as const;
 
 type UserRole = (typeof ALL_USER_ROLES)[number];
