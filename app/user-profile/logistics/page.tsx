@@ -55,7 +55,7 @@ const SHIPPING_FLOW = [
   "Preparando tu pedido",
   "Enviado",
   "En tránsito hacia tu ciudad",
-  "En reparto",
+  "Repartiendo",
   "Entregado",
 ] as const
 
@@ -307,7 +307,7 @@ export default function LogisticsPage() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-700">
                   <Truck className="h-5 w-5" />
                 </div>
-                <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">En reparto</p>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Repartiendo</p>
                 <p className="text-2xl font-semibold text-foreground">
                   {pendingShipments.filter((shipment) => shipment.latestStatus.toLowerCase().includes("reparto")).length}
                 </p>
