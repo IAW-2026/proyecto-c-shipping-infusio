@@ -58,4 +58,5 @@ export const ROLES = {
   LOGISTIC_OPERATOR: "logistic_operator",
   RIDER: "rider",
   SHIPPING_ADMIN: "shipping_admin",
+  VIEWER: "viewer",
 } as const;
