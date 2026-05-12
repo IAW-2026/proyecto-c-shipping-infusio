@@ -14,14 +14,14 @@ export const SITEMAP: SitemapSection[] = [
     title: 'Cuenta',
     links: [
       { label: 'Mi Perfil', href: '/user-profile', icon: 'user' },
-      { label: 'Mis Envíos', href: '/', icon: 'package' },
+      { label: 'Mis Envíos', href: '/user-profile/history', icon: 'package' },
     ],
   },
   {
     title: 'Rastreo',
     links: [
-      { label: 'Buscar Envío', href: '/viewer-refactor/tracking', icon: 'package' },
-      { label: 'Suscripción a Eventos', href: '/viewer-refactor/subscription', icon: 'package' },
+      { label: 'Buscar Envío', href: '/user-profile/tracking', icon: 'package' },
+      { label: 'Suscripción a Eventos', href: '/user-profile/subscription', icon: 'package' },
     ],
   },
   {
