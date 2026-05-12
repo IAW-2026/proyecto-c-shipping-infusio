@@ -115,7 +115,7 @@ export async function GET() {
       // await seedShipments(tx);
       // await seedTrackings(tx);
       // await dropTables(tx);
-      await seedUsers(tx);
+      // await seedUsers(tx);
     });
 
     return Response.json({ message: 'Database seeded successfully' });
