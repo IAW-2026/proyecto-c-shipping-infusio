@@ -1,10 +1,14 @@
-const SHIPMENTS = [
+import type { Shipment, ShipmentTracking } from "./definitions"
+
+const SHIPMENTS: Shipment[] = [
     {
         id: 'SHIPAA001',
         origin: 'CABA, Buenos Aires, Argentina',
         destination: 'Zelarrayán 233, Bahía Blanca, Buenos Aires, Argentina',
         origin_datetime: '2024-01-01T10:00:00Z',
         destination_datetime: '2024-01-02T18:00:00Z',
+        buyer_id: 'BUYER001',
+        seller_id: 'SELLER001'
     },
     {
         id: 'SHIPAA002',
@@ -12,6 +16,8 @@ const SHIPMENTS = [
         destination: 'CABA, Buenos Aires, Argentina',
         origin_datetime: '2024-01-01T10:00:00Z',
         destination_datetime: '2024-01-02T18:00:00Z',
+        buyer_id: 'BUYER002',
+        seller_id: 'SELLER002'
     },
     {
         id: 'SHIPAA003',
@@ -19,10 +25,12 @@ const SHIPMENTS = [
         destination: 'Dr. Arturo Sampay 1030, Bahía Blanca, Buenos Aires, Argentina',
         origin_datetime: '2024-01-01T10:00:00Z',
         destination_datetime: '2024-01-02T18:00:00Z',
+        buyer_id: 'BUYER003',
+        seller_id: 'SELLER003'
     }
 ]
 
-const SHIPMENT_TRACKINGS = [
+const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
     // SHIPAA001 - En tránsito
     {
         id: 'TRACK001',
