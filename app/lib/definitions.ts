@@ -3,7 +3,10 @@ export type Shipment = {
   origin: string;
   destination: string;
   origin_datetime: string;
-  destination_datetime: string;
+  destination_datetime: string | null;
+  buyer_id: any;
+  seller_id?: any;
+  order_id?: string;
 };
 
 export type LogisticOperator = {
@@ -23,7 +26,7 @@ export type Rider = {
 export type ShipmentTracking = {
   id: string;
   shipment_id: string;
-  status: 'pendiente' | 'preparado' | 'despachado' | 'en tránsito' | 'entregado' | 'cancelado' | 'con incidencia';
+  status: string;
   datetime: string;
   current_city: string;
   next_city: string;
