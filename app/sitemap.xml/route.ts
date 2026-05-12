@@ -38,10 +38,12 @@ function collectPages(dir: string) {
 
     for (const e of entries) {
       if (!e.isDirectory()) continue;
-      if (e.name.startsWith("(")) continue; // Next.js grouping folders
       if (e.name === "api") continue; // skip API routes
 
-      recurse(path.join(currentDir, e.name), path.join(relPath, e.name));
+      // For grouping folders (e.g., (footer)), continue recursing but don't include in path
+      const nextPath = e.name.startsWith("(") ? relPath : path.join(relPath, e.name);
+
+      recurse(path.join(currentDir, e.name), nextPath);
     }
   }
 
