@@ -1,14 +1,14 @@
 "use client"
 
 import { Card, CardContent } from "@/app/ui/card"
-import { Mail, MessageCircle } from "lucide-react"
+import { Mail, Bell } from "lucide-react"
 
 const channels = [
     {
-        id: "whatsapp",
-        title: "WhatsApp",
-        description: "Mensajes rápidos en tu celular.",
-        icon: MessageCircle,
+        id: "push",
+        title: "Notificación Push",
+        description: "Alertas instantáneas en tu dispositivo.",
+        icon: Bell,
     },
   {
     id: "email",
