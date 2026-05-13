@@ -57,8 +57,7 @@ export async function POST(request: Request) {
       datetime: now,
       current_city: body.origin_address.address,
       next_city: "Centro de Distribución",
-      seller_id: body.seller_id,
-      buyer_id: body.buyer_id,
+      // buyer/seller stored on shipment
     }
 
     // Mutar los arrays de ejemplo en memoria

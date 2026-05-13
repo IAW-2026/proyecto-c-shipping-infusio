@@ -30,8 +30,7 @@ export type ShipmentTracking = {
   datetime: string;
   current_city: string;
   next_city: string;
-  seller_id: string;
-  buyer_id: string;
+  // buyer/seller now stored on `Shipment`
 };
 
 export type User = {
