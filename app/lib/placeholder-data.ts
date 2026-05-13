@@ -7,6 +7,8 @@ const SHIPMENTS: Shipment[] = [
         destination: 'Zelarrayán 233, Bahía Blanca, Buenos Aires, Argentina',
         origin_datetime: '2024-01-01T10:00:00Z',
         destination_datetime: '2024-01-02T18:00:00Z',
+        seller_id: 'user_3DXOELulmYWRcib5qSHjXEJsiyU',
+        buyer_id: 'user_3DXScqrDOZjBGz3sb00kYAxSgh1',
     },
     {
         id: 'SHIPAA002',
@@ -14,6 +16,8 @@ const SHIPMENTS: Shipment[] = [
         destination: 'CABA, Buenos Aires, Argentina',
         origin_datetime: '2024-01-01T10:00:00Z',
         destination_datetime: '2024-01-02T18:00:00Z',
+        seller_id: 'user_3DXScqrDOZjBGz3sb00kYAxSgh1',
+        buyer_id: 'user_3DdtO3tGpGtvz1VoG5rJbLAWPAG',
     },
     {
         id: 'SHIPAA003',
@@ -21,6 +25,8 @@ const SHIPMENTS: Shipment[] = [
         destination: 'Dr. Arturo Sampay 1030, Bahía Blanca, Buenos Aires, Argentina',
         origin_datetime: '2024-01-01T10:00:00Z',
         destination_datetime: '2024-01-02T18:00:00Z',
+        seller_id: 'user_3DXScqrDOZjBGz3sb00kYAxSgh1',
+        buyer_id: 'user_3DXOELulmYWRcib5qSHjXEJsiyU',
     }
 ]
 
@@ -33,8 +39,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2024-01-01T10:00:00Z',
         current_city: 'Tienda Online Infusio',
         next_city: 'Centro de Distribución',
-        seller_id: 'SELLER001',
-        buyer_id: 'BUYER001'
+        
     },
     {
         id: 'TRACK002',
@@ -43,8 +48,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2024-01-01T14:15:00Z',
         current_city: 'Centro de Distribución - Palermo',
         next_city: 'Centro de Distribución - Palermo',
-        seller_id: 'SELLER001',
-        buyer_id: 'BUYER001'
+        
     },
     {
         id: 'TRACK003',
@@ -53,8 +57,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2024-01-01T18:00:00Z',
         current_city: 'Centro de Distribución - Palermo',
         next_city: 'Centro Logístico - Bahía Blanca',
-        seller_id: 'SELLER001',
-        buyer_id: 'BUYER001'
+        
     },
     {
         id: 'TRACK004',
@@ -63,8 +66,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2024-01-02T08:45:00Z',
         current_city: 'Centro Logístico - Bahía Blanca',
         next_city: 'Tu zona',
-        seller_id: 'SELLER001',
-        buyer_id: 'BUYER001'
+        
     },
     {
         id: 'TRACK005',
@@ -73,8 +75,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2024-01-02T11:10:00Z',
         current_city: 'Centro de Distribución - Bahía Blanca',
         next_city: 'Domicilio de entrega',
-        seller_id: 'SELLER001',
-        buyer_id: 'BUYER001'
+        
     },
     // SHIPAA002 - Entregado
     {
@@ -84,8 +85,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2023-12-25T09:30:00Z',
         current_city: 'Tienda Online Infusio',
         next_city: 'Centro de Distribución',
-        seller_id: 'SELLER002',
-        buyer_id: 'BUYER002'
+        
     },
     {
         id: 'TRACK007',
@@ -94,8 +94,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2023-12-25T13:00:00Z',
         current_city: 'Centro de Distribución - Rosario',
         next_city: 'Centro de Distribución - Rosario',
-        seller_id: 'SELLER002',
-        buyer_id: 'BUYER002'
+        
     },
     {
         id: 'TRACK008',
@@ -104,8 +103,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2023-12-25T16:45:00Z',
         current_city: 'Centro de Distribución - Rosario',
         next_city: 'Centro Logístico - CABA',
-        seller_id: 'SELLER002',
-        buyer_id: 'BUYER002'
+        
     },
     {
         id: 'TRACK009',
@@ -114,8 +112,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2023-12-26T07:30:00Z',
         current_city: 'Centro Logístico - CABA',
         next_city: 'Tu zona',
-        seller_id: 'SELLER002',
-        buyer_id: 'BUYER002'
+        
     },
     {
         id: 'TRACK010',
@@ -124,8 +121,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2023-12-26T14:20:00Z',
         current_city: 'Tu dirección',
         next_city: 'Entrega finalizada',
-        seller_id: 'SELLER002',
-        buyer_id: 'BUYER002'
+        
     },
     // SHIAA003 - Preparado
     {
@@ -135,8 +131,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2024-01-03T11:00:00Z',
         current_city: 'Tienda Online Infusio',
         next_city: 'Centro de Distribución',
-        seller_id: 'SELLER003',
-        buyer_id: 'BUYER003'
+        
     },
     {
         id: 'TRACK012',
@@ -145,8 +140,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         datetime: '2024-01-03T15:30:00Z',
         current_city: 'Centro de Distribución - Bahía Blanca',
         next_city: 'Centro de Distribución - Bahía Blanca',
-        seller_id: 'SELLER003',
-        buyer_id: 'BUYER003'
+        
     }
 ]
 
