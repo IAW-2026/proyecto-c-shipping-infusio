@@ -86,8 +86,8 @@ export default function HistoryPage() {
         datetime: tracking?.datetime ?? shipment.origin_datetime,
         currentCity: tracking?.current_city ?? shipment.origin,
         nextCity: tracking?.next_city ?? shipment.destination,
-        buyerId: tracking?.buyer_id ?? shipment.buyer_id ?? null,
-        sellerId: tracking?.seller_id ?? shipment.seller_id ?? null,
+        buyerId: shipment.buyer_id ?? null,
+        sellerId: shipment.seller_id ?? null,
       }
     }).filter((order) => {
       const isBuyer = order.buyerId === user.id
