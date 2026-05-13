@@ -5,6 +5,8 @@ export type Shipment = {
   origin_datetime: string;
   destination_datetime: string | null;
   order_id?: string;
+  buyer_id?: string;
+  seller_id?: string;
 };
 
 export type LogisticOperator = {
