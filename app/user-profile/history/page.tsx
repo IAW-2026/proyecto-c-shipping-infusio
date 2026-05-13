@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import Link from "next/link"
 import { useMemo } from "react"
 import { useSearchParams } from "next/navigation"
@@ -61,7 +62,7 @@ function getLatestTrackingByShipment() {
   return latestTrackings
 }
 
-export default function HistoryPage() {
+function HistoryPageContent() {
   const { user, isLoaded } = useUser()
   const searchParams = useSearchParams()
   const activeRole = normalizeFilterRole(searchParams.get("role"))
@@ -278,5 +279,19 @@ export default function HistoryPage() {
         )}
       </section>
     </div>
+  )
+}
+
+export default function HistoryPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-6 py-10 lg:px-8">
+          <p className="text-sm text-muted-foreground">Cargando historial...</p>
+        </div>
+      }
+    >
+      <HistoryPageContent />
+    </Suspense>
   )
 }
