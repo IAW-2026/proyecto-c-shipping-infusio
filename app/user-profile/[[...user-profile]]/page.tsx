@@ -3,12 +3,13 @@
 
 import { useUser } from "@clerk/nextjs"
 import { ViewerActions } from "@/app/ui/viewer-actions"
+import NotAuth from "@/app/ui/not-auth"
 
 export default function UserProfilePage() {
   const { user, isLoaded } = useUser()
 
   if (!isLoaded) return <p className="infusio">Cargando...</p>
-  if (!user) return <p className="infusio">No autenticado</p>
+  if (!user) return <NotAuth />
 
   return (
       <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 w-full">
