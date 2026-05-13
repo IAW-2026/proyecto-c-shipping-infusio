@@ -27,6 +27,7 @@ const SHIPMENTS: Shipment[] = [
 const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
     // SHIPAA001 - En tránsito
     {
+        id: 'TRACK001',
         shipment_id: 'SHIPAA001',
         status: 'Pedido confirmado',
         datetime: '2024-01-01T10:00:00Z',
@@ -36,6 +37,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER001'
     },
     {
+        id: 'TRACK002',
         shipment_id: 'SHIPAA001',
         status: 'Preparando tu pedido',
         datetime: '2024-01-01T14:15:00Z',
@@ -45,6 +47,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER001'
     },
     {
+        id: 'TRACK003',
         shipment_id: 'SHIPAA001',
         status: 'Enviado',
         datetime: '2024-01-01T18:00:00Z',
@@ -54,6 +57,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER001'
     },
     {
+        id: 'TRACK004',
         shipment_id: 'SHIPAA001',
         status: 'En tránsito hacia tu ciudad',
         datetime: '2024-01-02T08:45:00Z',
@@ -63,6 +67,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER001'
     },
     {
+        id: 'TRACK005',
         shipment_id: 'SHIPAA001',
         status: 'En reparto',
         datetime: '2024-01-02T11:10:00Z',
@@ -73,6 +78,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
     },
     // SHIPAA002 - Entregado
     {
+        id: 'TRACK006',
         shipment_id: 'SHIPAA002',
         status: 'Pedido confirmado',
         datetime: '2023-12-25T09:30:00Z',
@@ -82,6 +88,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER002'
     },
     {
+        id: 'TRACK007',
         shipment_id: 'SHIPAA002',
         status: 'Preparando tu pedido',
         datetime: '2023-12-25T13:00:00Z',
@@ -91,6 +98,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER002'
     },
     {
+        id: 'TRACK008',
         shipment_id: 'SHIPAA002',
         status: 'Enviado',
         datetime: '2023-12-25T16:45:00Z',
@@ -100,6 +108,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER002'
     },
     {
+        id: 'TRACK009',
         shipment_id: 'SHIPAA002',
         status: 'En reparto',
         datetime: '2023-12-26T07:30:00Z',
@@ -109,6 +118,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER002'
     },
     {
+        id: 'TRACK010',
         shipment_id: 'SHIPAA002',
         status: 'Entregado',
         datetime: '2023-12-26T14:20:00Z',
@@ -119,6 +129,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
     },
     // SHIAA003 - Preparado
     {
+        id: 'TRACK011',
         shipment_id: 'SHIPAA003',
         status: 'Pedido confirmado',
         datetime: '2024-01-03T11:00:00Z',
@@ -128,6 +139,7 @@ const SHIPMENT_TRACKINGS: ShipmentTracking[] = [
         buyer_id: 'BUYER003'
     },
     {
+        id: 'TRACK012',
         shipment_id: 'SHIPAA003',
         status: 'Preparando tu pedido',
         datetime: '2024-01-03T15:30:00Z',

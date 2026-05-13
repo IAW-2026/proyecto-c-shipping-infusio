@@ -24,6 +24,7 @@ export type Rider = {
 };
 
 export type ShipmentTracking = {
+  id: string;
   shipment_id: string;
   status: string;
   datetime: string;
