@@ -9,11 +9,12 @@ export async function POST(request: Request) {
     if (
       !body?.order_id ||
       !body?.buyer_id ||
+      !body?.seller_id ||
       !body?.origin_address ||
       !body?.destination_address
     ) {
       return NextResponse.json(
-        { error: "Missing required fields: order_id, buyer_id, origin_address, destination_address" },
+        { error: "Missing required fields: order_id, buyer_id, seller_id, origin_address, destination_address" },
         { status: 400 }
       )
     }
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     if (
       typeof body.order_id !== "string" ||
       typeof body.buyer_id !== "string" ||
+      typeof body.seller_id !== "string" ||
       typeof body.origin_address.address !== "string" ||
       typeof body.origin_address.postal_code !== "string" ||
       typeof body.destination_address.address !== "string" ||
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
       destination_datetime: null,
       order_id: body.order_id,
       buyer_id: body.buyer_id,
+      seller_id: body.seller_id,
     }
 
     const tracking = {
@@ -54,6 +57,8 @@ export async function POST(request: Request) {
       datetime: now,
       current_city: body.origin_address.address,
       next_city: "Centro de Distribución",
+      seller_id: body.seller_id,
+      buyer_id: body.buyer_id,
     }
 
     // Mutar los arrays de ejemplo en memoria

@@ -4,9 +4,9 @@ export type Shipment = {
   destination: string;
   origin_datetime: string;
   destination_datetime: string | null;
-  buyer_id: any;
-  seller_id?: any;
   order_id?: string;
+  buyer_id?: string;
+  seller_id?: string;
 };
 
 export type LogisticOperator = {
@@ -30,6 +30,8 @@ export type ShipmentTracking = {
   datetime: string;
   current_city: string;
   next_city: string;
+  seller_id: string;
+  buyer_id: string;
 };
 
 export type User = {

@@ -9,8 +9,6 @@ async function createTables(sqlClient: any = sql) {
 
   await sqlClient`CREATE TABLE IF NOT EXISTS shipment (
       id VARCHAR(255) PRIMARY KEY,
-      buyerId VARCHAR(255) NOT NULL,
-      sellerId VARCHAR(255) NOT NULL,
       origin VARCHAR(255) NOT NULL,
       destination VARCHAR(255) NOT NULL,
       origin_datetime TIMESTAMP NOT NULL,
@@ -26,8 +24,9 @@ async function createTables(sqlClient: any = sql) {
     )`;
 
   await sqlClient`CREATE TABLE IF NOT EXISTS tracking (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      shipment_id VARCHAR(255) NOT NULL REFERENCES shipment(id),
+      shipment_id VARCHAR(255) NOT NULL UNIQUE REFERENCES shipment(id),
+      buyer_id VARCHAR(255), 
+      seller_id VARCHAR(255),
       status VARCHAR(255) NOT NULL,
       datetime TIMESTAMP NOT NULL,
       current_city VARCHAR(255) NOT NULL,
@@ -65,7 +64,7 @@ async function seedShipments(sqlClient: any = sql) {
   const insertedShipments = await Promise.all(
     SHIPMENTS.map((shipment) =>
       sqlClient`
-        INSERT INTO shipment (id, buyerId, sellerId, origin, destination, origin_datetime, destination_datetime)
+        INSERT INTO shipment (id, origin, destination, origin_datetime, destination_datetime)
         VALUES (${shipment.id}, ${shipment.origin}, ${shipment.destination}, ${shipment.origin_datetime}, ${shipment.destination_datetime})
         ON CONFLICT (id) DO NOTHING;
       `,
@@ -79,9 +78,16 @@ async function seedTrackings(sqlClient: any = sql) {
   const insertedTrackings = await Promise.all(
     SHIPMENT_TRACKINGS.map((tracking) =>
       sqlClient`
-        INSERT INTO tracking (id, shipment_id, status, datetime, current_city, next_city)
-        VALUES (${tracking.id}, ${tracking.shipment_id}, ${tracking.status}, ${tracking.datetime}, ${tracking.current_city}, ${tracking.next_city})
-        ON CONFLICT (id) DO NOTHING;
+        INSERT INTO tracking (shipment_id, buyer_id, seller_id, status, datetime, current_city, next_city)
+        VALUES (${tracking.shipment_id}, ${tracking.buyer_id}, ${tracking.seller_id}, ${tracking.status}, ${tracking.datetime}, ${tracking.current_city}, ${tracking.next_city})
+        ON CONFLICT (shipment_id) DO UPDATE
+        SET 
+            buyer_id = ${tracking.buyer_id},
+            seller_id = ${tracking.seller_id},
+            status = ${tracking.status},
+            datetime = ${tracking.datetime},
+            current_city = ${tracking.current_city},
+            next_city = ${tracking.next_city};
       `,
     ),
   );
@@ -189,6 +195,11 @@ async function seedUsers(sqlClient: any = sql) {
 async function dropTables(sqlClient: any = sql) {
   await sqlClient`DROP TABLE IF EXISTS user_role`;
   await sqlClient`DROP TABLE IF EXISTS "user"`;
+  await sqlClient`DROP TABLE IF EXISTS tracking`;
+  await sqlClient`DROP TABLE IF EXISTS delivery_assignment`;
+  await sqlClient`DROP TABLE IF EXISTS rider`;
+  await sqlClient`DROP TABLE IF EXISTS logistic_operator`;
+  await sqlClient`DROP TABLE IF EXISTS shipment`;
 }
 
 export async function GET(request: Request) {
@@ -197,9 +208,9 @@ export async function GET(request: Request) {
     const action = searchParams.get('action') || 'sync-clerk-users';
     
     const result = await sql.begin(async (tx) => {
-      // await createTables(tx);
-      // await seedShipments(tx);
-      // await seedTrackings(tx);
+      await createTables(tx);
+      await seedShipments(tx);
+      await seedTrackings(tx);
       // await dropTables(tx);
       
       if (action === 'sync-clerk-users' || action === 'all') {

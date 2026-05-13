@@ -83,6 +83,8 @@ export async function PATCH(
       datetime: now,
       current_city,
       next_city: status === "delivered" ? "Entrega finalizada" : "En ruta",
+      seller_id: shipment.seller_id || "SELLER_UNKNOWN",
+      buyer_id: shipment.buyer_id || "BUYER_UNKNOWN",
     }
 
     SHIPMENT_TRACKINGS.push(tracking)
