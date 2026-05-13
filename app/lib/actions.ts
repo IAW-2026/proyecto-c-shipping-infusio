@@ -320,7 +320,7 @@ export async function createRiderProfile(
   try {
     const result = await sql`
       INSERT INTO rider (id, name, email, status, location)
-      VALUES (${userId}, ${riderData.name}, ${riderData.email}, 'activo', ${riderData.location})
+      VALUES (${userId}, ${riderData.name}, ${riderData.email}, 'inactivo', ${riderData.location})
       ON CONFLICT (id) DO UPDATE
       SET name = EXCLUDED.name, location = EXCLUDED.location
       RETURNING *
