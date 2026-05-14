@@ -9,6 +9,15 @@ export type Shipment = {
   seller_id?: string;
 };
 
+export type ShipmentSummary = {
+  id: string
+  origin: string
+  destination: string
+  latestStatus: string
+  latestDatetime: string
+  assignedRiderId: string | null
+};
+
 export type LogisticOperator = {
   id: string;
   name: string;
@@ -30,7 +39,6 @@ export type ShipmentTracking = {
   datetime: string;
   current_city: string;
   next_city: string;
-  // buyer/seller now stored on `Shipment`
 };
 
 export type User = {

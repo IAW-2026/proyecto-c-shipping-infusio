@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Map, Package, User, ChevronDown } from "lucide-react"
 import type { Dispatch, SetStateAction } from "react"
 import { SITEMAP } from "@/app/lib/sitemap-config"
-import { Button } from "./button"
+import { Button } from "../utils/button"
 
 type SitemapMenuProps = {
   sitemapMenuOpen: boolean

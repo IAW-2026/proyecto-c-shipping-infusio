@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardContent } from "@/app/ui/card"
+import { Card, CardContent } from "@/app/ui/utils/card"
 import { Mail, Bell } from "lucide-react"
 
 const channels = [

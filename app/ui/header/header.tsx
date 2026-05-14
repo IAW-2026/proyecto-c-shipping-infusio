@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Menu, X, ChevronDown, Map } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { Button } from "./button"
+import { Button } from "../utils/button"
 import ClerkInit from "./clerk-init"
 import { MobileSitemapMenu, SitemapMenuContent } from "./sitemap-menu"
 import { ProfileMenu } from "./profile-menu"

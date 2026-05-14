@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { ensureDefaultUserRoles, getUserRoles } from "@/app/lib/actions";
+import { ensureDefaultUserRoles } from "@/app/lib/actions";
+import { fetchUserRoles as getUserRoles } from "@/app/lib/data";
 
 export async function GET() {
   try {

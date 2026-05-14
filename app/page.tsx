@@ -1,8 +1,8 @@
-import { TrackingInput } from "./ui/tracking-input"
+import { TrackingInput } from "./ui/utils/tracking-input"
 import { Truck } from "lucide-react"
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
-import { ShipmentTimeline } from "./ui/shipment-timeline"
-import { QuickActions } from "./ui/quick-actions"
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/utils/card"
+import { ShipmentTimeline } from "./ui/utils/shipment-timeline"
+import { QuickActions } from "./ui/utils/quick-actions"
 import { timelineEvents } from "@/app/lib/timeline-data"
 
 export default function ShippingApp() {
