@@ -86,12 +86,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                     </div>
                   </div>
 
-                  <div className="absolute -bottom-4 -left-4 hidden rounded-2xl border border-border bg-card px-4 py-3 shadow-lg sm:block">
+                  {/* <div className="absolute -bottom-4 -left-4 hidden rounded-2xl border border-border bg-card px-4 py-3 shadow-lg sm:block">
                     <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Consejo</p>
                     <p className="mt-1 text-sm text-foreground">
                       Si apareció al iniciar, el problema suele estar en un provider global.
                     </p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </section>

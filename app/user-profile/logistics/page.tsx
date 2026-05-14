@@ -16,6 +16,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/card"
 import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
 import type { DeliveryAssignment, Rider } from "@/app/lib/definitions"
 import { fetchAllRiders } from "@/app/lib/data"
+import { RidersCard } from "@/app/ui/logistics/riders-card"
+import { LastUpdates } from "@/app/ui/logistics/last-updates"
 
 type ShipmentSummary = {
   id: string
@@ -44,14 +46,14 @@ const TRACKINGS_STORAGE_KEY = "logistics-trackings"
 const ASSIGNMENTS_STORAGE_KEY = "logistics-assignments"
 const OPERATOR_ID = "operator-001"
 
-// const RIDERS: Rider[] = [
-//   { id: "rider-001", name: "Ana Torres", email: "ana.torres@infusio.com", status: "activo", location: "Bahía Blanca" },
-//   { id: "rider-002", name: "Lucas Ferreyra", email: "lucas.ferreyra@infusio.com", status: "activo", location: "CABA" },
-//   { id: "rider-003", name: "Marina López", email: "marina.lopez@infusio.com", status: "inactivo", location: "Rosario" },
-//   { id: "rider-004", name: "Tomás Pérez", email: "tomas.perez@infusio.com", status: "activo", location: "La Plata" },
-// ]
+const RIDERS: Rider[] = [
+  { id: "rider-001", name: "Ana Torres", email: "ana.torres@infusio.com", status: "activo", location: "Bahía Blanca" },
+  { id: "rider-002", name: "Lucas Ferreyra", email: "lucas.ferreyra@infusio.com", status: "activo", location: "CABA" },
+  { id: "rider-003", name: "Marina López", email: "marina.lopez@infusio.com", status: "inactivo", location: "Rosario" },
+  { id: "rider-004", name: "Tomás Pérez", email: "tomas.perez@infusio.com", status: "activo", location: "La Plata" },
+]
 
-const RIDERS: Rider[] = await fetchAllRiders();
+// const RIDERS: Rider[] = await fetchAllRiders();
 
 const SHIPPING_FLOW = [
   "Pedido confirmado",
@@ -536,81 +538,8 @@ export default function LogisticsPage() {
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-0">
-              <CardTitle className="flex items-center gap-2 font-serif text-xl">
-                <Truck className="h-5 w-5 text-primary" />
-                Riders disponibles
-              </CardTitle>
-              <p className="mt-2 text-sm text-muted-foreground">Solo los riders activos quedan habilitados para nuevas asignaciones.</p>
-            </CardHeader>
-
-            <CardContent className="pt-6">
-              <div className="max-h-96 space-y-3 overflow-y-auto pr-2 [scrollbar-width:thin]">
-                {RIDERS.map((rider) => (
-                  <article key={rider.id} className="rounded-xl border border-border bg-background p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium text-foreground">{rider.name}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">{rider.email}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">Zona: {rider.location}</p>
-                      </div>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                          rider.status === "activo" ? "bg-emerald-500/10 text-emerald-700" : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {rider.status === "activo" ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 text-xs text-muted-foreground">
-                      Asignados hoy: {" "}
-                      {assignedPendingShipments.filter((shipment) => shipment.assignedRiderId === rider.id).length}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-0">
-              <CardTitle className="flex items-center gap-2 font-serif text-xl">
-                <Route className="h-5 w-5 text-primary" />
-                Últimos avances
-              </CardTitle>
-              <p className="mt-2 text-sm text-muted-foreground">Registro de las últimas actualizaciones de shipping.</p>
-            </CardHeader>
-
-            <CardContent className="pt-6">
-              <div className="max-h-112 space-y-3 overflow-y-auto pr-2 [scrollbar-width:thin]">
-                {recentlyUpdatedTrackings.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
-                    Aún no hay avances registrados.
-                  </p>
-                ) : (
-                  recentlyUpdatedTrackings.map((tracking) => (
-                    <article key={tracking.id} className="rounded-xl border border-border bg-background p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-medium text-foreground">{tracking.shipment_id}</p>
-                          <p className="mt-1 text-sm text-muted-foreground">{tracking.status}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(tracking.datetime).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      </div>
-                      <div className="mt-3 grid gap-2 text-xs text-muted-foreground">
-                        <p>Ciudad actual: {tracking.current_city}</p>
-                        <p>Próximo destino: {tracking.next_city}</p>
-                      </div>
-                    </article>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <RidersCard riders={RIDERS} assignedPendingShipments={assignedPendingShipments} />
+          <LastUpdates recentlyUpdatedTrackings={recentlyUpdatedTrackings} />
         </div>
       </div>
     </div>
