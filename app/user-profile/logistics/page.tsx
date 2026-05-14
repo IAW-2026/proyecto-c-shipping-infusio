@@ -1,3 +1,5 @@
+"use server"
+
 import { fetchAllRiders, fetchAllShipments } from "@/app/lib/data"
 import { LogisticsPageClient } from "./logistics-page-client"
 

@@ -1,38 +1,15 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import {
-  ArrowRightLeft,
-  CheckCircle2,
-  Clock3,
-  MapPin,
-  Package,
-  Truck,
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
 import { SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
-import type { DeliveryAssignment, Rider, Shipment } from "@/app/lib/definitions"
+import type {
+  DeliveryAssignment, Rider, Shipment, ShipmentSummary,
+  ShipmentTracking as LogisticsTracking } from "@/app/lib/definitions"
 import { RidersCard } from "@/app/ui/logistics/riders-card"
 import { LastUpdates } from "@/app/ui/logistics/last-updates"
 import { PackageAssignment } from "@/app/ui/logistics/package-assignment"
-
-type ShipmentSummary = {
-  id: string
-  origin: string
-  destination: string
-  latestStatus: string
-  latestDatetime: string
-  assignedRiderId: string | null
-}
-
-type LogisticsTracking = {
-  id: string
-  shipment_id: string
-  status: string
-  datetime: string
-  current_city: string
-  next_city: string
-}
+import { WelcomeLogistics } from "@/app/ui/logistics/welcome"
+import { PendingAndDelivered } from "@/app/ui/logistics/pending-and-delivered"
 
 type LogisticsSnapshot = {
   trackings: LogisticsTracking[]
@@ -269,62 +246,11 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
-      <section className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-8 shadow-sm sm:px-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.04),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(0,0,0,0.03),transparent_30%)]" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.3em] text-primary">Operador logístico</p>
-            <h1 className="font-serif text-3xl font-medium text-foreground sm:text-4xl">Asignar paquetes y mover cada envío paso a paso</h1>
-            <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
-              Desde esta vista podés vincular cada paquete con un rider disponible, avanzar el estado del shipping y seguir la operación en tiempo real.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-105">
-            <div className="rounded-3xl border border-border bg-background/80 p-4 shadow-sm transition-shadow hover:shadow-md">
-              <div className="flex min-h-33 flex-col items-center justify-center gap-3 text-center">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Package className="h-5 w-5" />
-                </div>
-                <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Pendientes</p>
-                <p className="text-2xl font-semibold text-foreground">{pendingShipments.length}</p>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-border bg-background/80 p-4 shadow-sm transition-shadow hover:shadow-md">
-              <div className="flex min-h-33 flex-col items-center justify-center gap-3 text-center">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-foreground">
-                  <ArrowRightLeft className="h-5 w-5" />
-                </div>
-                <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Asignados</p>
-                <p className="text-2xl font-semibold text-foreground">{assignmentCount}</p>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-border bg-background/80 p-4 shadow-sm transition-shadow hover:shadow-md">
-              <div className="flex min-h-33 flex-col items-center justify-center gap-3 text-center">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-700">
-                  <Truck className="h-5 w-5" />
-                </div>
-                <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Repartiendo</p>
-                <p className="text-2xl font-semibold text-foreground">
-                  {pendingShipments.filter((shipment) => shipment.latestStatus.toLowerCase().includes("reparto")).length}
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-border bg-background/80 p-4 shadow-sm transition-shadow hover:shadow-md">
-              <div className="flex min-h-33 flex-col items-center justify-center gap-3 text-center">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-                <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">Entregados</p>
-                <p className="text-2xl font-semibold text-foreground">{deliveredShipments.length}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <WelcomeLogistics
+        pendingShipments={pendingShipments}
+        deliveredShipments={deliveredShipments}
+        assignmentCount={assignmentCount}
+      />
 
       {notice && (
         <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
@@ -334,90 +260,16 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         <div className="space-y-6">
-            <PackageAssignment 
-                shipments={shipments} 
+            <PackageAssignment
+                shipments={shipments}
                 riders={riders}
             />
-          <Card>
-            <CardHeader className="pb-0">
-              <CardTitle className="flex items-center gap-2 font-serif text-xl">
-                <Clock3 className="h-5 w-5 text-primary" />
-                Pedidos pendientes y entregados
-              </CardTitle>
-              <p className="mt-2 text-sm text-muted-foreground">Revisá qué falta asignar y qué ya quedó cerrado.</p>
-            </CardHeader>
-
-            <CardContent className="pt-6">
-              <div className="grid gap-6 xl:grid-cols-2">
-                <div>
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Sin asignar</h3>
-                    <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-foreground">{unassignedPendingShipments.length}</span>
-                  </div>
-                  <div className="space-y-3">
-                    {unassignedPendingShipments.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
-                        No quedan paquetes pendientes sin rider.
-                      </p>
-                    ) : (
-                      unassignedPendingShipments.map((shipment) => (
-                        <article key={shipment.id} className="rounded-xl border border-border bg-background p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-medium text-foreground">{shipment.id}</p>
-                              <p className="mt-1 text-sm text-muted-foreground">{shipment.destination}</p>
-                            </div>
-                            <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700">Sin rider</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedShipmentId(shipment.id)
-                              setNotice(`Seleccionaste ${shipment.id} para asignación.`)
-                            }}
-                            className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
-                          >
-                            Ver y asignar
-                            <MapPin className="h-4 w-4" />
-                          </button>
-                        </article>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Entregados</h3>
-                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{deliveredShipments.length}</span>
-                  </div>
-                  <div className="space-y-3">
-                    {deliveredShipments.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
-                        No hay envíos entregados todavía.
-                      </p>
-                    ) : (
-                      deliveredShipments.map((shipment) => (
-                        <article key={shipment.id} className="rounded-xl border border-border bg-background p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-medium text-foreground">{shipment.id}</p>
-                              <p className="mt-1 text-sm text-muted-foreground">{shipment.destination}</p>
-                            </div>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              Entregado
-                            </span>
-                          </div>
-                          <p className="mt-3 text-xs text-muted-foreground">Última actualización: {new Date(shipment.latestDatetime).toLocaleString("es-AR")}</p>
-                        </article>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <PendingAndDelivered
+                unassignedPendingShipments={unassignedPendingShipments}
+                deliveredShipments={deliveredShipments}
+                setSelectedShipmentId={setSelectedShipmentId}
+                setNotice={setNotice}
+            />
         </div>
 
         <div className="space-y-6">

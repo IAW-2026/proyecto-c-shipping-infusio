@@ -4,16 +4,13 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
 
-    // Validar que los campos requeridos estén presentes
     if (
       !body.origin_postal_code ||
-      !body.destination_postal_code ||
-      body.volume === undefined ||
-      body.volume === null
+      !body.destination_postal_code
     ) {
       return Response.json(
         {
-          error: "Missing required fields: origin_postal_code, destination_postal_code, volume",
+          error: "Missing required fields: origin_postal_code, destination_postal_code",
         },
         { status: 400 }
       )
@@ -34,18 +31,10 @@ export async function POST(request: Request) {
       )
     }
 
-    if (typeof body.volume !== "number" || body.volume < 0) {
-      return Response.json(
-        { error: "volume must be a positive number" },
-        { status: 400 }
-      )
-    }
-
     // Calcular el costo
     const cost = calculateShippingCost({
       originPostalCode: body.origin_postal_code,
       destinationPostalCode: body.destination_postal_code,
-      volume: body.volume,
     })
 
     return Response.json(
