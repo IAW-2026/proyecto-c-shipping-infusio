@@ -1,7 +1,8 @@
+"use server"
+
 export type ShippingCostInput = {
   originPostalCode: string
   destinationPostalCode: string
-  volume: number
 }
 
 function postalCodeScore(postalCode: string) {
@@ -22,10 +23,9 @@ function postalCodeScore(postalCode: string) {
   return score
 }
 
-export function calculateShippingCost({
+export async function calculateShippingCost({
   originPostalCode,
   destinationPostalCode,
-  volume,
 }: ShippingCostInput) {
   const originScore = postalCodeScore(originPostalCode)
   const destinationScore = postalCodeScore(destinationPostalCode)
@@ -33,7 +33,6 @@ export function calculateShippingCost({
 
   const baseCost = 2500
   const distanceCost = Math.round(Math.min(25000, distanceScore * 0.02))
-  const volumeCost = Math.round(Math.max(volume, 0) * 1200)
 
-  return Math.max(0, baseCost + distanceCost + volumeCost)
+  return Math.max(0, baseCost + distanceCost)
 }
