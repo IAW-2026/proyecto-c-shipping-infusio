@@ -23,7 +23,7 @@ function postalCodeScore(postalCode: string) {
   return score
 }
 
-export function calculateShippingCost({
+export async function calculateShippingCost({
   originPostalCode,
   destinationPostalCode,
 }: ShippingCostInput) {
