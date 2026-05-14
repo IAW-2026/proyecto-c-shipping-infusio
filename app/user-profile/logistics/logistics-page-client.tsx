@@ -9,12 +9,12 @@ import {
   Package,
   Truck,
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/card"
-import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
+import { SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
 import type { DeliveryAssignment, Rider, Shipment } from "@/app/lib/definitions"
 import { RidersCard } from "@/app/ui/logistics/riders-card"
 import { LastUpdates } from "@/app/ui/logistics/last-updates"
-import { AssignedAndDelivered } from "@/app/ui/logistics/assigned-and-delivered"
+import { PackageAssignment } from "@/app/ui/logistics/package-assignment"
 
 type ShipmentSummary = {
   id: string
@@ -334,7 +334,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         <div className="space-y-6">
-            <AssignedAndDelivered 
+            <PackageAssignment 
                 shipments={shipments} 
                 riders={riders}
             />

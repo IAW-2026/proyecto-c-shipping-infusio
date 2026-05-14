@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from "react"
 import { Archive, ArrowRightLeft, Package, Route, UserRound } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/card"
-// import { SHIPMENTS } from "@/app/lib/placeholder-data"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
 import type { DeliveryAssignment, Rider, Shipment } from "@/app/lib/definitions"
 
-export function AssignedAndDelivered({shipments, riders}: { shipments: Shipment[], riders: Rider[] }) {
+export function PackageAssignment({shipments, riders}: { shipments: Shipment[], riders: Rider[] }) {
     const assignments: DeliveryAssignment[] = []
     const [selectedShipmentId, setSelectedShipmentId] = useState(shipments[0]?.id ?? "")
     const [selectedRiderId, setSelectedRiderId] = useState("")

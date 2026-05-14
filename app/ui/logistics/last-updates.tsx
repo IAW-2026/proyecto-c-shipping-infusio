@@ -1,7 +1,7 @@
 "use client"
 
 import { Route } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
 
 export function LastUpdates({recentlyUpdatedTrackings}: { recentlyUpdatedTrackings: any }) {
     return (

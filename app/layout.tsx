@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Header } from './ui/header'
+import { Header } from './ui/header/header'
 import { Footer } from './ui/footer'
 import { Inter, Playfair_Display } from 'next/font/google'
 // import { Analytics } from '@vercel/analytics/next'

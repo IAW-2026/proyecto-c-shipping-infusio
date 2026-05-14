@@ -2,7 +2,7 @@
 
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { TrackingInput } from "@/app/ui/tracking-input"
+import { TrackingInput } from "@/app/ui/utils/tracking-input"
 
 function TrackingPageContent() {
 	const searchParams = useSearchParams()

@@ -1,7 +1,7 @@
 "use client"
 
 import { Truck } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
 import type { Rider } from "@/app/lib/definitions"
 
 type RidersCardProps = {

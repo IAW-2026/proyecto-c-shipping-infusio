@@ -2,7 +2,7 @@
 "use client"
 
 import { useUser } from "@clerk/nextjs"
-import { ViewerActions } from "@/app/ui/viewer-actions"
+import { ViewerActions } from "@/app/ui/utils/viewer-actions"
 import NotAuth from "@/app/ui/not-auth"
 
 export default function UserProfilePage() {
