@@ -12,11 +12,11 @@ export function WelcomeLogistics({pendingShipments, deliveredShipments, assignme
     return (
         <section className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-8 shadow-sm sm:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.04),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(0,0,0,0.03),transparent_30%)]" />
-        <div className="relative flex flex-col gap-4 md:gap-6 lg:flex-row lg:items-end lg:justify-between\">
+        <div className="relative flex flex-col gap-4 md:gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.3em] text-primary\">Operador logístico</p>
-            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-foreground\">Asignar paquetes y mover cada envío paso a paso</h1>
-            <p className="mt-3 max-w-xl text-xs md:text-sm lg:text-base text-muted-foreground\">
+            <p className="mb-2 text-xs font-medium uppercase tracking-[0.3em] text-primary">Operador logístico</p>
+            <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-medium text-foreground">Asignar paquetes y mover cada envío paso a paso</h1>
+            <p className="mt-3 max-w-xl text-xs md:text-sm lg:text-base text-muted-foreground">
               Desde esta vista podés vincular cada paquete con un rider disponible, avanzar el estado del shipping y seguir la operación en tiempo real.
             </p>
           </div>

@@ -2,8 +2,13 @@
 
 import { Route } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
+import type { ShipmentTracking } from "@/app/lib/definitions"
 
-export function LastUpdates({recentlyUpdatedTrackings}: { recentlyUpdatedTrackings: any }) {
+type LastUpdatesProps = {
+  recentlyUpdatedTrackings: ShipmentTracking[]
+}
+
+export function LastUpdates({ recentlyUpdatedTrackings }: LastUpdatesProps) {
     return (
         <Card>
             <CardHeader className="pb-0">
