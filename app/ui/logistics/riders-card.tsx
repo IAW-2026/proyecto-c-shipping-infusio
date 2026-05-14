@@ -21,17 +21,17 @@ export function RidersCard({ riders, assignedPendingShipments }: RidersCardProps
       </CardHeader>
 
       <CardContent className="pt-6">
-        <div className="max-h-96 space-y-3 overflow-y-auto pr-2 [scrollbar-width:thin]">
+        <div className="max-h-96 md:max-h-112 space-y-3 overflow-y-auto pr-2 [scrollbar-width:thin]">
           {riders.map((rider) => (
-            <article key={rider.id} className="rounded-xl border border-border bg-background p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium text-foreground">{rider.name}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{rider.email}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Zona: {rider.location}</p>
+            <article key={rider.id} className="rounded-xl border border-border bg-background p-3 md:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground truncate">{rider.name}</p>
+                  <p className="mt-1 text-sm text-muted-foreground truncate">{rider.email}</p>
+                  <p className="mt-1 text-sm text-muted-foreground truncate">Zona: {rider.location}</p>
                 </div>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap ${
                     rider.status === "activo" ? "bg-emerald-500/10 text-emerald-700" : "bg-muted text-muted-foreground"
                   }`}
                 >

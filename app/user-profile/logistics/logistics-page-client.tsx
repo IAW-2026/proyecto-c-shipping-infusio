@@ -245,7 +245,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
   const assignmentCount = assignments.length
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
+    <div className="w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-10">
       <WelcomeLogistics
         pendingShipments={pendingShipments}
         deliveredShipments={deliveredShipments}
@@ -258,8 +258,8 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
         </div>
       )}
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-        <div className="space-y-6">
+      <div className="mt-8 grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-[1fr_0.75fr]">
+        <div className="space-y-4 md:space-y-6">
             <PackageAssignment
                 shipments={shipments}
                 riders={riders}
@@ -272,7 +272,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
             />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           <RidersCard riders={riders} assignedPendingShipments={assignedPendingShipments} />
           <LastUpdates recentlyUpdatedTrackings={recentlyUpdatedTrackings} />
         </div>

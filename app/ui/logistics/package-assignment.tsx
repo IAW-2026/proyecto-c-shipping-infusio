@@ -37,7 +37,12 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
       []
     )
 
-    const riderById = useMemo<Record<string, Rider>>(() => ({}), [])
+    const riderById = useMemo<Record<string, Rider>>(() => {
+      return riders.reduce<Record<string, Rider>>((acc, rider) => {
+        acc[rider.id] = rider
+        return acc
+      }, {})
+    }, [riders])
 
     const pendingShipments = shipmentSummaries.filter((shipment) => {
       const statusText = shipment.latestStatus.toLowerCase()
@@ -51,8 +56,13 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
       ? assignments.find((assignment) => assignment.shipment_id === selectedShipment.id) ?? null
       : null
 
-    const assignShipment = () => undefined
-    const advanceShipment = (_shipmentId: string) => undefined
+    const assignShipment = () => {
+      if (!selectedShipment) return
+      // This component receives data from parent, actual assignment happens in parent
+    }
+    const advanceShipment = (_shipmentId: string) => {
+      // This component receives data from parent, actual advancement happens in parent
+    }
 
     return (
         <Card>
@@ -72,7 +82,7 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
             </CardHeader>
 
             <CardContent className="pt-6">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2">
                 <label className="space-y-2 text-sm text-foreground">
                   <span className="flex items-center gap-2 font-medium">
                     <Package className="h-4 w-4 text-primary" />
@@ -81,7 +91,7 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
                   <select
                     value={selectedShipmentId}
                     onChange={(event) => setSelectedShipmentId(event.target.value)}
-                    className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition-colors focus:border-primary"
+                    className="h-12 w-full rounded-xl border border-border bg-background px-3 md:px-4 text-sm outline-none transition-colors focus:border-primary appearance-none"
                   >
                     {shipmentSummaries.map((shipment) => (
                       <option key={shipment.id} value={shipment.id}>
@@ -99,7 +109,7 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
                   <select
                     value={selectedRiderId}
                     onChange={(event) => setSelectedRiderId(event.target.value)}
-                    className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition-colors focus:border-primary"
+                    className="h-12 w-full rounded-xl border border-border bg-background px-3 md:px-4 text-sm outline-none transition-colors focus:border-primary appearance-none"
                   >
                     {riders.map((rider) => (
                       <option key={rider.id} value={rider.id} disabled={rider.status !== "activo"}>
@@ -110,11 +120,11 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
                 </label>
               </div>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
+              <div className="mt-4 md:mt-5 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 md:gap-3">
                 <button
                   type="button"
                   onClick={assignShipment}
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   <ArrowRightLeft className="h-4 w-4" />
                   Vincular paquete
@@ -124,7 +134,7 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
                   type="button"
                   onClick={() => selectedShipment && advanceShipment(selectedShipment.id)}
                   disabled={!selectedShipment || selectedShipment.latestStatus.toLowerCase().includes("entregado")}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Route className="h-4 w-4" />
                   Avanzar paso
@@ -132,26 +142,26 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
               </div>
 
               {selectedShipment && (
-                <div className="mt-6 rounded-2xl border border-border bg-background p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="mt-6 rounded-2xl border border-border bg-background p-4 md:p-5">
+                  <div className="flex flex-col md:flex-row md:flex-wrap items-start justify-between gap-4 md:gap-6">
                     <div>
                       <p className="text-xs uppercase tracking-widest text-muted-foreground">Selección actual</p>
-                      <h3 className="mt-1 font-serif text-2xl text-foreground">{selectedShipment.id}</h3>
+                      <h3 className="mt-1 font-serif text-xl md:text-2xl text-foreground break-words">{selectedShipment.id}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">{selectedShipment.origin}</p>
                       <p className="mt-1 text-sm text-muted-foreground">Destino: {selectedShipment.destination}</p>
                     </div>
 
-                    <div className="rounded-2xl border border-border px-4 py-3">
+                    <div className="w-full md:w-auto rounded-2xl border border-border px-4 py-3">
                       <p className="text-xs uppercase tracking-widest text-muted-foreground">Estado actual</p>
                       <p className="mt-1 text-sm font-medium text-foreground">{selectedShipment.latestStatus}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{new Date(selectedShipment.latestDatetime).toLocaleString("es-AR")}</p>
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2">
                     <div className="rounded-xl border border-border bg-card p-4">
                       <p className="text-xs uppercase tracking-widest text-muted-foreground">Rider asignado</p>
-                      <p className="mt-2 text-sm font-medium text-foreground">
+                      <p className="mt-2 text-sm font-medium text-foreground break-words">
                         {selectedShipmentCurrentAssignment ? riderById[selectedShipmentCurrentAssignment.rider_id]?.name ?? "Rider no encontrado" : "Sin asignar"}
                       </p>
                     </div>

@@ -1,4 +1,6 @@
 
+"use client"
+
 import { CheckCircle2, Clock3, MapPin } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
 import {  ShipmentSummary } from "@/app/lib/definitions"
@@ -20,7 +22,7 @@ export function PendingAndDelivered({unassignedPendingShipments, deliveredShipme
             </CardHeader>
 
             <CardContent className="pt-6">
-              <div className="grid gap-6 xl:grid-cols-2">
+              <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
                 <div>
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Sin asignar</h3>
@@ -34,12 +36,12 @@ export function PendingAndDelivered({unassignedPendingShipments, deliveredShipme
                     ) : (
                       unassignedPendingShipments.map((shipment) => (
                         <article key={shipment.id} className="rounded-xl border border-border bg-background p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-medium text-foreground">{shipment.id}</p>
-                              <p className="mt-1 text-sm text-muted-foreground">{shipment.destination}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="font-medium text-foreground truncate">{shipment.id}</p>
+                              <p className="mt-1 text-sm text-muted-foreground truncate">{shipment.destination}</p>
                             </div>
-                            <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700">Sin rider</span>
+                            <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 whitespace-nowrap">Sin rider</span>
                           </div>
                           <button
                             type="button"
@@ -71,12 +73,12 @@ export function PendingAndDelivered({unassignedPendingShipments, deliveredShipme
                     ) : (
                       deliveredShipments.map((shipment) => (
                         <article key={shipment.id} className="rounded-xl border border-border bg-background p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-medium text-foreground">{shipment.id}</p>
-                              <p className="mt-1 text-sm text-muted-foreground">{shipment.destination}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="font-medium text-foreground truncate">{shipment.id}</p>
+                              <p className="mt-1 text-sm text-muted-foreground truncate">{shipment.destination}</p>
                             </div>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary whitespace-nowrap">
                               <CheckCircle2 className="h-3.5 w-3.5" />
                               Entregado
                             </span>
