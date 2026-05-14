@@ -1,4 +1,4 @@
-import { fetchAllRiders } from "@/app/lib/data"
+import { fetchAllRiders, fetchAllShipments } from "@/app/lib/data"
 import { LogisticsPageClient } from "./logistics-page-client"
 
 const TRACKINGS_STORAGE_KEY = "logistics-trackings"
@@ -7,10 +7,12 @@ const OPERATOR_ID = "operator-001"
 
 export default async function LogisticsPage() {
   const riders = await fetchAllRiders()
+  const shipments = await fetchAllShipments()
 
   return (
     <LogisticsPageClient
       riders={riders}
+      shipments={shipments}
       operatorId={OPERATOR_ID}
       storageKeys={{
         trackings: TRACKINGS_STORAGE_KEY,

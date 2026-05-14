@@ -2,7 +2,7 @@
 
 import postgres from "postgres";
 import { assignRoleToUser } from "./actions";
-import { Rider } from "./definitions";
+import { Rider, Shipment } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -43,6 +43,19 @@ export async function fetchRiderByActive(): Promise<Rider | null> {
     return result[0] || null;
   } catch (error) {
     console.error("Error getting active rider:", error);
+    throw error;
+  }
+}
+
+export async function fetchAllShipments(): Promise<Shipment[]> {
+  try {
+    const result = await sql<Shipment[]>`
+      SELECT * FROM shipment
+    `;
+
+    return result;
+  } catch (error) {
+    console.error("Error getting all shipments:", error);
     throw error;
   }
 }
