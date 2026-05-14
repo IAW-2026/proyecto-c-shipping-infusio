@@ -1,4 +1,4 @@
-import { resolveSingleDestination } from "@/lib/geocoding"
+import { resolveSingleDestination } from "@/app/lib/geocoding"
 import { SHIPMENTS } from "@/app/lib/placeholder-data"
 
 const defaultMicroserviceViewerUrl = "https://realtimetracker-vlmx.onrender.com/"

@@ -1,4 +1,4 @@
-import { calculateShippingCost } from "@/lib/shipping-cost"
+import { calculateShippingCost } from "@/app/lib/shipping-cost"
 
 export async function POST(request: Request) {
   try {

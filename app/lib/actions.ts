@@ -3,6 +3,7 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import postgres from "postgres";
 import { User, RoleUser } from "./definitions";
+import { fetchUserRoles as getUserRoles } from "./data";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 const DEFAULT_USER_ROLES = ["viewer"] as const;
@@ -251,20 +252,6 @@ export async function assignRoleToUser(userId: string, role: string) {
   }
 }
 
-// Obtener todos los roles de un usuario
-export async function getUserRoles(userId: string): Promise<string[]> {
-  try {
-    const result = await sql<{ role: string }[]>`
-      SELECT role FROM user_role WHERE user_id = ${userId}
-    `;
-
-    return result.map((row) => row.role);
-  } catch (error) {
-    console.error("Error getting user roles:", error);
-    throw error;
-  }
-}
-
 // Eliminar un rol de un usuario
 export async function removeRoleFromUser(userId: string, role: string) {
   try {
@@ -287,75 +274,6 @@ export async function removeRoleFromUser(userId: string, role: string) {
     return true;
   } catch (error) {
     console.error("Error removing role:", error);
-    throw error;
-  }
-}
-
-// Obtener usuario con sus roles
-export async function getUserWithRoles(userId: string) {
-  try {
-    const user = await sql`
-      SELECT * FROM "user" WHERE id = ${userId}
-    `;
-
-    if (!user.length) return null;
-
-    const roles = await getUserRoles(userId);
-
-    return {
-      ...user[0],
-      roles,
-    };
-  } catch (error) {
-    console.error("Error getting user with roles:", error);
-    throw error;
-  }
-}
-
-// Crear rider asociado a usuario
-export async function createRiderProfile(
-  userId: string,
-  riderData: { name: string; email: string; location: string }
-) {
-  try {
-    const result = await sql`
-      INSERT INTO rider (id, name, email, status, location)
-      VALUES (${userId}, ${riderData.name}, ${riderData.email}, 'inactivo', ${riderData.location})
-      ON CONFLICT (id) DO UPDATE
-      SET name = EXCLUDED.name, location = EXCLUDED.location
-      RETURNING *
-    `;
-
-    // Asignar rol de rider
-    await assignRoleToUser(userId, "rider");
-
-    return result[0];
-  } catch (error) {
-    console.error("Error creating rider profile:", error);
-    throw error;
-  }
-}
-
-// Crear logistic operator asociado a usuario
-export async function createLogisticOperatorProfile(
-  userId: string,
-  operatorData: { name: string; email: string }
-) {
-  try {
-    const result = await sql`
-      INSERT INTO logistic_operator (id, name, email)
-      VALUES (${userId}, ${operatorData.name}, ${operatorData.email})
-      ON CONFLICT (id) DO UPDATE
-      SET name = EXCLUDED.name
-      RETURNING *
-    `;
-
-    // Asignar rol de logistic_operator
-    await assignRoleToUser(userId, "logistic_operator");
-
-    return result[0];
-  } catch (error) {
-    console.error("Error creating logistic operator profile:", error);
     throw error;
   }
 }

@@ -1,3 +1,5 @@
+"use server"
+
 export type ShippingCostInput = {
   originPostalCode: string
   destinationPostalCode: string

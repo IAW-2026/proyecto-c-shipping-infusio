@@ -1,3 +1,5 @@
+"use server"
+
 type ResolvedDestination = {
   latitude: string
   longitude: string

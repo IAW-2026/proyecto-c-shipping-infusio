@@ -15,6 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/card"
 import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
 import type { DeliveryAssignment, Rider } from "@/app/lib/definitions"
+import { fetchAllRiders } from "@/app/lib/data"
 
 type ShipmentSummary = {
   id: string
@@ -43,12 +44,14 @@ const TRACKINGS_STORAGE_KEY = "logistics-trackings"
 const ASSIGNMENTS_STORAGE_KEY = "logistics-assignments"
 const OPERATOR_ID = "operator-001"
 
-const RIDERS: Rider[] = [
-  { id: "rider-001", name: "Ana Torres", email: "ana.torres@infusio.com", status: "activo", location: "Bahía Blanca" },
-  { id: "rider-002", name: "Lucas Ferreyra", email: "lucas.ferreyra@infusio.com", status: "activo", location: "CABA" },
-  { id: "rider-003", name: "Marina López", email: "marina.lopez@infusio.com", status: "inactivo", location: "Rosario" },
-  { id: "rider-004", name: "Tomás Pérez", email: "tomas.perez@infusio.com", status: "activo", location: "La Plata" },
-]
+// const RIDERS: Rider[] = [
+//   { id: "rider-001", name: "Ana Torres", email: "ana.torres@infusio.com", status: "activo", location: "Bahía Blanca" },
+//   { id: "rider-002", name: "Lucas Ferreyra", email: "lucas.ferreyra@infusio.com", status: "activo", location: "CABA" },
+//   { id: "rider-003", name: "Marina López", email: "marina.lopez@infusio.com", status: "inactivo", location: "Rosario" },
+//   { id: "rider-004", name: "Tomás Pérez", email: "tomas.perez@infusio.com", status: "activo", location: "La Plata" },
+// ]
+
+const RIDERS: Rider[] = await fetchAllRiders();
 
 const SHIPPING_FLOW = [
   "Pedido confirmado",
