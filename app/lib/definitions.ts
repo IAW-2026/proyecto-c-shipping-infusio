@@ -75,3 +75,15 @@ export type ShipmentSummary = {
   latestDatetime: string
   assignedRiderId: string | null
 };
+
+export const TimelineStatuses = 
+{
+  CONFIRMED: "Pedido confirmado",
+  PREPARING: "Preparando tu pedido",
+  IN_TRANSIT: "En tránsito hacia tu ciudad",
+  ARRIVED_CITY: "El envió llegó a tu ciudad",
+  OUT_FOR_DELIVERY: "En reparto",
+  DELIVERED: "Entregado",
+  CANCELLED: "Pedido cancelado",
+  WITH_ISSUE: "Pedido con incidencia"
+} as const;

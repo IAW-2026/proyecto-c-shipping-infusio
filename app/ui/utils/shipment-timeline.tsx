@@ -1,7 +1,8 @@
-import { CheckCircle2, Circle, Package, Truck, Home, Box, Clock, Cross, Warehouse } from "lucide-react"
+import { CheckCircle2, Circle, Package, Truck, Home, Box, CircleCheckBig, Cross, Warehouse } from "lucide-react"
+import { TimelineStatuses } from "@/app/lib/definitions"
 
 interface TimelineEvent {
-  status: string
+  status: typeof TimelineStatuses[keyof typeof TimelineStatuses]
   location: string
   date: string
   time: string
@@ -13,15 +14,13 @@ interface ShipmentTimelineProps {
   events: TimelineEvent[]
 }
 
-const getIcon = (status: string) => {
-  if (status.includes("entregado")) return Home
-  if (status.includes("reparto") || status.includes("tránsito") ||
-    status.includes("despachado")) return Truck
-  if (status.includes("enviado") || status.includes("centro") ||
-    (status.includes("preparado"))) return Package
-  if (status.includes("pendiente")) return Clock
-  if (status.includes("cancelado") || status.includes("con incidencia")) return Cross
-  if (status.includes("tu ciudad")) return Warehouse
+const getIcon = (status: typeof TimelineStatuses[keyof typeof TimelineStatuses]) => {
+  if (status === TimelineStatuses.DELIVERED) return Home
+  if (status === TimelineStatuses.OUT_FOR_DELIVERY || status === TimelineStatuses.IN_TRANSIT) return Truck
+  if (status === TimelineStatuses.CONFIRMED) return CircleCheckBig
+  if (status === TimelineStatuses.PREPARING) return Package
+  if (status === TimelineStatuses.CANCELLED || status === TimelineStatuses.WITH_ISSUE) return Cross
+  if (status === TimelineStatuses.ARRIVED_CITY) return Warehouse
   return Box
 }
 
