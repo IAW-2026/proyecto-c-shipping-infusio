@@ -1,21 +1,13 @@
+/* DATABASE SCHEMA DEFINITIONS */
+
 export type Shipment = {
   id: string;
   origin: string;
   destination: string;
-  origin_datetime: string;
-  destination_datetime: string | null;
-  order_id?: string;
-  buyer_id?: string;
-  seller_id?: string;
-};
-
-export type ShipmentSummary = {
-  id: string
-  origin: string
-  destination: string
-  latestStatus: string
-  latestDatetime: string
-  assignedRiderId: string | null
+  originDatetime: string;
+  destinationDatetime: string | null;
+  buyer_id: string;
+  seller_id: string;
 };
 
 export type LogisticOperator = {
@@ -32,13 +24,12 @@ export type Rider = {
   location: string;
 };
 
-export type ShipmentTracking = {
-  id: string;
-  shipment_id: string;
+export type Tracking = {
+  shipmentId: string;
   status: string;
   datetime: string;
-  current_city: string;
-  next_city: string;
+  currentCity: string;
+  nextCity: string;
 };
 
 export type User = {
@@ -46,19 +37,23 @@ export type User = {
   name: string;
   surname: string;
   email: string;
+  emailSub: boolean;
+  pushSub: boolean;
 };
 
-export type RoleUser = {
-  user_id: string;
-  role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller';
+export type UserRole = {
+  userId: string;
+  role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller' | 'shipping_admin' | 'viewer';
 };
 
 export type DeliveryAssignment = {
   id: string;
-  shipment_id: string;
-  rider_id: string;
-  operator_id: string;
+  shipmentId: string;
+  riderId: string;
+  logisticOperatorId: string;
 };
+
+/* ROLES DEFINITIONS */
 
 export const ROLES = {
   ADMIN: "admin",
@@ -69,3 +64,14 @@ export const ROLES = {
   SHIPPING_ADMIN: "shipping_admin",
   VIEWER: "viewer",
 } as const;
+
+/* UTILS */
+
+export type ShipmentSummary = {
+  id: string
+  origin: string
+  destination: string
+  latestStatus: string
+  latestDatetime: string
+  assignedRiderId: string | null
+};
