@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Package, Truck, Home, Box, CircleCheckBig, Cross, Warehouse } from "lucide-react"
+import { CheckCircle2, Package, Truck, Home, Box, CircleCheckBig, Cross, Warehouse } from "lucide-react"
 import { TimelineStatuses, Tracking } from "@/app/lib/definitions"
 
 interface ShipmentTimelineProps {
@@ -46,7 +46,7 @@ export function ShipmentTimeline({ events }: ShipmentTimelineProps) {
               {event.completed ? (
                 event.current ? <Icon className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />
               ) : (
-                <Circle className="h-5 w-5" />
+                <Icon className="h-5 w-5" />
               )}
             </div>
 
