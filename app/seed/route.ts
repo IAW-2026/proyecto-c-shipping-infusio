@@ -1,4 +1,4 @@
-import { PrismaClient } from '@/app/generated/prisma/client';
+import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { clerkClient } from '@clerk/nextjs/server';
 import { SHIPMENTS, SHIPMENT_TRACKINGS } from '../lib/placeholder-data';
