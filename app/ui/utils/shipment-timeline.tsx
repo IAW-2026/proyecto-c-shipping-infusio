@@ -36,7 +36,7 @@ export function ShipmentTimeline({ events }: ShipmentTimelineProps) {
             {/* Line */}
             {!isLast && (
               <div 
-                className={`absolute left-[19px] top-10 w-0.5 h-[calc(100%-2rem)] ${
+                className={`absolute left-4.75 top-10 w-0.5 h-[calc(100%-2rem)] ${
                   event.completed ? "bg-primary" : "bg-border"
                 }`}
               />
