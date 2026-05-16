@@ -4,6 +4,7 @@ import { Search, AlertCircle, Radio } from "lucide-react"
 import { useState, FormEvent, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
+import type { Tracking } from "@/app/lib/definitions"
 import { ShipmentTimeline } from "./shipment-timeline"
 import { Card, CardHeader, CardTitle, CardContent } from "./card"
 
@@ -73,7 +74,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       return
     }
 
-    const trackings = SHIPMENT_TRACKINGS.filter(t => t.shipment_id === cleanCode)
+    const trackings = SHIPMENT_TRACKINGS.filter((t) => t.shipmentId === cleanCode)
     setResult({ shipment, trackings })
     setError(null)
     setLiveTrackingEnabled(false)
@@ -110,37 +111,11 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
   const getTimelineEvents = () => {
     if (!result?.trackings) return []
     
-    const trackings = result.trackings.sort((a: any, b: any) => 
+    const trackings = [...result.trackings].sort((a: Tracking, b: Tracking) => 
       new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
     )
-    
-    // Find the last tracking to determine if it's current
-    const lastIndex = trackings.length - 1
-    
-    return trackings.map((tracking: any, index: number) => {
-      const date = new Date(tracking.datetime)
-      const dateStr = date.toLocaleDateString("es-AR", { 
-        year: "numeric", 
-        month: "long", 
-        day: "numeric" 
-      })
-      const timeStr = date.toLocaleTimeString("es-AR", { 
-        hour: "2-digit", 
-        minute: "2-digit" 
-      })
-      
-      // Check if shipment is completed by looking at the status
-      const isCompleted = !['pendiente', 'preparado', 'despachado'].includes(tracking.status.toLowerCase())
-      
-      return {
-        status: tracking.status,
-        location: tracking.current_city,
-        date: dateStr,
-        time: timeStr,
-        completed: isCompleted,
-        current: index === lastIndex && !['entregado', 'cancelado'].includes(tracking.status.toLowerCase())
-      }
-    })
+
+    return trackings
   }
 
   const isDeliveryToHomeInProgress = () => {

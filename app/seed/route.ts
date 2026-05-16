@@ -1,226 +1,188 @@
-import postgres from 'postgres';
-import { clerkClient } from "@clerk/nextjs/server";
+import { PrismaClient } from '../generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { clerkClient } from '@clerk/nextjs/server';
 import { SHIPMENTS, SHIPMENT_TRACKINGS } from '../lib/placeholder-data';
+import { TimelineStatuses } from '../lib/definitions';
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const connectionString = process.env.PRISMA_DATABASE_URL ?? process.env.POSTGRES_URL ?? process.env.DATABASE_URL;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
-async function createTables(sqlClient: any = sql) {
-  await sqlClient`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+// Map descriptive strings to Prisma enum values
+const statusMap: Record<string, string> = {
+  [TimelineStatuses.CONFIRMED]: 'CONFIRMED',
+  [TimelineStatuses.PREPARING]: 'PREPARING',
+  [TimelineStatuses.IN_TRANSIT]: 'IN_TRANSIT',
+  [TimelineStatuses.ARRIVED_CITY]: 'ARRIVED_CITY',
+  [TimelineStatuses.OUT_FOR_DELIVERY]: 'OUT_FOR_DELIVERY',
+  [TimelineStatuses.DELIVERED]: 'DELIVERED',
+  [TimelineStatuses.CANCELLED]: 'CANCELLED',
+  [TimelineStatuses.WITH_ISSUE]: 'WITH_ISSUE',
+};
 
-  await sqlClient`CREATE TABLE IF NOT EXISTS shipment (
-      id VARCHAR(255) PRIMARY KEY,
-      origin VARCHAR(255) NOT NULL,
-      destination VARCHAR(255) NOT NULL,
-      origin_datetime TIMESTAMP NOT NULL,
-      destination_datetime TIMESTAMP NOT NULL,
-      buyer_id VARCHAR(255),
-      seller_id VARCHAR(255)
-    )`;
-
-  await sqlClient`CREATE TABLE IF NOT EXISTS rider (
-      id VARCHAR(255) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      status VARCHAR(255) NOT NULL,
-      location VARCHAR(255) NOT NULL
-    )`;
-
-  await sqlClient`CREATE TABLE IF NOT EXISTS tracking (
-      shipment_id VARCHAR(255) NOT NULL UNIQUE REFERENCES shipment(id),
-      status VARCHAR(255) NOT NULL,
-      datetime TIMESTAMP NOT NULL,
-      current_city VARCHAR(255) NOT NULL,
-      next_city VARCHAR(255) NOT NULL
-    )`;
-
-  await sqlClient`CREATE TABLE IF NOT EXISTS "user" (
-      id VARCHAR(255) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      surname VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL UNIQUE
-    )`;
-
-  await sqlClient`CREATE TABLE IF NOT EXISTS user_role (
-        user_id VARCHAR(255) NOT NULL REFERENCES "user"(id),
-        role VARCHAR(50) NOT NULL,
-        PRIMARY KEY (user_id, role)
-    )`;
-
-  await sqlClient`CREATE TABLE IF NOT EXISTS logistic_operator (
-        id VARCHAR(255) PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL
-    )`;
-
-  await sqlClient`CREATE TABLE IF NOT EXISTS delivery_assignment (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        shipment_id VARCHAR(255) NOT NULL REFERENCES shipment(id),
-        rider_id VARCHAR(255) REFERENCES rider(id),
-        logistic_operator_id VARCHAR(255) REFERENCES logistic_operator(id)
-    )`;
+function mapStatusToPrismaEnum(status: string): string {
+  return statusMap[status] || 'CONFIRMED';
 }
 
-async function seedShipments(sqlClient: any = sql) {
-  const insertedShipments = await Promise.all(
-    SHIPMENTS.map((shipment) =>
-      sqlClient`
-        INSERT INTO shipment (id, origin, destination, origin_datetime, destination_datetime, buyer_id, seller_id)
-        VALUES (${shipment.id}, ${shipment.origin}, ${shipment.destination}, ${shipment.origin_datetime}, ${shipment.destination_datetime}, ${shipment.buyer_id}, ${shipment.seller_id})
-        ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
+async function seedShipments(prismaClient: PrismaClient = prisma) {
+  const ops = SHIPMENTS.map((shipment) =>
+    prismaClient.shipment.upsert({
+      where: { id: shipment.id },
+      create: {
+        id: shipment.id,
+        origin: shipment.origin,
+        destination: shipment.destination,
+        originDatetime: new Date(shipment.originDatetime),
+        destinationDatetime: new Date(shipment.destinationDatetime!),
+        buyerId: shipment.buyerId,
+        sellerId: shipment.sellerId,
+      },
+      update: {},
+    }),
   );
 
-  return insertedShipments;
+  return Promise.all(ops);
 }
 
-async function seedTrackings(sqlClient: any = sql) {
-  const insertedTrackings = await Promise.all(
-    SHIPMENT_TRACKINGS.map((tracking) =>
-      sqlClient`
-        INSERT INTO tracking (shipment_id, status, datetime, current_city, next_city)
-        VALUES (${tracking.shipment_id}, ${tracking.status}, ${tracking.datetime}, ${tracking.current_city}, ${tracking.next_city})
-        ON CONFLICT (shipment_id) DO UPDATE
-        SET 
-            status = ${tracking.status},
-            datetime = ${tracking.datetime},
-            current_city = ${tracking.current_city},
-            next_city = ${tracking.next_city};
-      `,
-    ),
+async function seedTrackings(prismaClient: PrismaClient = prisma) {
+  const ops = SHIPMENT_TRACKINGS.map((tracking) =>
+    prismaClient.tracking.upsert({
+      where: { shipmentId: tracking.shipmentId },
+      create: {
+        shipmentId: tracking.shipmentId,
+        status: mapStatusToPrismaEnum(tracking.status) as any,
+        datetime: new Date(tracking.datetime),
+        currentCity: tracking.currentCity,
+        nextCity: tracking.nextCity,
+        completed: tracking.completed,
+        current: tracking.current,
+      },
+      update: {
+        status: mapStatusToPrismaEnum(tracking.status) as any,
+        datetime: new Date(tracking.datetime),
+        currentCity: tracking.currentCity,
+        nextCity: tracking.nextCity,
+        completed: tracking.completed,
+        current: tracking.current,
+      },
+    }),
   );
 
-  return insertedTrackings;
+  return Promise.all(ops);
 }
 
-async function seedUsersFromClerk(sqlClient: any = sql) {
+async function seedUsersFromClerk(prismaClient: PrismaClient = prisma) {
   try {
     const clerk = await clerkClient();
-    
-    // Obtener todos los usuarios de Clerk
     const clerkUsers = await clerk.users.getUserList({ limit: 500 });
-    
-    console.log(`Sincronizando ${clerkUsers.data.length} usuarios de Clerk...`);
-    
-    for (const clerkUser of clerkUsers.data) {
+    const users = clerkUsers.data;
+
+    console.log(`Sincronizando ${users.length} usuarios de Clerk...`);
+
+    for (const clerkUser of users) {
       const userId = clerkUser.id;
       const firstName = clerkUser.firstName || '';
       const lastName = clerkUser.lastName || '';
       const email = clerkUser.emailAddresses?.[0]?.emailAddress || '';
-      
+
       if (!email) {
         console.warn(`Usuario ${userId} sin email, omitiendo...`);
         continue;
       }
-      
-      // 1. Insertar o actualizar usuario
-      await sqlClient`
-        INSERT INTO "user" (id, name, surname, email)
-        VALUES (${userId}, ${firstName}, ${lastName}, ${email})
-        ON CONFLICT (id) DO UPDATE
-        SET name = EXCLUDED.name, surname = EXCLUDED.surname, email = EXCLUDED.email
-      `;
-      
-      // 2. Obtener roles del metadata de Clerk
+
+      await prismaClient.user.upsert({
+        where: { id: userId },
+        create: {
+          id: userId,
+          name: firstName || '',
+          surname: lastName || '',
+          email,
+          pushSub: false,
+          emailSub: false,
+        },
+        update: {
+          name: firstName || '',
+          surname: lastName || '',
+          email,
+        },
+      });
+
       const roles = (clerkUser.publicMetadata?.roles as string[]) || [];
-      
-      // Siempre asignar el rol "viewer" por defecto
       const allRoles = Array.from(new Set(['viewer', ...roles]));
-      
-      // 3. Insertar roles del usuario
-      for (const role of allRoles) {
-        await sqlClient`
-          INSERT INTO user_role (user_id, role)
-          VALUES (${userId}, ${role})
-          ON CONFLICT (user_id, role) DO NOTHING
-        `;
+
+      // Insert roles using createMany to skip duplicates
+      const roleData = allRoles.map((role) => ({ userId, role: role as any }));
+      try {
+        await prismaClient.userRole.createMany({ data: roleData, skipDuplicates: true });
+      } catch (e) {
+        // Fallback: create one by one
+        for (const r of roleData) {
+          try {
+            await prismaClient.userRole.create({ data: r as any });
+          } catch (err) {
+            // ignore duplicates
+          }
+        }
       }
-      
-      // 4. Si tiene rol de rider, crear perfil en tabla rider
+
       if (allRoles.includes('rider')) {
-        // Usar datos de Clerk o valores por defecto
         const riderName = `${firstName} ${lastName}`.trim() || email.split('@')[0];
-        const riderEmail = email;
-        const riderLocation = 'CABA'; // Valor por defecto
-        
-        await sqlClient`
-          INSERT INTO rider (id, name, email, status, location)
-          VALUES (${userId}, ${riderName}, ${riderEmail}, 'activo', ${riderLocation})
-          ON CONFLICT (id) DO UPDATE
-          SET name = EXCLUDED.name, email = EXCLUDED.email, status = EXCLUDED.status
-        `;
+        await prismaClient.rider.upsert({
+          where: { id: userId },
+          create: {
+            id: userId,
+            name: riderName,
+            email,
+            status: 'activo',
+            location: 'CABA',
+          },
+          update: {
+            name: riderName,
+            email,
+            status: 'activo',
+          },
+        });
       }
-      
-      // 5. Si tiene rol de logistic_operator, crear perfil en tabla logistic_operator
+
       if (allRoles.includes('logistic_operator')) {
         const operatorName = `${firstName} ${lastName}`.trim() || email.split('@')[0];
-        const operatorEmail = email;
-        
-        await sqlClient`
-          INSERT INTO logistic_operator (id, name, email)
-          VALUES (${userId}, ${operatorName}, ${operatorEmail})
-          ON CONFLICT (id) DO UPDATE
-          SET name = EXCLUDED.name, email = EXCLUDED.email
-        `;
+        await prismaClient.logisticOperator.upsert({
+          where: { id: userId },
+          create: { id: userId, name: operatorName, email },
+          update: { name: operatorName, email },
+        });
       }
-      
+
       console.log(`✓ Usuario sincronizado: ${email} (roles: ${allRoles.join(', ')})`);
     }
-    
+
     console.log(`✓ Sincronización de usuarios completada`);
-    return { success: true, count: clerkUsers.data.length };
+    return { success: true, count: users.length };
   } catch (error) {
-    console.error("Error seeding users from Clerk:", error);
+    console.error('Error seeding users from Clerk:', error);
     throw error;
   }
-}
-
-async function seedUsers(sqlClient: any = sql) {
-  await sqlClient`CREATE TABLE IF NOT EXISTS "user" (
-      id VARCHAR(255) PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      surname VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL UNIQUE
-    )`;
-
-  await sqlClient`CREATE TABLE IF NOT EXISTS user_role (
-        user_id VARCHAR(255) NOT NULL REFERENCES "user"(id),
-        role VARCHAR(50) NOT NULL,
-        PRIMARY KEY (user_id, role)
-    )`;
-  }
-
-async function dropTables(sqlClient: any = sql) {
-  await sqlClient`DROP TABLE IF EXISTS user_role`;
-  await sqlClient`DROP TABLE IF EXISTS "user"`;
-  await sqlClient`DROP TABLE IF EXISTS tracking`;
-  await sqlClient`DROP TABLE IF EXISTS delivery_assignment`;
-  await sqlClient`DROP TABLE IF EXISTS rider`;
-  await sqlClient`DROP TABLE IF EXISTS logistic_operator`;
-  await sqlClient`DROP TABLE IF EXISTS shipment`;
 }
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action') || 'sync-clerk-users';
-    
-    const result = await sql.begin(async (tx) => {
-      await createTables(tx);
-      await seedShipments(tx);
-      await seedTrackings(tx);
-      // await dropTables(tx);
-      
-      if (action === 'sync-clerk-users' || action === 'all') {
-        await seedUsersFromClerk(tx);
-      }
-    });
+    let result: any = null;
 
-    return Response.json({ 
-      message: 'Database seeded successfully',
-      action,
-      result 
-    });
+    if (action === 'sync-clerk-users' || action === 'all') {
+      result = await seedUsersFromClerk(prisma);
+    }
+
+    // if (action === 'shipments' || action === 'all') {
+    //   await seedShipments(prisma);
+    // }
+
+    // if (action === 'trackings' || action === 'all') {
+    //   await seedTrackings(prisma);
+    // }
+
+    return Response.json({ message: 'Database seeded successfully', action, result });
   } catch (error: any) {
     console.error('Seed error:', error);
     return Response.json({ error: String(error) }, { status: 500 });

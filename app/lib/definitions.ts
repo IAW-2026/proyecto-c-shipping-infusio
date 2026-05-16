@@ -1,21 +1,13 @@
+/* DATABASE SCHEMA DEFINITIONS */
+
 export type Shipment = {
   id: string;
   origin: string;
   destination: string;
-  origin_datetime: string;
-  destination_datetime: string | null;
-  order_id?: string;
-  buyer_id?: string;
-  seller_id?: string;
-};
-
-export type ShipmentSummary = {
-  id: string
-  origin: string
-  destination: string
-  latestStatus: string
-  latestDatetime: string
-  assignedRiderId: string | null
+  originDatetime: Date;
+  destinationDatetime: Date | null;
+  buyerId: string;
+  sellerId: string;
 };
 
 export type LogisticOperator = {
@@ -32,13 +24,14 @@ export type Rider = {
   location: string;
 };
 
-export type ShipmentTracking = {
-  id: string;
-  shipment_id: string;
-  status: string;
-  datetime: string;
-  current_city: string;
-  next_city: string;
+export type Tracking = {
+  shipmentId: string;
+  status: typeof TimelineStatuses[keyof typeof TimelineStatuses];
+  datetime: Date;
+  currentCity: string;
+  nextCity: string;
+  completed: boolean;
+  current: boolean;
 };
 
 export type User = {
@@ -46,21 +39,26 @@ export type User = {
   name: string;
   surname: string;
   email: string;
+  emailSub: boolean;
+  pushSub: boolean;
 };
 
-export type RoleUser = {
-  user_id: string;
-  role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller';
+export type UserRole = {
+  userId: string;
+  //role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller' | 'shipping_admin' | 'viewer';
+  role: typeof Roles[keyof typeof Roles];
 };
 
 export type DeliveryAssignment = {
   id: string;
-  shipment_id: string;
-  rider_id: string;
-  operator_id: string;
+  shipmentId: string;
+  riderId: string;
+  logisticOperatorId: string;
 };
 
-export const ROLES = {
+/* ROLES DEFINITIONS */
+
+export const Roles = {
   ADMIN: "admin",
   BUYER: "buyer",
   SELLER: "seller",
@@ -68,4 +66,26 @@ export const ROLES = {
   RIDER: "rider",
   SHIPPING_ADMIN: "shipping_admin",
   VIEWER: "viewer",
+} as const;
+
+/* UTILS */
+
+export type ShipmentSummary = {
+  id: string
+  origin: string
+  destination: string
+  latestStatus: string
+  latestDatetime: string
+  assignedRiderId: string | null
+};
+
+export const TimelineStatuses = {
+  CONFIRMED: "Pedido confirmado",
+  PREPARING: "Preparando tu pedido",
+  IN_TRANSIT: "En tránsito hacia tu ciudad",
+  ARRIVED_CITY: "El envió llegó a tu ciudad",
+  OUT_FOR_DELIVERY: "En reparto",
+  DELIVERED: "Entregado",
+  CANCELLED: "Pedido cancelado",
+  WITH_ISSUE: "Pedido con incidencia"
 } as const;

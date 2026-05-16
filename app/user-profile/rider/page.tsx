@@ -35,13 +35,13 @@ const modeParamName =
   defaultModeParamName
 
 function getLatestTrackingByShipment() {
-  const latestMap: Record<string, { status: string; datetime: string }> = {}
+  const latestMap: Record<string, { status: string; datetime: Date }> = {}
 
   for (const tracking of SHIPMENT_TRACKINGS) {
-    const current = latestMap[tracking.shipment_id]
+    const current = latestMap[tracking.shipmentId]
 
     if (!current || new Date(tracking.datetime).getTime() > new Date(current.datetime).getTime()) {
-      latestMap[tracking.shipment_id] = {
+      latestMap[tracking.shipmentId] = {
         status: tracking.status,
         datetime: tracking.datetime,
       }
@@ -77,7 +77,7 @@ export default function RiderPage() {
         destination: shipment.destination,
         origin: shipment.origin,
         latestStatus: latest?.status ?? "Sin novedades",
-        latestDatetime: latest?.datetime ?? shipment.origin_datetime,
+        latestDatetime: (latest?.datetime ?? shipment.originDatetime).toISOString(),
       }
     })
   }, [])

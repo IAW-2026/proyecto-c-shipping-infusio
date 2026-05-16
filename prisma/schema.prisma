@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model DeliveryAssignment {
+  id                 String            @id
+  shipmentId         String
+  riderId            String?
+  logisticOperatorId String?
+  LogisticOperator   LogisticOperator? @relation(fields: [logisticOperatorId], references: [id])
+  Rider              Rider?            @relation(fields: [riderId], references: [id])
+  Shipment           Shipment          @relation(fields: [shipmentId], references: [id])
+}
+
+model LogisticOperator {
+  id                 String               @id
+  name               String
+  email              String               @unique
+  DeliveryAssignment DeliveryAssignment[]
+}
+
+model Rider {
+  id                 String               @id
+  name               String
+  email              String               @unique
+  status             RiderStatus
+  location           String
+  DeliveryAssignment DeliveryAssignment[]
+}
+
+model Shipment {
+  id                  String               @id
+  origin              String
+  destination         String
+  originDatetime      DateTime
+  destinationDatetime DateTime
+  buyerId             String
+  sellerId            String
+  DeliveryAssignment  DeliveryAssignment[]
+  Tracking            Tracking?
+}
+
+model Tracking {
+  shipmentId  String   @id
+  status      TimelineStatuses
+  datetime    DateTime
+  currentCity String
+  nextCity    String
+  completed   Boolean  @default(false)
+  current     Boolean  @default(false)
+  Shipment    Shipment @relation(fields: [shipmentId], references: [id])
+}
+
+model User {
+  id       String     @id
+  name     String
+  surname  String
+  email    String     @unique
+  pushSub  Boolean    @default(false)
+  emailSub Boolean    @default(false)
+  UserRole UserRole[]
+}
+
+model UserRole {
+  userId String
+  role   UserRoleType
+  User   User   @relation(fields: [userId], references: [id])
+
+  @@id([userId, role])
+}
+
+enum RiderStatus {
+  activo
+  inactivo
+}
+
+enum UserRoleType {
+  rider
+  logistic_operator
+  admin
+  buyer
+  seller
+  shipping_admin
+  viewer
+}
+
+enum TimelineStatuses {
+  CONFIRMED
+  PREPARING
+  IN_TRANSIT
+  ARRIVED_CITY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  WITH_ISSUE
+}
