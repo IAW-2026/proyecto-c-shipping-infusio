@@ -2,15 +2,16 @@
 
 import { clerkClient } from "@clerk/nextjs/server";
 import postgres from "postgres";
-import { User, RoleUser } from "./definitions";
+import { User, UserRole } from "./definitions";
 import { fetchUserRoles as getUserRoles } from "./data";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
+
 const DEFAULT_USER_ROLES = ["viewer"] as const;
-const EXTRA_USER_ROLES = ["rider", "logistic_operator", "admin", "shipping_admin"] as const;
+const EXTRA_USER_ROLES = ["rider", "logistic_operator", "admin", "shipping_admin", "buyer", "seller"] as const;
 const ALL_USER_ROLES = [...DEFAULT_USER_ROLES, ...EXTRA_USER_ROLES] as const;
 
-type UserRole = (typeof ALL_USER_ROLES)[number];
+// type UserRole = (typeof ALL_USER_ROLES)[number];
 
 type ClerkMetadata = {
   roles?: unknown;
@@ -97,7 +98,7 @@ async function syncDatabaseRoles(userId: string, roles: UserRole[]) {
     }
 
     await sql`
-      DELETE FROM user_role WHERE user_id = ${userId} AND role = ${role}
+      DELETE FROM UserRole WHERE userId = ${userId} AND role = ${role}
     `;
   }
 
@@ -107,9 +108,9 @@ async function syncDatabaseRoles(userId: string, roles: UserRole[]) {
     }
 
     await sql`
-      INSERT INTO user_role (user_id, role)
+      INSERT INTO UserRole (userId, role)
       VALUES (${userId}, ${role})
-      ON CONFLICT (user_id, role) DO NOTHING
+      ON CONFLICT (userId, role) DO NOTHING
     `;
   }
 }
@@ -160,14 +161,14 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
     const user = await sql.begin(async (tx) => {
       const existingById = await tx`
         SELECT id, email
-        FROM "user"
+        FROM User
         WHERE id = ${clerkUser.id}
         LIMIT 1
       `;
 
       if (existingById.length > 0) {
         const updatedById = await tx`
-          UPDATE "user"
+          UPDATE User
           SET name = ${firstName},
               surname = ${lastName},
               email = ${email}
@@ -180,7 +181,7 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
 
       const existingByEmail = await tx`
         SELECT id
-        FROM "user"
+        FROM User
         WHERE email = ${email}
         LIMIT 1
       `;
@@ -199,7 +200,7 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
       }
 
       const inserted = await tx`
-        INSERT INTO "user" (id, name, surname, email)
+        INSERT INTO User (id, name, surname, email)
         VALUES (${clerkUser.id}, ${firstName}, ${lastName}, ${email})
         RETURNING *
       `;

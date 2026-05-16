@@ -4,10 +4,10 @@ export type Shipment = {
   id: string;
   origin: string;
   destination: string;
-  originDatetime: string;
-  destinationDatetime: string | null;
-  buyer_id: string;
-  seller_id: string;
+  originDatetime: Date;
+  destinationDatetime: Date | null;
+  buyerId: string;
+  sellerId: string;
 };
 
 export type LogisticOperator = {
@@ -26,8 +26,8 @@ export type Rider = {
 
 export type Tracking = {
   shipmentId: string;
-  status: string;
-  datetime: string;
+  status: typeof TimelineStatuses[keyof typeof TimelineStatuses];
+  datetime: Date;
   currentCity: string;
   nextCity: string;
 };
@@ -43,7 +43,8 @@ export type User = {
 
 export type UserRole = {
   userId: string;
-  role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller' | 'shipping_admin' | 'viewer';
+  //role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller' | 'shipping_admin' | 'viewer';
+  role: typeof Roles[keyof typeof Roles];
 };
 
 export type DeliveryAssignment = {
@@ -55,7 +56,7 @@ export type DeliveryAssignment = {
 
 /* ROLES DEFINITIONS */
 
-export const ROLES = {
+export const Roles = {
   ADMIN: "admin",
   BUYER: "buyer",
   SELLER: "seller",
@@ -76,8 +77,7 @@ export type ShipmentSummary = {
   assignedRiderId: string | null
 };
 
-export const TimelineStatuses = 
-{
+export const TimelineStatuses = {
   CONFIRMED: "Pedido confirmado",
   PREPARING: "Preparando tu pedido",
   IN_TRANSIT: "En tránsito hacia tu ciudad",

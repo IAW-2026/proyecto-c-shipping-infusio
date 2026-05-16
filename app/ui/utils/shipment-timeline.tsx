@@ -43,7 +43,7 @@ export function ShipmentTimeline({ events }: ShipmentTimelineProps) {
             )}
 
             {/* Icon */}
-            <div className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+            <div className={`relative z-10 shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
               event.current 
                 ? "bg-primary text-primary-foreground" 
                 : event.completed 
