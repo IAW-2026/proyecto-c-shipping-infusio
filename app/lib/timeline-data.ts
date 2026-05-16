@@ -1,45 +1,58 @@
-export const timelineEvents = [
+import { TimelineStatuses, type Tracking } from "./definitions";
+
+export const timelineEvents: Tracking[] = [
   {
-    status: "Pedido confirmado",
-    location: "Tienda Online Infusio",
-    date: "24 Abril 2026",
-    time: "10:30",
-    completed: true
-  },
-  {
-    status: "Preparando tu pedido",
-    location: "Centro de Distribución - Palermo",
-    date: "24 Abril 2026",
-    time: "14:15",
-    completed: true
-  },
-  {
-    status: "Enviado",
-    location: "Centro de Distribución - Palermo",
-    date: "25 Abril 2026",
-    time: "09:00",
-    completed: true
-  },
-  {
-    status: "En tránsito hacia tu ciudad",
-    location: "Centro Logístico - Bahía Blanca",
-    date: "26 Abril 2026",
-    time: "08:45",
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.CONFIRMED,
+    datetime: new Date("2026-04-24T10:30:00Z"),
+    currentCity: "Tienda Online Infusio",
+    nextCity: "Centro de Distribución - Palermo",
     completed: true,
-    current: true
+    current: false,
   },
   {
-    status: "En reparto",
-    location: "Tu zona",
-    date: "Pendiente",
-    time: "--:--",
-    completed: false
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.PREPARING,
+    datetime: new Date("2026-04-24T14:15:00Z"),
+    currentCity: "Centro de Distribución - Palermo",
+    nextCity: "Centro Logístico - Bahía Blanca",
+    completed: true,
+    current: false,
   },
   {
-    status: "Entregado",
-    location: "Tu dirección",
-    date: "Pendiente",
-    time: "--:--",
-    completed: false
-  }
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.IN_TRANSIT,
+    datetime: new Date("2026-04-26T08:45:00Z"),
+    currentCity: "En ruta",
+    nextCity: "Centro Logístico - Bahía Blanca",
+    completed: true,
+    current: false,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.ARRIVED_CITY,
+    datetime: new Date("2026-04-26T12:00:00Z"),
+    currentCity: "Centro Logístico - Bahía Blanca",
+    nextCity: "Tu zona",
+    completed: true,
+    current: true,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.OUT_FOR_DELIVERY,
+    datetime: new Date("2026-04-26T16:00:00Z"),
+    currentCity: "Tu zona",
+    nextCity: "Tu dirección",
+    completed: false,
+    current: false,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.DELIVERED,
+    datetime: new Date("2026-04-26T20:00:00Z"),
+    currentCity: "Tu dirección",
+    nextCity: "Entrega finalizada",
+    completed: false,
+    current: false,
+  },
 ]

@@ -2,9 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
+import {
+  TimelineStatuses,
+} from "@/app/lib/definitions"
 import type {
-  DeliveryAssignment, Rider, Shipment, ShipmentSummary,
-  ShipmentTracking as LogisticsTracking } from "@/app/lib/definitions"
+  DeliveryAssignment,
+  Rider,
+  Shipment,
+  ShipmentSummary,
+  Tracking as LogisticsTracking,
+} from "@/app/lib/definitions"
 import { RidersCard } from "@/app/ui/logistics/riders-card"
 import { LastUpdates } from "@/app/ui/logistics/last-updates"
 import { PackageAssignment } from "@/app/ui/logistics/package-assignment"
@@ -26,14 +33,9 @@ type LogisticsPageClientProps = {
   }
 }
 
-const SHIPPING_FLOW = [
-  "Pedido confirmado",
-  "Preparando tu pedido",
-  "Enviado",
-  "En tránsito hacia tu ciudad",
-  "Repartiendo",
-  "Entregado",
-] as const
+type ShippingStatus = typeof TimelineStatuses[keyof typeof TimelineStatuses]
+
+const SHIPPING_FLOW = Object.values(TimelineStatuses) as ShippingStatus[]
 
 const SHIPPING_CITY_STEPS = [
   { current: "Centro de atención", next: "Centro de distribución" },
@@ -67,10 +69,10 @@ function getLatestTrackingByShipment(trackings: LogisticsTracking[]) {
   const latestMap: Record<string, LogisticsTracking> = {}
 
   for (const tracking of trackings) {
-    const current = latestMap[tracking.shipment_id]
+    const current = latestMap[tracking.shipmentId]
 
     if (!current || new Date(tracking.datetime).getTime() > new Date(current.datetime).getTime()) {
-      latestMap[tracking.shipment_id] = tracking
+      latestMap[tracking.shipmentId] = tracking
     }
   }
 
@@ -92,17 +94,18 @@ function getCityStage(stepIndex: number, destination: string) {
   }
 }
 
-function createTrackingEvent(shipmentId: string, status: (typeof SHIPPING_FLOW)[number], destination: string): LogisticsTracking {
+function createTrackingEvent(shipmentId: string, status: ShippingStatus, destination: string): LogisticsTracking {
   const stepIndex = SHIPPING_FLOW.findIndex((step) => step === status)
   const { currentCity, nextCity } = getCityStage(stepIndex === -1 ? 0 : stepIndex, destination)
 
   return {
-    id: `TRACK-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    shipment_id: shipmentId,
+    shipmentId,
     status,
-    datetime: new Date().toISOString(),
-    current_city: currentCity,
-    next_city: nextCity,
+    datetime: new Date(),
+    currentCity,
+    nextCity,
+    completed: false,
+    current: true,
   }
 }
 
@@ -145,7 +148,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
 
   const shipmentSummaries = useMemo<ShipmentSummary[]>(() => {
     const assignmentByShipment = assignments.reduce<Record<string, DeliveryAssignment>>((accumulator, assignment) => {
-      accumulator[assignment.shipment_id] = assignment
+      accumulator[assignment.shipmentId] = assignment
       return accumulator
     }, {})
 
@@ -158,11 +161,11 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
         origin: shipment.origin,
         destination: shipment.destination,
         latestStatus: latestTracking?.status ?? "Pedido confirmado",
-        latestDatetime: latestTracking?.datetime ?? shipment.origin_datetime,
-        assignedRiderId: assignment?.rider_id ?? null,
+        latestDatetime: (latestTracking?.datetime ?? shipment.originDatetime).toISOString(),
+        assignedRiderId: assignment?.riderId ?? null,
       }
     })
-  }, [assignments, latestTrackingByShipment])
+  }, [assignments, latestTrackingByShipment, shipments])
 
   const pendingShipments = shipmentSummaries.filter((shipment) => {
     const statusText = shipment.latestStatus.toLowerCase()
@@ -178,7 +181,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
   const selectedRider = riderById[selectedRiderId] ?? null
 
   const selectedShipmentCurrentAssignment = selectedShipment
-    ? assignments.find((assignment) => assignment.shipment_id === selectedShipment.id) ?? null
+    ? assignments.find((assignment) => assignment.shipmentId === selectedShipment.id) ?? null
     : null
 
   const recentlyUpdatedTrackings = [...trackings]
@@ -197,12 +200,12 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
     }
 
     setAssignments((currentAssignments) => {
-      const existingIndex = currentAssignments.findIndex((assignment) => assignment.shipment_id === selectedShipment.id)
+      const existingIndex = currentAssignments.findIndex((assignment) => assignment.shipmentId === selectedShipment.id)
       const nextAssignment: DeliveryAssignment = {
         id: existingIndex >= 0 ? currentAssignments[existingIndex].id : `ASSIGN-${Date.now()}`,
-        shipment_id: selectedShipment.id,
-        rider_id: selectedRider.id,
-        operator_id: operatorId,
+        shipmentId: selectedShipment.id,
+        riderId: selectedRider.id,
+        logisticOperatorId: operatorId,
       }
 
       if (existingIndex >= 0) {
@@ -260,16 +263,16 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
 
       <div className="mt-8 grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-[1fr_0.75fr]">
         <div className="space-y-4 md:space-y-6">
-            <PackageAssignment
-                shipments={shipments}
-                riders={riders}
-            />
-            <PendingAndDelivered
-                unassignedPendingShipments={unassignedPendingShipments}
-                deliveredShipments={deliveredShipments}
-                setSelectedShipmentId={setSelectedShipmentId}
-                setNotice={setNotice}
-            />
+          <PackageAssignment
+            shipments={shipments}
+            riders={riders}
+          />
+          <PendingAndDelivered
+            unassignedPendingShipments={unassignedPendingShipments}
+            deliveredShipments={deliveredShipments}
+            setSelectedShipmentId={setSelectedShipmentId}
+            setNotice={setNotice}
+          />
         </div>
 
         <div className="space-y-4 md:space-y-6">

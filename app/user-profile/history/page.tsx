@@ -15,10 +15,10 @@ type OrderHistoryRow = {
   id: string
   origin: string
   destination: string
-  originDatetime: string
-  destinationDatetime: string | null
+  originDatetime: Date
+  destinationDatetime: Date | null
   status: string
-  datetime: string
+  datetime: Date
   currentCity: string
   nextCity: string
   buyerId: string | null
@@ -33,7 +33,7 @@ function normalizeFilterRole(value: string | null): FilterRole {
   return "all"
 }
 
-function formatDateTime(value: string | null) {
+function formatDateTime(value: Date | null) {
   if (!value) {
     return "Sin fecha"
   }
@@ -41,7 +41,7 @@ function formatDateTime(value: string | null) {
   return new Intl.DateTimeFormat("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value))
+  }).format(value)
 }
 
 function buildFilterHref(role: FilterRole) {
@@ -52,10 +52,10 @@ function getLatestTrackingByShipment() {
   const latestTrackings = new Map<string, (typeof SHIPMENT_TRACKINGS)[number]>()
 
   for (const tracking of SHIPMENT_TRACKINGS) {
-    const current = latestTrackings.get(tracking.shipment_id)
+    const current = latestTrackings.get(tracking.shipmentId)
 
     if (!current || new Date(tracking.datetime).getTime() > new Date(current.datetime).getTime()) {
-      latestTrackings.set(tracking.shipment_id, tracking)
+      latestTrackings.set(tracking.shipmentId, tracking)
     }
   }
 
@@ -81,14 +81,14 @@ function HistoryPageContent() {
         id: shipment.id,
         origin: shipment.origin,
         destination: shipment.destination,
-        originDatetime: shipment.origin_datetime,
-        destinationDatetime: shipment.destination_datetime,
+        originDatetime: shipment.originDatetime,
+        destinationDatetime: shipment.destinationDatetime,
         status: tracking?.status ?? "Pedido confirmado",
-        datetime: tracking?.datetime ?? shipment.origin_datetime,
-        currentCity: tracking?.current_city ?? shipment.origin,
-        nextCity: tracking?.next_city ?? shipment.destination,
-        buyerId: shipment.buyer_id ?? null,
-        sellerId: shipment.seller_id ?? null,
+        datetime: tracking?.datetime ?? shipment.originDatetime,
+        currentCity: tracking?.currentCity ?? shipment.origin,
+        nextCity: tracking?.nextCity ?? shipment.destination,
+        buyerId: shipment.buyerId ?? null,
+        sellerId: shipment.sellerId ?? null,
       }
     }).filter((order) => {
       const isBuyer = order.buyerId === user.id
