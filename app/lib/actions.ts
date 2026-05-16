@@ -3,7 +3,7 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import postgres from "postgres";
 import { User, RoleUser } from "./definitions";
-import { fetchUserRoles as getUserRoles } from "./data";
+import { fetchUserRoles as getUserRoles } from "./queries";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 const DEFAULT_USER_ROLES = ["viewer"] as const;
@@ -107,7 +107,7 @@ async function syncDatabaseRoles(userId: string, roles: UserRole[]) {
     }
 
     await sql`
-      INSERT INTO user_role (user_id, role)
+      INSERT INTO "UserRole" (user_id, role)
       VALUES (${userId}, ${role})
       ON CONFLICT (user_id, role) DO NOTHING
     `;
@@ -160,14 +160,14 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
     const user = await sql.begin(async (tx) => {
       const existingById = await tx`
         SELECT id, email
-        FROM "user"
+        FROM "User"
         WHERE id = ${clerkUser.id}
         LIMIT 1
       `;
 
       if (existingById.length > 0) {
         const updatedById = await tx`
-          UPDATE "user"
+          UPDATE "User"
           SET name = ${firstName},
               surname = ${lastName},
               email = ${email}
@@ -187,7 +187,7 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
 
       if (existingByEmail.length > 0) {
         const updatedByEmail = await tx`
-          UPDATE "user"
+          UPDATE "User"
           SET id = ${clerkUser.id},
               name = ${firstName},
               surname = ${lastName}
@@ -199,7 +199,7 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
       }
 
       const inserted = await tx`
-        INSERT INTO "user" (id, name, surname, email)
+        INSERT INTO "User" (id, name, surname, email)
         VALUES (${clerkUser.id}, ${firstName}, ${lastName}, ${email})
         RETURNING *
       `;
@@ -239,9 +239,9 @@ export async function assignRoleToUser(userId: string, role: string) {
     await syncDatabaseRoles(userId, nextRoles);
 
     const result = await sql`
-      INSERT INTO user_role (user_id, role)
+      INSERT INTO "UserRole" (userId, role)
       VALUES (${userId}, ${role})
-      ON CONFLICT (user_id, role) DO NOTHING
+      ON CONFLICT (userId, role) DO NOTHING
       RETURNING *
     `;
 

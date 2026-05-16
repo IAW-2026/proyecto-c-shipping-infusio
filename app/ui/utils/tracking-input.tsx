@@ -1,11 +1,10 @@
 "use client"
 
 import { Search, AlertCircle, Radio } from "lucide-react"
-import { useState, FormEvent, useEffect } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
-import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
 import { ShipmentTimeline } from "./shipment-timeline"
-import { Card, CardHeader, CardTitle, CardContent } from "./card"
+import { Card, CardContent, CardHeader, CardTitle } from "./card"
 
 const defaultMicroserviceViewerUrl = "https://realtimetracker-vlmx.onrender.com/"
 const defaultShipmentParamName = "shipmentId"
@@ -40,22 +39,81 @@ interface TrackingInputProps {
   initialCode?: string
 }
 
+type Shipment = {
+  id: string
+  destination?: string | null
+  origin?: string | null
+}
+
+type Tracking = {
+  shipment_id: string
+  status: string
+  datetime: string
+  current_city: string
+  next_city?: string | null
+}
+
+type ApiResponse = {
+  shipments?: Shipment[]
+  trackings?: Tracking[]
+}
+
 export function TrackingInput({ redirectOnResult = false, initialCode }: TrackingInputProps) {
   const router = useRouter()
   const [trackingCode, setTrackingCode] = useState(initialCode || "")
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{ shipment: Shipment; trackings: Tracking[] } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [liveTrackingEnabled, setLiveTrackingEnabled] = useState(false)
   const [liveLoading, setLiveLoading] = useState(false)
   const [liveError, setLiveError] = useState<string | null>(null)
   const [liveEmbedUrl, setLiveEmbedUrl] = useState<string | null>(null)
+  const [shipments, setShipments] = useState<Shipment[]>([])
+  const [allTrackings, setAllTrackings] = useState<Tracking[]>([])
+  const [loadingData, setLoadingData] = useState(true)
 
-  // Auto-search if initialCode is provided
   useEffect(() => {
-    if (initialCode) {
+    let mounted = true
+
+    const load = async () => {
+      try {
+        setLoadingData(true)
+        const res = await fetch("/api/shipments")
+
+        if (!res.ok) {
+          throw new Error("Failed to load shipments")
+        }
+
+        const json = (await res.json()) as ApiResponse
+
+        if (!mounted) return
+
+        setShipments(json.shipments ?? [])
+        setAllTrackings(json.trackings ?? [])
+      } catch (loadError) {
+        console.error("Error loading shipments:", loadError)
+        if (!mounted) return
+        setError("No se pudieron cargar los envíos para búsqueda")
+      } finally {
+        if (mounted) {
+          setLoadingData(false)
+        }
+      }
+    }
+
+    load()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (initialCode && !loadingData && shipments.length > 0 && allTrackings.length > 0) {
       searchTracking(initialCode)
     }
-  }, [initialCode])
+    // The search function intentionally depends on current shipment data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCode, loadingData, shipments.length, allTrackings.length])
 
   const searchTracking = (code: string) => {
     const cleanCode = code.trim().toUpperCase()
@@ -65,16 +123,16 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       return
     }
 
-    const shipment = SHIPMENTS.find(s => s.id === cleanCode)
-    
+    const shipment = shipments.find((item) => item.id === cleanCode)
+
     if (!shipment) {
       setError("El código de seguimiento no existe")
       setResult(null)
       return
     }
 
-    const trackings = SHIPMENT_TRACKINGS.filter(t => t.shipment_id === cleanCode)
-    setResult({ shipment, trackings })
+    const relevantTrackings = allTrackings.filter((tracking) => tracking.shipment_id === cleanCode)
+    setResult({ shipment, trackings: relevantTrackings })
     setError(null)
     setLiveTrackingEnabled(false)
     setLiveLoading(false)
@@ -91,8 +149,8 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       return
     }
 
-    const shipment = SHIPMENTS.find(s => s.id === code)
-    
+    const shipment = shipments.find((item) => item.id === code)
+
     if (!shipment) {
       setError("El código de seguimiento no existe")
       setResult(null)
@@ -108,37 +166,35 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
   }
 
   const getTimelineEvents = () => {
-    if (!result?.trackings) return []
-    
-    const trackings = result.trackings.sort((a: any, b: any) => 
-      new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+    if (!result?.trackings?.length) return []
+
+    const sortedTrackings = [...result.trackings].sort(
+      (a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
     )
-    
-    // Find the last tracking to determine if it's current
-    const lastIndex = trackings.length - 1
-    
-    return trackings.map((tracking: any, index: number) => {
+
+    const lastIndex = sortedTrackings.length - 1
+
+    return sortedTrackings.map((tracking, index) => {
       const date = new Date(tracking.datetime)
-      const dateStr = date.toLocaleDateString("es-AR", { 
-        year: "numeric", 
-        month: "long", 
-        day: "numeric" 
+      const dateStr = date.toLocaleDateString("es-AR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       })
-      const timeStr = date.toLocaleTimeString("es-AR", { 
-        hour: "2-digit", 
-        minute: "2-digit" 
+      const timeStr = date.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
       })
-      
-      // Check if shipment is completed by looking at the status
-      const isCompleted = !['pendiente', 'preparado', 'despachado'].includes(tracking.status.toLowerCase())
-      
+
+      const isCompleted = !["pendiente", "preparado", "despachado"].includes(tracking.status.toLowerCase())
+
       return {
         status: tracking.status,
         location: tracking.current_city,
         date: dateStr,
         time: timeStr,
         completed: isCompleted,
-        current: index === lastIndex && !['entregado', 'cancelado'].includes(tracking.status.toLowerCase())
+        current: index === lastIndex && !["entregado", "cancelado"].includes(tracking.status.toLowerCase()),
       }
     })
   }
@@ -146,9 +202,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
   const isDeliveryToHomeInProgress = () => {
     if (!result?.trackings?.length) return false
 
-    const sorted = [...result.trackings].sort((a: any, b: any) =>
-      new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
-    )
+    const sorted = [...result.trackings].sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
 
     const latestStatus = sorted[sorted.length - 1]?.status?.toLowerCase() || ""
     const inRoute = latestStatus.includes("reparto") || latestStatus.includes("sal")
@@ -224,18 +278,18 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       <form className="w-full" onSubmit={handleSubmit}>
         <div className="flex w-full items-center gap-3">
           <div className="relative flex-1 min-w-0 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 text-muted-foreground w-5" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Ingresá tu código de seguimiento..."
               value={trackingCode}
-              onChange={(e) => setTrackingCode(e.target.value)}
+              onChange={(event) => setTrackingCode(event.target.value)}
               className="h-14 w-full rounded-full border border-border/50 bg-card pl-12 text-base focus-visible:ring-primary"
             />
           </div>
           <button
             type="submit"
-            className="h-14 px-6 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            className="h-14 rounded-full bg-primary px-6 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Buscar
           </button>
@@ -243,8 +297,8 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       </form>
 
       {error && (
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-          <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
           <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
@@ -255,11 +309,13 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="font-serif text-xl">Seguimiento del Envío</CardTitle>
-                <p className="text-sm text-muted-foreground mt-2"><span className="font-medium">Código:</span> {result.shipment.id}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  <span className="font-medium">Código:</span> {result.shipment.id}
+                </p>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground">
+              <div className="flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-primary-foreground">
                 <span className="text-xs font-medium uppercase tracking-wide">
-                  {result.trackings[result.trackings.length - 1]?.status || 'Procesando'}
+                  {result.trackings[result.trackings.length - 1]?.status || "Procesando"}
                 </span>
               </div>
             </div>
@@ -272,7 +328,9 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-medium text-foreground">Seguimiento en tiempo real</p>
-                    <p className="text-xs text-muted-foreground">Si querés, podés abrir el mapa en vivo para ver la entrega al domicilio.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Si querés, podés abrir el mapa en vivo para ver la entrega al domicilio.
+                    </p>
                   </div>
                   <button
                     type="button"

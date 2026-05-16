@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       String   @id
+  name     String
+  surname  String
+  email    String   @unique
+  pushSub  Boolean  @default(false)
+  emailSub Boolean  @default(false)
+  
+  roles    UserRole[]
+}
+
+model Shipment {
+  id                  String   @id
+  origin              String
+  destination         String
+  originDatetime      DateTime
+  destinationDatetime DateTime
+  buyerId             String
+  sellerId            String
+
+  deliveryAssignments DeliveryAssignment[]
+  trackings Tracking[]
+}
+
+model Rider {
+  id       String   @id
+  name     String
+  email    String   @unique
+  status   String
+  location String
+
+  deliveryAssignments DeliveryAssignment[]
+}
+
+model Tracking {
+  shipmentId   String   @id
+  status       String
+  datetime     DateTime
+  currentCity  String
+  nextCity     String
+  shipment     Shipment @relation(fields: [shipmentId], references: [id])
+}
+
+model UserRole {
+  userId String
+  role   String
+  user   User   @relation(fields: [userId], references: [id]) 
+  @@id([userId, role])
+}
+
+model LogisticOperator {
+  id    String   @id
+  name  String
+  email String   @unique
+
+  deliveryAssignments DeliveryAssignment[]
+}
+
+model DeliveryAssignment {
+  id                 String   @id
+  shipmentId         String
+  riderId            String?
+  logisticOperatorId String?
+  shipment           Shipment @relation(fields: [shipmentId], references: [id])
+  rider              Rider?   @relation(fields: [riderId], references: [id])
+  logisticOperator   LogisticOperator? @relation(fields: [logisticOperatorId], references: [id])
+}
