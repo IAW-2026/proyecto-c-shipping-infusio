@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Package, Truck, Home, Box, CircleCheckBig, Cross, Warehouse } from "lucide-react"
+import { CheckCircle2, Package, Truck, Home, Box, CircleCheckBig, Cross, Warehouse } from "lucide-react"
 import { TimelineStatuses, Tracking } from "@/app/lib/definitions"
 
 interface ShipmentTimelineProps {
