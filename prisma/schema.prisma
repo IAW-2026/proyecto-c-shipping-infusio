@@ -42,18 +42,20 @@ model Shipment {
   buyerId             String
   sellerId            String
   DeliveryAssignment  DeliveryAssignment[]
-  Tracking            Tracking?
+  Tracking            Tracking[]
 }
 
 model Tracking {
-  shipmentId  String   @id
-  status      TimelineStatuses
+  shipmentId  String
   datetime    DateTime
+  status      TimelineStatuses
   currentCity String
   nextCity    String
   completed   Boolean  @default(false)
   current     Boolean  @default(false)
   Shipment    Shipment @relation(fields: [shipmentId], references: [id])
+
+  @@id([shipmentId, datetime])
 }
 
 model User {
