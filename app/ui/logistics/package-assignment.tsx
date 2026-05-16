@@ -31,7 +31,7 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
           origin: shipment.origin,
           destination: shipment.destination,
           latestStatus: "Pedido confirmado",
-          latestDatetime: shipment.origin_datetime,
+          latestDatetime: shipment.originDatetime,
           assignedRiderId: null as string | null,
         })),
       []
@@ -53,7 +53,7 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
     
     const selectedShipment = shipmentSummaries.find((shipment) => shipment.id === selectedShipmentId) ?? null
     const selectedShipmentCurrentAssignment = selectedShipment
-      ? assignments.find((assignment) => assignment.shipment_id === selectedShipment.id) ?? null
+      ? assignments.find((assignment) => assignment.shipmentId === selectedShipment.id) ?? null
       : null
 
     const assignShipment = () => {
@@ -161,8 +161,8 @@ export function PackageAssignment({shipments, riders}: { shipments: Shipment[], 
                   <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2">
                     <div className="rounded-xl border border-border bg-card p-4">
                       <p className="text-xs uppercase tracking-widest text-muted-foreground">Rider asignado</p>
-                      <p className="mt-2 text-sm font-medium text-foreground break-words">
-                        {selectedShipmentCurrentAssignment ? riderById[selectedShipmentCurrentAssignment.rider_id]?.name ?? "Rider no encontrado" : "Sin asignar"}
+                      <p className="mt-2 text-sm font-medium text-foreground wrap-break-word">
+                        {selectedShipmentCurrentAssignment ? riderById[selectedShipmentCurrentAssignment.riderId]?.name ?? "Rider no encontrado" : "Sin asignar"}
                       </p>
                     </div>
 

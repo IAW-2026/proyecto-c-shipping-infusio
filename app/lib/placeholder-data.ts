@@ -39,7 +39,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2024-01-01T10:00:00Z'),
         currentCity: 'Tienda Online Infusio',
         nextCity: 'Centro de Distribución',
-        
+        completed: true,
+        current: false        
     },
     {
         shipmentId: 'SHIPAA001',
@@ -47,6 +48,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2024-01-01T14:15:00Z'),
         currentCity: 'Centro de Distribución - Palermo',
         nextCity: 'Centro de Distribución - Palermo',
+        completed: true,
+        current: false 
         
     },
     {
@@ -55,6 +58,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2024-01-02T08:45:00Z'),
         currentCity: 'Centro Logístico - Bahía Blanca',
         nextCity: 'Tu zona',
+        completed: true,
+        current: false 
         
     },
     {
@@ -63,6 +68,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2024-01-02T11:10:00Z'),
         currentCity: 'Centro de Distribución - Bahía Blanca',
         nextCity: 'Domicilio de entrega',
+        completed: false,
+        current: true 
         
     },
     // SHIPAA002 - Entregado
@@ -72,7 +79,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2023-12-25T09:30:00Z'),
         currentCity: 'Tienda Online Infusio',
         nextCity: 'Centro de Distribución',
-        
+        completed: true,
+        current: false        
     },
     {
         shipmentId: 'SHIPAA002',
@@ -80,6 +88,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2023-12-25T13:00:00Z'),
         currentCity: 'Centro de Distribución - Rosario',
         nextCity: 'Centro de Distribución - Rosario',
+        completed: true,
+        current: false 
         
     },
     {
@@ -88,7 +98,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2023-12-26T07:30:00Z'),
         currentCity: 'Centro Logístico - CABA',
         nextCity: 'Tu zona',
-        
+        completed: true,
+        current: false 
     },
     {
         shipmentId: 'SHIPAA002',
@@ -96,7 +107,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2023-12-26T14:20:00Z'),
         currentCity: 'Tu dirección',
         nextCity: 'Entrega finalizada',
-        
+        completed: false,
+        current: true 
     },
     // SHIAA003 - Preparado
     {
@@ -105,7 +117,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2024-01-03T11:00:00Z'),
         currentCity: 'Tienda Online Infusio',
         nextCity: 'Centro de Distribución',
-        
+        completed: true,
+        current: false        
     },
     {
         shipmentId: 'SHIPAA003',
@@ -113,7 +126,8 @@ const SHIPMENT_TRACKINGS: Tracking[] = [
         datetime: new Date('2024-01-03T15:30:00Z'),
         currentCity: 'Centro de Distribución - Bahía Blanca',
         nextCity: 'Centro de Distribución - Bahía Blanca',
-        
+        completed: false,
+        current: true 
     }
 ]
 

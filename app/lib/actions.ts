@@ -2,7 +2,7 @@
 
 import { clerkClient } from "@clerk/nextjs/server";
 import postgres from "postgres";
-import { User, UserRole } from "./definitions";
+import { User, UserRole as DbUserRole, Roles } from "./definitions";
 import { fetchUserRoles as getUserRoles } from "./data";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
@@ -11,7 +11,7 @@ const DEFAULT_USER_ROLES = ["viewer"] as const;
 const EXTRA_USER_ROLES = ["rider", "logistic_operator", "admin", "shipping_admin", "buyer", "seller"] as const;
 const ALL_USER_ROLES = [...DEFAULT_USER_ROLES, ...EXTRA_USER_ROLES] as const;
 
-// type UserRole = (typeof ALL_USER_ROLES)[number];
+type UserRole = (typeof ALL_USER_ROLES)[number];
 
 type ClerkMetadata = {
   roles?: unknown;
@@ -240,13 +240,13 @@ export async function assignRoleToUser(userId: string, role: string) {
     await syncDatabaseRoles(userId, nextRoles);
 
     const result = await sql`
-      INSERT INTO user_role (user_id, role)
+      INSERT INTO UserRole (userId, role)
       VALUES (${userId}, ${role})
-      ON CONFLICT (user_id, role) DO NOTHING
+      ON CONFLICT (userId, role) DO NOTHING
       RETURNING *
     `;
 
-    return result[0] as RoleUser;
+    return result[0] as DbUserRole;
   } catch (error) {
     console.error("Error assigning role:", error);
     throw error;

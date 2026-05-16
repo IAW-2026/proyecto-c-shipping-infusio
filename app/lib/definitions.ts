@@ -30,6 +30,8 @@ export type Tracking = {
   datetime: Date;
   currentCity: string;
   nextCity: string;
+  completed: boolean;
+  current: boolean;
 };
 
 export type User = {

@@ -1,7 +1,7 @@
-"use server"
-
 import { fetchAllRiders, fetchAllShipments } from "@/app/lib/data"
 import { LogisticsPageClient } from "./logistics-page-client"
+
+export const dynamic = "force-dynamic"
 
 const TRACKINGS_STORAGE_KEY = "logistics-trackings"
 const ASSIGNMENTS_STORAGE_KEY = "logistics-assignments"
