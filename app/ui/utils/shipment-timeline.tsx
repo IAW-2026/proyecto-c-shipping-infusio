@@ -1,17 +1,8 @@
 import { CheckCircle2, Circle, Package, Truck, Home, Box, CircleCheckBig, Cross, Warehouse } from "lucide-react"
-import { TimelineStatuses } from "@/app/lib/definitions"
-
-interface TimelineEvent {
-  status: typeof TimelineStatuses[keyof typeof TimelineStatuses]
-  location: string
-  date: string
-  time: string
-  completed: boolean
-  current?: boolean
-}
+import { TimelineStatuses, Tracking } from "@/app/lib/definitions"
 
 interface ShipmentTimelineProps {
-  events: TimelineEvent[]
+  events: Tracking[]
 }
 
 const getIcon = (status: typeof TimelineStatuses[keyof typeof TimelineStatuses]) => {
@@ -30,6 +21,8 @@ export function ShipmentTimeline({ events }: ShipmentTimelineProps) {
       {events.map((event, index) => {
         const Icon = getIcon(event.status)
         const isLast = index === events.length - 1
+        const date = event.datetime.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+        const time = event.datetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
 
         return (
           <div key={index} className="relative flex gap-4 pb-8 last:pb-0">
@@ -62,8 +55,8 @@ export function ShipmentTimeline({ events }: ShipmentTimelineProps) {
               <p className={`font-medium ${event.current ? "text-foreground" : event.completed ? "text-foreground" : "text-muted-foreground"}`}>
                 {event.status}
               </p>
-              <p className="text-sm text-muted-foreground mt-0.5">{event.location}</p>
-              <p className="text-xs text-muted-foreground mt-1">{event.date} • {event.time}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{event.currentCity}</p>
+              <p className="text-xs text-muted-foreground mt-1">{date} • {time}</p>
             </div>
           </div>
         )
