@@ -14,14 +14,13 @@ export const timelineEvents = [
     completed: true
   },
   {
-    status: "Enviado",
-    location: "Centro de Distribución - Palermo",
-    date: "25 Abril 2026",
-    time: "09:00",
-    completed: true
+    status: "En tránsito hacia tu ciudad",
+    date: "26 Abril 2026",
+    time: "08:45",
+    completed: true,
   },
   {
-    status: "En tránsito hacia tu ciudad",
+    status: "El envió llegó a tu ciudad",
     location: "Centro Logístico - Bahía Blanca",
     date: "26 Abril 2026",
     time: "08:45",
