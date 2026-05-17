@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Bike, CheckCircle2, CircleDot, Clock3, Map } from "lucide-react"
-import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
 
 type RiderStatus = "activo" | "inactivo"
 
@@ -14,7 +13,14 @@ type ShipmentWithTracking = {
   latestDatetime: string
 }
 
-const ACTIVE_STORAGE_KEY = "rider-status"
+type RiderAssignedShipment = {
+  deliveryAssignmentId: string
+  shipmentId: string
+  origin: string
+  destination: string
+  latestStatus: string
+  latestDatetime: string
+}
 
 const defaultMicroserviceViewerUrl = "https://realtimetracker-vlmx.onrender.com/"
 const defaultShipmentParamName = "shipmentId"
@@ -34,53 +40,82 @@ const modeParamName =
   process.env.NEXT_PUBLIC_MICROSERVICE_MODE_PARAM ??
   defaultModeParamName
 
-function getLatestTrackingByShipment() {
-  const latestMap: Record<string, { status: string; datetime: Date }> = {}
-
-  for (const tracking of SHIPMENT_TRACKINGS) {
-    const current = latestMap[tracking.shipmentId]
-
-    if (!current || new Date(tracking.datetime).getTime() > new Date(current.datetime).getTime()) {
-      latestMap[tracking.shipmentId] = {
-        status: tracking.status,
-        datetime: tracking.datetime,
-      }
-    }
-  }
-
-  return latestMap
-}
-
 export default function RiderPage() {
   const [status, setStatus] = useState<RiderStatus>("activo")
+  const [loadingStatus, setLoadingStatus] = useState(true)
+  const [savingStatus, setSavingStatus] = useState(false)
+  const [statusError, setStatusError] = useState<string | null>(null)
+  const [assignedShipments, setAssignedShipments] = useState<RiderAssignedShipment[]>([])
+  const [loadingDeliveries, setLoadingDeliveries] = useState(true)
+  const [deliveriesError, setDeliveriesError] = useState<string | null>(null)
   const [showMap, setShowMap] = useState(false)
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(ACTIVE_STORAGE_KEY)
-    if (saved === "activo" || saved === "inactivo") {
-      setStatus(saved)
+    const loadStatus = async () => {
+      setLoadingStatus(true)
+      setStatusError(null)
+
+      try {
+        const response = await fetch("/api/user/rider/status", {
+          cache: "no-store",
+        })
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data?.error ?? "No se pudo obtener el estado del rider")
+        }
+
+        if (data?.status === "activo" || data?.status === "inactivo") {
+          setStatus(data.status)
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error desconocido"
+        setStatusError(message)
+      } finally {
+        setLoadingStatus(false)
+      }
     }
+
+    loadStatus()
   }, [])
 
   useEffect(() => {
-    window.localStorage.setItem(ACTIVE_STORAGE_KEY, status)
-  }, [status])
+    const loadDeliveries = async () => {
+      setLoadingDeliveries(true)
+      setDeliveriesError(null)
+
+      try {
+        const response = await fetch("/api/user/rider/deliveries", {
+          cache: "no-store",
+        })
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data?.error ?? "No se pudieron obtener las entregas asignadas")
+        }
+
+        setAssignedShipments(Array.isArray(data?.shipments) ? data.shipments : [])
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Error desconocido"
+        setDeliveriesError(message)
+        setAssignedShipments([])
+      } finally {
+        setLoadingDeliveries(false)
+      }
+    }
+
+    loadDeliveries()
+  }, [])
 
   const shipmentsWithLatest = useMemo<ShipmentWithTracking[]>(() => {
-    const latestMap = getLatestTrackingByShipment()
-
-    return SHIPMENTS.map((shipment) => {
-      const latest = latestMap[shipment.id]
-
-      return {
-        id: shipment.id,
-        destination: shipment.destination,
-        origin: shipment.origin,
-        latestStatus: latest?.status ?? "Sin novedades",
-        latestDatetime: (latest?.datetime ?? shipment.originDatetime).toISOString(),
-      }
-    })
-  }, [])
+    return assignedShipments.map((shipment) => ({
+      id: shipment.shipmentId,
+      destination: shipment.destination,
+      origin: shipment.origin,
+      latestStatus: shipment.latestStatus,
+      latestDatetime: shipment.latestDatetime,
+    }))
+  }, [assignedShipments])
 
   const pendingDeliveries = useMemo(() => {
     return shipmentsWithLatest.filter((shipment) => {
@@ -102,8 +137,36 @@ export default function RiderPage() {
     })
   }, [shipmentsWithLatest])
 
-  const toggleStatus = () => {
-    setStatus((current) => (current === "activo" ? "inactivo" : "activo"))
+  const persistStatusToggle = async () => {
+    if (savingStatus || loadingStatus) {
+      return
+    }
+
+    setSavingStatus(true)
+    setStatusError(null)
+
+    try {
+      const response = await fetch("/api/user/rider/status", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error ?? "No se pudo actualizar el estado del rider")
+      }
+
+      if (data?.status === "activo" || data?.status === "inactivo") {
+        setStatus(data.status)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error desconocido"
+      setStatusError(message)
+    } finally {
+      setSavingStatus(false)
+    }
   }
 
   const getMapUrl = useMemo(() => {
@@ -131,16 +194,18 @@ export default function RiderPage() {
 
         <button
           type="button"
-          onClick={toggleStatus}
-          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+          onClick={persistStatusToggle}
+          disabled={loadingStatus || savingStatus}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
             status === "activo"
               ? "bg-primary text-primary-foreground hover:bg-primary/90"
               : "bg-secondary text-foreground hover:bg-secondary/80"
           }`}
         >
           <Bike className="h-4 w-4" />
-          Estado: {status === "activo" ? "Activo" : "No activo"}
+          Estado: {loadingStatus ? "Cargando..." : savingStatus ? "Actualizando..." : status === "activo" ? "Activo" : "No activo"}
         </button>
+        {statusError ? <p className="mt-2 text-sm text-red-500">{statusError}</p> : null}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -150,7 +215,11 @@ export default function RiderPage() {
             <h2 className="font-serif text-xl text-foreground">Pedidos por entregar</h2>
           </div>
 
-          {pendingDeliveries.length === 0 ? (
+          {loadingDeliveries ? (
+            <p className="text-sm text-muted-foreground">Cargando pedidos asignados...</p>
+          ) : deliveriesError ? (
+            <p className="text-sm text-red-500">{deliveriesError}</p>
+          ) : pendingDeliveries.length === 0 ? (
             <p className="text-sm text-muted-foreground">No tenés pedidos pendientes por entregar.</p>
           ) : (
             <ul className="space-y-3">
