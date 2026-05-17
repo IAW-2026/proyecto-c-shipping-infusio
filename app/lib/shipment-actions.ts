@@ -1,6 +1,22 @@
 "use server"
 
 import { prisma } from "@/app/lib/prisma"
+import { TimelineStatuses } from "@/app/lib/definitions"
+
+type AdvanceShipmentTrackingInput = {
+  shipmentId: string
+  status: keyof typeof TimelineStatuses
+}
+
+type PersistedTracking = {
+  shipmentId: string
+  datetime: string
+  status: keyof typeof TimelineStatuses
+  currentCity: string
+  nextCity: string
+  completed: boolean
+  current: boolean
+}
 
 export async function fetchShipmentByIdServer(code: string) {
   if (!code) return null
@@ -40,4 +56,56 @@ export async function fetchShipmentByIdServer(code: string) {
     console.warn("fetchShipmentByIdServer: HTTP fetch failed", err)
     return null
   }
+}
+
+export async function advanceShipmentTrackingServer({ shipmentId, status }: AdvanceShipmentTrackingInput) {
+  if (!shipmentId || !status) {
+    throw new Error("shipmentId y status son requeridos")
+  }
+
+  const shipment = await prisma.shipment.findUnique({ where: { id: shipmentId } })
+
+  if (!shipment) {
+    throw new Error("Shipment no encontrado")
+  }
+
+  const latestTracking = await prisma.tracking.findFirst({
+    where: { shipmentId },
+    orderBy: { datetime: "desc" },
+  })
+
+  const now = new Date()
+  const isTerminal =
+    status === "DELIVERED" || status === "CANCELLED" || status === "WITH_ISSUE"
+
+  const tracking = await prisma.$transaction(async (tx) => {
+    await tx.tracking.updateMany({
+      where: { shipmentId, current: true },
+      data: { current: false, completed: true },
+    })
+
+    return tx.tracking.create({
+      data: {
+        shipmentId,
+        datetime: now,
+        status,
+        currentCity: latestTracking?.nextCity ?? latestTracking?.currentCity ?? shipment.origin,
+        nextCity: shipment.destination,
+        completed: isTerminal,
+        current: true,
+      },
+    })
+  })
+
+  const persistedTracking: PersistedTracking = {
+    shipmentId: tracking.shipmentId,
+    datetime: tracking.datetime.toISOString(),
+    status: tracking.status,
+    currentCity: tracking.currentCity,
+    nextCity: tracking.nextCity,
+    completed: tracking.completed,
+    current: tracking.current,
+  }
+
+  return { tracking: persistedTracking }
 }

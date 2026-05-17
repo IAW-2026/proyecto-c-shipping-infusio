@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { validateAnyApiKeyMiddleware } from "@/app/lib/api-key-validation"
+import { validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ shipping_id: string }> }
 ) {
   try {
-    const authError = validateAnyApiKeyMiddleware(request, [
+    const authError = validateApiKeysMiddleware(request, [
       process.env.INTERNAL_API_KEY,
       process.env.SELLER,
       process.env.BUYER,
