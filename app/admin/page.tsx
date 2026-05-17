@@ -48,7 +48,12 @@ const revenueData = [
   { month: "Jul", ingresos: 580000 },
 ]
 
-const COLORS = ["#16a34a", "#2563eb", "#f59e0b", "#dc2626"]
+const COLORS = [
+  "#6b7056", // olive / primary
+  "#b86f4c", // terracotta / accent
+  "#d4cfc5", // tan / secondary
+  "#2d2926", // brown / foreground
+]
 
 export default function AdminPage() {
   return (
