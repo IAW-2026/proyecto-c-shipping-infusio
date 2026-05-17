@@ -65,11 +65,25 @@ export default async function AdminPage() {
     { role: "Seller", count: sellersCount },
   ]
 
+  // Estadísticas principales desde la DB
+  const totalShipmentsCount = await prisma.shipment.count()
+  const inTransitCount = await prisma.shipment.count({ where: { Tracking: { some: { status: "IN_TRANSIT" } } } })
+  const deliveredCount = await prisma.shipment.count({ where: { Tracking: { some: { status: "DELIVERED" } } } })
+  const incidentsCount = await prisma.shipment.count({ where: { Tracking: { some: { status: { in: ["WITH_ISSUE", "CANCELLED"] } } } } })
+
+  const stats = {
+    total: totalShipmentsCount,
+    inTransit: inTransitCount,
+    delivered: deliveredCount,
+    incidents: incidentsCount,
+  }
+
   return ( 
     <DashboardClient 
       monthlyShipments={monthlyShipments} 
       latestShipments={latest} 
       rolesCount={rolesCount}
+      stats={stats}
     />
   )
 }
