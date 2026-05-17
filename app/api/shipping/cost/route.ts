@@ -40,7 +40,7 @@ function estimateShippingCost(input: ShippingCostRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = validateAnyApiKeyMiddleware(request, [
+    const authError = validateApiKeysMiddleware(request, [
       process.env.INTERNAL_API_KEY,
       process.env.BUYER,
     ])
