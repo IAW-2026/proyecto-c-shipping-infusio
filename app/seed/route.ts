@@ -188,9 +188,9 @@ export async function GET(request: Request) {
     const action = searchParams.get('action') || 'sync-clerk-users';
     let result: any = null;
 
-    // if (action === 'sync-clerk-users' || action === 'all') {
-    //   result = await seedUsersFromClerk(prisma);
-    // }
+    if (action === 'sync-clerk-users' || action === 'all') {
+      result = await seedUsersFromClerk(prisma);
+    }
 
     if (action === 'shipments' || action === 'all') {
       await seedShipments(prisma);
