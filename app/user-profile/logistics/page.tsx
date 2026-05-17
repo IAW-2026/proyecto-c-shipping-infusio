@@ -1,4 +1,4 @@
-import { fetchAllRiders, fetchAllShipments } from "@/app/lib/data"
+import { fetchAllRiders, fetchAllShipments, fetchAllTrackings } from "@/app/lib/data"
 import { LogisticsPageClient } from "./logistics-page-client"
 import { currentUser } from "@clerk/nextjs/server"
 
@@ -14,11 +14,13 @@ export default async function LogisticsPage() {
 
   const riders = await fetchAllRiders()
   const shipments = await fetchAllShipments()
+  const trackings = await fetchAllTrackings()
 
   return (
     <LogisticsPageClient
       riders={riders}
       shipments={shipments}
+      initialTrackings={trackings}
       operatorId={OPERATOR_ID}
       storageKeys={{
         trackings: TRACKINGS_STORAGE_KEY,

@@ -92,6 +92,20 @@ export async function fetchAllShipments(): Promise<Shipment[]> {
   }
 }
 
+export async function fetchAllTrackings() {
+  try {
+    const result = await sql`
+      SELECT * FROM "Tracking"
+      ORDER BY datetime DESC
+    `;
+
+    return result;
+  } catch (error) {
+    console.error("Error getting all trackings:", error);
+    throw error;
+  }
+}
+
 /* -------------- CREATE -------------- */
 export async function createRiderProfile(
   userId: string,
