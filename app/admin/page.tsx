@@ -52,10 +52,24 @@ export default async function AdminPage() {
     }
   })
 
+  // Contar usuarios por rol (OL = logistic_operator)
+  const logisticOperatorsCount = await prisma.userRole.count({ where: { role: "logistic_operator" } })
+  const buyersCount = await prisma.userRole.count({ where: { role: "buyer" } })
+  const ridersCount = await prisma.userRole.count({ where: { role: "rider" } })
+  const sellersCount = await prisma.userRole.count({ where: { role: "seller" } })
+
+  const rolesCount = [
+    { role: "OL", count: logisticOperatorsCount },
+    { role: "Buyer", count: buyersCount },
+    { role: "Rider", count: ridersCount },
+    { role: "Seller", count: sellersCount },
+  ]
+
   return ( 
     <DashboardClient 
-        monthlyShipments={monthlyShipments} 
-        latestShipments={latest} 
+      monthlyShipments={monthlyShipments} 
+      latestShipments={latest} 
+      rolesCount={rolesCount}
     />
   )
 }

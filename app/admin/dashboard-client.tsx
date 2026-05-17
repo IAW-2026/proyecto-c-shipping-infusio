@@ -3,8 +3,6 @@
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell,
@@ -26,6 +24,7 @@ import { CHART_COLORS as COLORS } from "@/app/lib/definitions"
 
 type Monthly = { month: string; envios: number }
 type Latest = { code: string; destination: string; status: string; date: string }
+type RoleCount = { role: string; count: number }
 
 const statusData = [
   { name: "Entregados", value: 64 },
@@ -34,22 +33,14 @@ const statusData = [
   { name: "Incidencias", value: 4 },
 ]
 
-const revenueData = [
-  { month: "Ene", ingresos: 240000 },
-  { month: "Feb", ingresos: 320000 },
-  { month: "Mar", ingresos: 410000 },
-  { month: "Abr", ingresos: 390000 },
-  { month: "May", ingresos: 520000 },
-  { month: "Jun", ingresos: 610000 },
-  { month: "Jul", ingresos: 580000 },
-]
-
 export default function DashboardClient({
   monthlyShipments,
   latestShipments,
+  rolesCount,
 }: {
   monthlyShipments: Monthly[]
   latestShipments: Latest[]
+  rolesCount: RoleCount[]
 }) {
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
@@ -78,20 +69,20 @@ export default function DashboardClient({
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="envios" radius={[8, 8, 0, 0]} color={COLORS[3]} />
+              <Bar dataKey="envios" radius={[8, 8, 0, 0]} fill={COLORS[1]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
-
-        <ChartCard title="Ingresos por envíos">
+        {/* Usuarios por rol */}
+        <ChartCard title="Usuarios por rol">
           <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={revenueData}>
+            <BarChart data={rolesCount}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
+              <XAxis dataKey="role" />
               <YAxis />
-              <Tooltip formatter={(value) => (value != null ? `$${Number(value).toLocaleString("es-AR")}` : "-")} />
-              <Line type="monotone" dataKey="ingresos" strokeWidth={3} dot={{ r: 4 }} color={COLORS[3]} />
-            </LineChart>
+              <Tooltip />
+              <Bar dataKey="count" radius={[8, 8, 0, 0]} fill={COLORS[2]} />
+            </BarChart>
           </ResponsiveContainer>
         </ChartCard>
       </section>
