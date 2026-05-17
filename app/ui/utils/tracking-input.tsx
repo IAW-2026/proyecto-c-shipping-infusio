@@ -263,7 +263,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground">
                 <span className="text-xs font-medium uppercase tracking-wide">
-                  {result.trackings?.[result.trackings.length - 1]?.status || 'Procesando'}
+                  {result.trackings?.[0]?.status || 'Procesando'}
                 </span>
               </div>
             </div>
