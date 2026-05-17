@@ -183,7 +183,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
 
       const embeddedUrl = new URL(microserviceViewerUrl)
       embeddedUrl.searchParams.set(shipmentParamName, result.shipment.id)
-      embeddedUrl.searchParams.set(modeParamName, viewerModeValue)
+      //embeddedUrl.searchParams.set(modeParamName, viewerModeValue)
 
       const destinationAddress = result.shipment.destination?.trim()
 
