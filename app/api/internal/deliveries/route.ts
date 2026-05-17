@@ -5,7 +5,7 @@ import { prisma } from "@/app/lib/prisma";
 // GET - Obtener delivery assignments
 export async function GET(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request);
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!) ||;
     if (authError) return authError;
 
     const { searchParams } = new URL(request.url);
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 // POST - Crear delivery assignment
 export async function POST(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request);
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!);
     if (authError) return authError;
 
     const body = await request.json();
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
 // PUT - Actualizar delivery assignment
 export async function PUT(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request);
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!);
     if (authError) return authError;
 
     const body = await request.json();
@@ -204,7 +204,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Eliminar delivery assignment
 export async function DELETE(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request);
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!);
     if (authError) return authError;
 
     const { searchParams } = new URL(request.url);

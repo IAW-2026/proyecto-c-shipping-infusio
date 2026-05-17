@@ -1,43 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
 import { validateApiKeyMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
-
-type ExternalShippingStatus =
-  | "prepared"
-  | "dispatched"
-  | "in_transit"
-  | "delivered"
-  | "cancelled"
-  | "incident"
+import { TimelineStatuses } from "@/app/lib/definitions"
 
 type StatusUpdateRequest = {
-  status: ExternalShippingStatus
+  status: keyof typeof TimelineStatuses
 }
 
-const allowedStatuses: ExternalShippingStatus[] = [
-  "prepared",
-  "dispatched",
-  "in_transit",
-  "delivered",
-  "cancelled",
-  "incident",
-]
-
-function toInternalStatus(status: ExternalShippingStatus) {
-  if (status === "prepared") return "PREPARING"
-  if (status === "dispatched") return "OUT_FOR_DELIVERY"
-  if (status === "in_transit") return "IN_TRANSIT"
-  if (status === "delivered") return "DELIVERED"
-  if (status === "cancelled") return "CANCELLED"
-  return "WITH_ISSUE"
-}
+const allowedStatuses = Object.keys(TimelineStatuses) as Array<keyof typeof TimelineStatuses>
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ shipping_id: string }> }
 ) {
   try {
-    const authError = validateApiKeyMiddleware(request)
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!) ||
+        validateApiKeyMiddleware(request, process.env.SELLER!)
     if (authError) return authError
 
     const { shipping_id } = await params
@@ -62,7 +40,8 @@ export async function PATCH(
     })
 
     const now = new Date()
-    const isTerminal = body.status === "delivered" || body.status === "cancelled" || body.status === "incident"
+    const isTerminal =
+      body.status === "DELIVERED" || body.status === "CANCELLED" || body.status === "WITH_ISSUE"
 
     await prisma.$transaction(async (tx) => {
       await tx.tracking.updateMany({
@@ -74,7 +53,7 @@ export async function PATCH(
         data: {
           shipmentId: shipping_id,
           datetime: now,
-          status: toInternalStatus(body.status!),
+          status: body.status!,
           currentCity: latestTracking?.nextCity ?? latestTracking?.currentCity ?? shipment.origin,
           nextCity: shipment.destination,
           completed: isTerminal,

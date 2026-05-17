@@ -7,7 +7,9 @@ export async function GET(
   { params }: { params: Promise<{ shipping_id: string }> }
 ) {
   try {
-    const authError = validateApiKeyMiddleware(request)
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!) ||
+        validateApiKeyMiddleware(request, process.env.SELLER!) ||
+        validateApiKeyMiddleware(request, process.env.BUYER!)
     if (authError) return authError
 
     const { shipping_id } = await params
