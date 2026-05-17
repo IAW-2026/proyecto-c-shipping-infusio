@@ -11,7 +11,7 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 export async function fetchUserRoles(userId: string): Promise<string[]> {
   try {
     const result = await sql<{ role: string }[]>`
-      SELECT role FROM user_role WHERE user_id = ${userId}
+      SELECT role FROM "UserRole" WHERE "userId" = ${userId}
     `;
 
     return result.map((row) => row.role);
@@ -24,7 +24,7 @@ export async function fetchUserRoles(userId: string): Promise<string[]> {
 export async function fetchAllRiders(): Promise<Rider[]> {
   try {
     const result = await sql<Rider[]>`
-      SELECT * FROM rider
+      SELECT * FROM "Rider"
     `;
 
     return result;
@@ -37,7 +37,7 @@ export async function fetchAllRiders(): Promise<Rider[]> {
 export async function fetchRiderByActive(): Promise<Rider | null> {
   try {
     const result = await sql<Rider[]>`
-      SELECT * FROM rider WHERE status = 'activo'
+      SELECT * FROM "Rider" WHERE status = 'activo'
     `;
 
     return result[0] || null;
@@ -50,7 +50,7 @@ export async function fetchRiderByActive(): Promise<Rider | null> {
 export async function fetchAllShipments(): Promise<Shipment[]> {
   try {
     const result = await sql<Shipment[]>`
-      SELECT * FROM shipment
+      SELECT * FROM "Shipment"
     `;
 
     return result;
@@ -67,7 +67,7 @@ export async function createRiderProfile(
 ) {
   try {
     const result = await sql`
-      INSERT INTO rider (id, name, email, status, location)
+      INSERT INTO "Rider" (id, name, email, status, location)
       VALUES (${userId}, ${riderData.name}, ${riderData.email}, 'inactivo', ${riderData.location})
       ON CONFLICT (id) DO UPDATE
       SET name = EXCLUDED.name, location = EXCLUDED.location
@@ -91,7 +91,7 @@ export async function createLogisticOperatorProfile(
 ) {
   try {
     const result = await sql`
-      INSERT INTO logistic_operator (id, name, email)
+      INSERT INTO "LogisticOperator" (id, name, email)
       VALUES (${userId}, ${operatorData.name}, ${operatorData.email})
       ON CONFLICT (id) DO UPDATE
       SET name = EXCLUDED.name
