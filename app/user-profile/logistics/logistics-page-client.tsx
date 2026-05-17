@@ -27,6 +27,7 @@ type LogisticsSnapshot = {
 type LogisticsPageClientProps = {
   riders: Rider[]
   shipments: Shipment[]
+  initialTrackings?: any[]
   operatorId: string
   storageKeys: {
     trackings: string
@@ -127,33 +128,37 @@ function createTrackingEvent(shipmentId: string, status: ShippingStatus, destina
   }
 }
 
-export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys }: LogisticsPageClientProps) {
-  const [trackings, setTrackings] = useState<LogisticsTracking[]>(SHIPMENT_TRACKINGS as LogisticsTracking[])
+export function LogisticsPageClient({ riders, shipments, initialTrackings, operatorId, storageKeys }: LogisticsPageClientProps) {
+  // Convert database trackings to LogisticsTracking format
+  const convertedTrackings: LogisticsTracking[] = (initialTrackings || []).map((tracking: any) => ({
+    shipmentId: tracking.shipmentId,
+    status: TimelineStatuses[tracking.status as keyof typeof TimelineStatuses] || tracking.status,
+    datetime: new Date(tracking.datetime),
+    currentCity: tracking.currentCity,
+    nextCity: tracking.nextCity,
+    completed: tracking.completed,
+    current: tracking.current,
+  }))
+
+  const [trackings, setTrackings] = useState<LogisticsTracking[]>(convertedTrackings.length > 0 ? convertedTrackings : (SHIPMENT_TRACKINGS as LogisticsTracking[]))
   const [assignments, setAssignments] = useState<DeliveryAssignment[]>([])
   const [selectedShipmentId, setSelectedShipmentId] = useState(shipments[0]?.id ?? "")
   const [selectedRiderId, setSelectedRiderId] = useState(riders.find((rider) => rider.status === "activo")?.id ?? riders[0]?.id ?? "")
   const [notice, setNotice] = useState<string | null>(null)
 
+  // Only load localStorage for assignments, not trackings (trackings come from DB)
   useEffect(() => {
-    const savedSnapshot = safeParseSnapshot(window.localStorage.getItem(storageKeys.trackings))
     const savedAssignments = safeParseSnapshot(window.localStorage.getItem(storageKeys.assignments))
-
-    if (savedSnapshot?.trackings?.length) {
-      setTrackings(savedSnapshot.trackings)
-    }
 
     if (savedAssignments?.assignments?.length) {
       setAssignments(savedAssignments.assignments)
     }
-  }, [storageKeys.assignments, storageKeys.trackings])
+  }, [storageKeys.assignments])
 
+  // Save assignments to localStorage (but not trackings, since they come from DB)
   useEffect(() => {
-    window.localStorage.setItem(storageKeys.trackings, JSON.stringify({ trackings, assignments }))
-  }, [assignments, storageKeys.trackings, trackings])
-
-  useEffect(() => {
-    window.localStorage.setItem(storageKeys.assignments, JSON.stringify({ trackings, assignments }))
-  }, [assignments, storageKeys.assignments, trackings])
+    window.localStorage.setItem(storageKeys.assignments, JSON.stringify({ assignments }))
+  }, [assignments, storageKeys.assignments])
 
   const riderById = useMemo(() => {
     return riders.reduce<Record<string, Rider>>((accumulator, rider) => {
