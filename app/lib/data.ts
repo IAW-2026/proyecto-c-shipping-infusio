@@ -47,6 +47,38 @@ export async function fetchRiderByActive(): Promise<Rider | null> {
   }
 }
 
+export async function fetchRiderById(userId: string): Promise<Rider | null> {
+  try {
+    const result = await sql<Rider[]>`
+      SELECT * FROM "Rider" WHERE id = ${userId} LIMIT 1
+    `;
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("Error getting rider by id:", error);
+    throw error;
+  }
+}
+
+export async function updateRiderStatus(
+  userId: string,
+  status: Rider["status"]
+): Promise<Rider | null> {
+  try {
+    const result = await sql<Rider[]>`
+      UPDATE "Rider"
+      SET status = ${status}
+      WHERE id = ${userId}
+      RETURNING *
+    `;
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("Error updating rider status:", error);
+    throw error;
+  }
+}
+
 export async function fetchAllShipments(): Promise<Shipment[]> {
   try {
     const result = await sql<Shipment[]>`
