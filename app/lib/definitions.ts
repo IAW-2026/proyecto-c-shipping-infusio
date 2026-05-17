@@ -103,3 +103,10 @@ export type CreateShippingRequest = {
     postal_code: string
   }
 }
+
+export const CHART_COLORS = [
+  "#6b7056", // olive / primary
+  "#b86f4c", // terracotta / accent
+  "#d4cfc5", // tan / secondary
+  "#2d2926", // brown / foreground
+]
