@@ -5,10 +5,17 @@
  * Todas las solicitudes incluyen autenticación API KEY
  */
 
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${process.env.INTERNAL_API_KEY || ""}`,
-});
+const getHeaders = () => {
+  const key = process.env.INTERNAL_API_KEY;
+  if (!key) {
+    console.error("INTERNAL_API_KEY no está configurada en variables de entorno");
+    throw new Error("INTERNAL_API_KEY no está configurada en variables de entorno");
+  }
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${key}`,
+  };
+};
 
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
