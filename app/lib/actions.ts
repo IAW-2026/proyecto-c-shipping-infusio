@@ -98,7 +98,7 @@ async function syncDatabaseRoles(userId: string, roles: UserRole[]) {
     }
 
     await sql`
-      DELETE FROM UserRole WHERE userId = ${userId} AND role = ${role}
+      DELETE FROM "UserRole" WHERE "userId" = ${userId} AND role = ${role}
     `;
   }
 
@@ -108,9 +108,9 @@ async function syncDatabaseRoles(userId: string, roles: UserRole[]) {
     }
 
     await sql`
-      INSERT INTO UserRole (userId, role)
+      INSERT INTO "UserRole" ("userId", role)
       VALUES (${userId}, ${role})
-      ON CONFLICT (userId, role) DO NOTHING
+      ON CONFLICT ("userId", role) DO NOTHING
     `;
   }
 }
@@ -161,14 +161,14 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
     const user = await sql.begin(async (tx) => {
       const existingById = await tx`
         SELECT id, email
-        FROM User
+        FROM "User"
         WHERE id = ${clerkUser.id}
         LIMIT 1
       `;
 
       if (existingById.length > 0) {
         const updatedById = await tx`
-          UPDATE User
+          UPDATE "User"
           SET name = ${firstName},
               surname = ${lastName},
               email = ${email}
@@ -181,14 +181,14 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
 
       const existingByEmail = await tx`
         SELECT id
-        FROM User
+        FROM "User"
         WHERE email = ${email}
         LIMIT 1
       `;
 
       if (existingByEmail.length > 0) {
         const updatedByEmail = await tx`
-          UPDATE "user"
+          UPDATE "User"
           SET id = ${clerkUser.id},
               name = ${firstName},
               surname = ${lastName}
@@ -200,7 +200,7 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
       }
 
       const inserted = await tx`
-        INSERT INTO User (id, name, surname, email)
+        INSERT INTO "User" (id, name, surname, email)
         VALUES (${clerkUser.id}, ${firstName}, ${lastName}, ${email})
         RETURNING *
       `;
@@ -240,9 +240,9 @@ export async function assignRoleToUser(userId: string, role: string) {
     await syncDatabaseRoles(userId, nextRoles);
 
     const result = await sql`
-      INSERT INTO UserRole (userId, role)
+      INSERT INTO "UserRole" ("userId", role)
       VALUES (${userId}, ${role})
-      ON CONFLICT (userId, role) DO NOTHING
+      ON CONFLICT ("userId", role) DO NOTHING
       RETURNING *
     `;
 
@@ -269,7 +269,7 @@ export async function removeRoleFromUser(userId: string, role: string) {
     await syncDatabaseRoles(userId, nextRoles);
 
     await sql`
-      DELETE FROM user_role WHERE user_id = ${userId} AND role = ${role}
+      DELETE FROM "UserRole" WHERE "userId" = ${userId} AND role = ${role}
     `;
 
     return true;
