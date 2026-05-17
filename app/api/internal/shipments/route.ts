@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKeyMiddleware } from "@/app/lib/api-key-validation";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/app/lib/prisma";
 
 // GET - Obtener todos los shipments o filtrar
 export async function GET(request: NextRequest) {

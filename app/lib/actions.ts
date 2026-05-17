@@ -2,7 +2,7 @@
 
 import { clerkClient } from "@clerk/nextjs/server";
 import postgres from "postgres";
-import { User, UserRole as DbUserRole, Roles } from "./definitions";
+import { User, UserRole as DbUserRole } from "./definitions";
 import { fetchUserRoles as getUserRoles } from "./data";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });

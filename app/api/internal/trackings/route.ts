@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKeyMiddleware } from "@/app/lib/api-key-validation";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/app/lib/prisma";
 
 // GET - Obtener trackings
 export async function GET(request: NextRequest) {
@@ -107,12 +105,24 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const tracking = await prisma.tracking.update({
+    const existingTracking = await prisma.tracking.findFirst({
       where: {
-        shipmentId_datetime: {
-          shipmentId,
-          datetime: new Date(datetime),
-        },
+        shipmentId,
+        datetime: new Date(datetime),
+      },
+    });
+
+    if (!existingTracking) {
+      return NextResponse.json(
+        { error: "Tracking no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.tracking.updateMany({
+      where: {
+        shipmentId,
+        datetime: new Date(datetime),
       },
       data: {
         ...(status && { status }),
@@ -120,6 +130,13 @@ export async function PUT(request: NextRequest) {
         ...(nextCity !== undefined && { nextCity }),
         ...(completed !== undefined && { completed }),
         ...(current !== undefined && { current }),
+      },
+    });
+
+    const tracking = await prisma.tracking.findFirst({
+      where: {
+        shipmentId,
+        datetime: new Date(datetime),
       },
       include: {
         Shipment: true,
@@ -153,14 +170,19 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.tracking.delete({
+    const deleted = await prisma.tracking.deleteMany({
       where: {
-        shipmentId_datetime: {
-          shipmentId,
-          datetime: new Date(datetime),
-        },
+        shipmentId,
+        datetime: new Date(datetime),
       },
     });
+
+    if (deleted.count === 0) {
+      return NextResponse.json(
+        { error: "Tracking no encontrado" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(
       { message: "Tracking eliminado correctamente" },
