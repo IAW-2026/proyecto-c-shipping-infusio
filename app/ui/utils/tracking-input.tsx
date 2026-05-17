@@ -4,6 +4,7 @@ import { Search, AlertCircle, Radio } from "lucide-react"
 import { useState, FormEvent, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import type { Tracking } from "@/app/lib/definitions"
+import { TimelineStatuses } from "@/app/lib/definitions"
 import { fetchShipmentByIdServer } from "@/app/lib/shipment-actions"
 import { fetchTrackingsByShipmentIdServer } from "@/app/lib/tracking-actions"
 import { ShipmentTimeline } from "./shipment-timeline"
@@ -77,7 +78,25 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
 
       const trackings = await fetchTrackingsByShipmentIdServer(shipment.id)
 
-      setResult({ shipment, trackings })
+      // Normalize status values to human-readable strings using TimelineStatuses
+      const humanizeStatus = (s: any) => {
+        if (!s) return s
+        if (typeof s !== "string") return s
+        // If s is a key like 'OUT_FOR_DELIVERY', map to TimelineStatuses[...] value
+        if (s in TimelineStatuses) {
+          return (TimelineStatuses as any)[s]
+        }
+        // Otherwise assume it's already a human string
+        return s
+      }
+
+      const normalized = (trackings ?? []).map((t: any) => ({
+        ...t,
+        originalStatus: t.status,
+        status: humanizeStatus(t.status),
+      }))
+
+      setResult({ shipment, trackings: normalized })
       setLiveTrackingEnabled(false)
       setLiveLoading(false)
       setLiveError(null)
@@ -122,9 +141,22 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
     )
 
-    const latestStatus = sorted[sorted.length - 1]?.status?.toLowerCase() || ""
-    const inRoute = latestStatus.includes("reparto") || latestStatus.includes("sal")
-    const deliveredOrCanceled = latestStatus.includes("entregado") || latestStatus.includes("cancelado")
+    const latest = sorted[sorted.length - 1]
+    const latestStatus = latest?.status?.toLowerCase() || ""
+    const latestOriginal = (latest?.originalStatus || "").toString().toUpperCase()
+
+    // Prefer checking enum codes when available for robustness
+    const inRoute =
+      latestOriginal === "OUT_FOR_DELIVERY" ||
+      latestOriginal === "IN_TRANSIT" ||
+      latestStatus.includes("reparto") ||
+      latestStatus.includes("sal")
+
+    const deliveredOrCanceled =
+      latestOriginal === "DELIVERED" ||
+      latestOriginal === "CANCELLED" ||
+      latestStatus.includes("entregado") ||
+      latestStatus.includes("cancelado")
 
     return inRoute && !deliveredOrCanceled
   }
