@@ -10,6 +10,7 @@ type PackageAssignmentProps = {
   shipmentSummaries: ShipmentSummary[]
   riders: Rider[]
   onAdvanceShipment?: (shipmentId: string) => void
+  onAssignShipment: (shipmentId: string, riderId: string) => Promise<void>
 }
 
 const SHIPPING_FLOW = [
@@ -34,7 +35,7 @@ function isTerminalStatus(status: string) {
   )
 }
 
-export function PackageAssignment({ shipmentSummaries, riders, onAdvanceShipment }: PackageAssignmentProps) {
+export function PackageAssignment({ shipmentSummaries, riders, onAdvanceShipment, onAssignShipment }: PackageAssignmentProps) {
   const [selectedShipmentId, setSelectedShipmentId] = useState(shipmentSummaries[0]?.id ?? "")
   const [selectedRiderId, setSelectedRiderId] = useState("")
 
@@ -56,9 +57,12 @@ export function PackageAssignment({ shipmentSummaries, riders, onAdvanceShipment
     ? riderById[selectedShipment.assignedRiderId] ?? null
     : null
 
-  const assignShipment = () => {
-    if (!selectedShipment) return
-    // This component receives data from parent, actual assignment happens in parent.
+  const assignShipment = async () => {
+    if (!selectedShipment || selectedShipment.latestStatus !== TimelineStatuses.ARRIVED_CITY) {
+      return
+    }
+
+    await onAssignShipment(selectedShipment.id, selectedRiderId)
   }
 
   const advanceShipment = () => {
@@ -129,7 +133,8 @@ export function PackageAssignment({ shipmentSummaries, riders, onAdvanceShipment
           <button
             type="button"
             onClick={assignShipment}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto sm:justify-start"
+            disabled={!selectedShipment || selectedShipment.latestStatus !== TimelineStatuses.ARRIVED_CITY}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start"
           >
             <ArrowRightLeft className="h-4 w-4" />
             Vincular paquete

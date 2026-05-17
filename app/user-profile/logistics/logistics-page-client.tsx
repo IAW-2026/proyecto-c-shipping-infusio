@@ -18,6 +18,7 @@ import { PackageAssignment } from "@/app/ui/logistics/package-assignment"
 import { WelcomeLogistics } from "@/app/ui/logistics/welcome"
 import { PendingAndDelivered } from "@/app/ui/logistics/pending-and-delivered"
 import { advanceShipmentTrackingServer } from "@/app/lib/shipment-actions"
+import { createDelivery, updateDelivery } from "@/app/lib/crud-actions"
 
 type LogisticsSnapshot = {
   trackings: LogisticsTracking[]
@@ -179,7 +180,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
         origin: shipment.origin,
         destination: shipment.destination,
         latestStatus: latestTracking?.status ?? "Pedido confirmado",
-        latestDatetime: (latestTracking?.datetime ?? shipment.originDatetime).toISOString(),
+        latestDatetime: new Date(latestTracking?.datetime ?? shipment.originDatetime).toISOString(),
         assignedRiderId: assignment?.riderId ?? null,
       }
     })
@@ -195,36 +196,52 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
 
   const deliveredShipments = shipmentSummaries.filter((shipment) => shipment.latestStatus.toLowerCase().includes("entregado"))
 
-  const selectedShipment = shipmentSummaries.find((shipment) => shipment.id === selectedShipmentId) ?? null
-  const selectedRider = riderById[selectedRiderId] ?? null
-
-  const selectedShipmentCurrentAssignment = selectedShipment
-    ? assignments.find((assignment) => assignment.shipmentId === selectedShipment.id) ?? null
-    : null
-
   const recentlyUpdatedTrackings = [...trackings]
     .sort((left, right) => new Date(right.datetime).getTime() - new Date(left.datetime).getTime())
     .slice(0, 10)
 
-  const assignShipment = () => {
-    if (!selectedShipment || !selectedRider) {
+  const assignShipment = async (shipmentId: string, riderId: string) => {
+    const shipment = shipmentSummaries.find((item) => item.id === shipmentId) ?? null
+    const rider = riderById[riderId] ?? null
+
+    if (!shipment || !rider) {
       setNotice("Elegí un paquete y un rider activo antes de asignar.")
       return
     }
 
-    if (selectedRider.status !== "activo") {
+    if (shipment.latestStatus !== TimelineStatuses.ARRIVED_CITY) {
+      setNotice("Solo podés asignar cuando el paquete llegó a tu ciudad.")
+      return
+    }
+
+    if (rider.status !== "activo") {
       setNotice("Ese rider está inactivo. Elegí uno activo para continuar.")
       return
     }
 
+    const existingAssignment = assignments.find((assignment) => assignment.shipmentId === shipment.id) ?? null
+    const nextAssignment: DeliveryAssignment = {
+      id: existingAssignment?.id ?? `ASSIGN-${Date.now()}`,
+      shipmentId,
+      riderId,
+      logisticOperatorId: operatorId,
+    }
+
+    const persistResult = existingAssignment
+      ? await updateDelivery({
+          id: nextAssignment.id,
+          riderId,
+          logisticOperatorId: operatorId,
+        })
+      : await createDelivery(nextAssignment)
+
+    if (persistResult?.__error) {
+      setNotice("No se pudo guardar la asignación en la base de datos.")
+      return
+    }
+
     setAssignments((currentAssignments) => {
-      const existingIndex = currentAssignments.findIndex((assignment) => assignment.shipmentId === selectedShipment.id)
-      const nextAssignment: DeliveryAssignment = {
-        id: existingIndex >= 0 ? currentAssignments[existingIndex].id : `ASSIGN-${Date.now()}`,
-        shipmentId: selectedShipment.id,
-        riderId: selectedRider.id,
-        logisticOperatorId: operatorId,
-      }
+      const existingIndex = currentAssignments.findIndex((assignment) => assignment.shipmentId === shipment.id)
 
       if (existingIndex >= 0) {
         const updatedAssignments = [...currentAssignments]
@@ -235,7 +252,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
       return [...currentAssignments, nextAssignment]
     })
 
-    setNotice(`Paquete ${selectedShipment.id} vinculado con ${selectedRider.name}.`)
+    setNotice(`Paquete ${shipment.id} vinculado con ${rider.name}.`)
   }
 
   const advanceShipment = async (shipmentId: string) => {
@@ -312,6 +329,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
             shipmentSummaries={shipmentSummaries}
             riders={riders}
             onAdvanceShipment={advanceShipment}
+            onAssignShipment={assignShipment}
           />
           <PendingAndDelivered
             unassignedPendingShipments={unassignedPendingShipments}
