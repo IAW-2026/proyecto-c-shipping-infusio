@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { validateApiKeyMiddleware } from "@/app/lib/api-key-validation"
+import { validateAnyApiKeyMiddleware } from "@/app/lib/api-key-validation"
 
 type ShippingCostRequest = {
   origin_postal_code: string
@@ -40,8 +40,10 @@ function estimateShippingCost(input: ShippingCostRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!) ||
-        validateApiKeyMiddleware(request, process.env.BUYER!);
+    const authError = validateAnyApiKeyMiddleware(request, [
+      process.env.INTERNAL_API_KEY,
+      process.env.BUYER,
+    ])
     if (authError) return authError
 
     const body = (await request.json()) as Partial<ShippingCostRequest>
