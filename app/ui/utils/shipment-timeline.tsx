@@ -55,7 +55,9 @@ export function ShipmentTimeline({ events }: ShipmentTimelineProps) {
               <p className={`font-medium ${event.current ? "text-foreground" : event.completed ? "text-foreground" : "text-muted-foreground"}`}>
                 {event.status}
               </p>
-              <p className="text-sm text-muted-foreground mt-0.5">{event.currentCity}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {event.status === TimelineStatuses.DELIVERED ? event.currentCity : ""}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">{date} • {time}</p>
             </div>
           </div>

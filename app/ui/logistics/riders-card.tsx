@@ -28,7 +28,6 @@ export function RidersCard({ riders, assignedPendingShipments }: RidersCardProps
                 <div className="min-w-0">
                   <p className="font-medium text-foreground truncate">{rider.name}</p>
                   <p className="mt-1 text-sm text-muted-foreground truncate">{rider.email}</p>
-                  <p className="mt-1 text-sm text-muted-foreground truncate">Zona: {rider.location}</p>
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap ${
@@ -37,11 +36,6 @@ export function RidersCard({ riders, assignedPendingShipments }: RidersCardProps
                 >
                   {rider.status === "activo" ? "Activo" : "Inactivo"}
                 </span>
-              </div>
-
-              <div className="mt-3 text-xs text-muted-foreground">
-                Asignados hoy: {" "}
-                {assignedPendingShipments.filter((shipment) => shipment.assignedRiderId === rider.id).length}
               </div>
             </article>
           ))}

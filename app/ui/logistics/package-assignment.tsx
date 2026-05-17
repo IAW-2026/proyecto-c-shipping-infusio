@@ -157,7 +157,7 @@ export function PackageAssignment({ shipmentSummaries, riders, onAdvanceShipment
               <div>
                 <p className="text-xs uppercase tracking-widest text-muted-foreground">Selección actual</p>
                 <h3 className="mt-1 wrap-break-word font-serif text-xl text-foreground md:text-2xl">{selectedShipment.id}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{selectedShipment.origin}</p>
+                <p className="mt-1 text-sm text-muted-foreground">Origen: {selectedShipment.origin}</p>
                 <p className="mt-1 text-sm text-muted-foreground">Destino: {selectedShipment.destination}</p>
               </div>
 

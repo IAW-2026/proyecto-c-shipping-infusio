@@ -37,10 +37,6 @@ export function LastUpdates({ recentlyUpdatedTrackings }: LastUpdatesProps) {
                           {new Date(tracking.datetime).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
-                      <div className="mt-3 grid gap-2 text-xs text-muted-foreground">
-                        <p className="truncate">Ciudad actual: {tracking.currentCity}</p>
-                        <p className="truncate">Próximo destino: {tracking.nextCity}</p>
-                      </div>
                     </article>
                   ))
                 )}
