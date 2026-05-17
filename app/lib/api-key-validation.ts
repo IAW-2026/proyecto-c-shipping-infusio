@@ -39,3 +39,22 @@ export function validateApiKeyMiddleware(request: NextRequest, validApiKey: stri
   }
   return null; // Continuar con la request
 }
+
+/**
+ * Permite que una request pase si coincide con cualquiera de las API keys dadas.
+ */
+export function validateAnyApiKeyMiddleware(
+  request: NextRequest,
+  validApiKeys: Array<string | undefined>
+) {
+  for (const validApiKey of validApiKeys) {
+    if (validApiKey && validateApiKey(request, validApiKey)) {
+      return null;
+    }
+  }
+
+  return NextResponse.json(
+    { error: "API Key inválida o no proporcionada" },
+    { status: 401 }
+  );
+}

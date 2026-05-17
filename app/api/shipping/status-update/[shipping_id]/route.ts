@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { validateApiKeyMiddleware } from "@/app/lib/api-key-validation"
+import { validateAnyApiKeyMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
 import { TimelineStatuses } from "@/app/lib/definitions"
 
@@ -14,8 +14,10 @@ export async function PATCH(
   { params }: { params: Promise<{ shipping_id: string }> }
 ) {
   try {
-    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!) ||
-        validateApiKeyMiddleware(request, process.env.SELLER!)
+    const authError = validateAnyApiKeyMiddleware(request, [
+      process.env.INTERNAL_API_KEY,
+      process.env.SELLER,
+    ])
     if (authError) return authError
 
     const { shipping_id } = await params
