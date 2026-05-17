@@ -3,12 +3,20 @@
 import { prisma } from "@/app/lib/prisma"
 
 export async function fetchTrackingsByShipmentIdServer(shipmentId: string) {
-  if (!shipmentId) throw new Error("shipmentId requerido")
+  if (!shipmentId) {
+    console.warn("fetchTrackingsByShipmentIdServer called without shipmentId")
+    return []
+  }
 
-  const trackings = await prisma.tracking.findMany({
-    where: { shipmentId },
-    orderBy: { datetime: "desc" },
-  })
+  try {
+    const trackings = await prisma.tracking.findMany({
+      where: { shipmentId },
+      orderBy: { datetime: "desc" },
+    })
 
-  return trackings
+    return trackings
+  } catch (err) {
+    console.error("fetchTrackingsByShipmentIdServer: DB query failed", err)
+    return []
+  }
 }
