@@ -5,12 +5,33 @@
  * Todas las solicitudes incluyen autenticación API KEY
  */
 
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${process.env.INTERNAL_API_KEY || ""}`,
-});
+const getHeaders = () => {
+  const key = process.env.INTERNAL_API_KEY;
+  if (!key) {
+    console.error("INTERNAL_API_KEY no está configurada en variables de entorno");
+    throw new Error("INTERNAL_API_KEY no está configurada en variables de entorno");
+  }
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${key}`,
+  };
+};
 
 const getBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+async function handleResponse(response: Response) {
+  const text = await response.text();
+  let body: any = null;
+  try {
+    body = text ? JSON.parse(text) : null;
+  } catch {
+    body = text;
+  }
+
+  if (response.ok) return body;
+
+  return { __error: true, status: response.status, body };
+}
 
 // ============= SHIPMENTS =============
 
@@ -31,8 +52,9 @@ export async function getShipments(filters?: {
       }
     );
 
-    if (!response.ok) throw new Error("Error fetching shipments");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en getShipments:", error);
     throw error;
@@ -49,8 +71,9 @@ export async function getShipmentById(id: string) {
       }
     );
 
-    if (!response.ok) throw new Error("Error fetching shipment");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en getShipmentById:", error);
     throw error;
@@ -76,8 +99,9 @@ export async function createShipment(data: {
       }
     );
 
-    if (!response.ok) throw new Error("Error creating shipment");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en createShipment:", error);
     throw error;
@@ -103,8 +127,9 @@ export async function updateShipment(data: {
       }
     );
 
-    if (!response.ok) throw new Error("Error updating shipment");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en updateShipment:", error);
     throw error;
@@ -121,8 +146,9 @@ export async function deleteShipment(id: string) {
       }
     );
 
-    if (!response.ok) throw new Error("Error deleting shipment");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en deleteShipment:", error);
     throw error;
@@ -148,8 +174,9 @@ export async function getTrackings(filters?: {
       }
     );
 
-    if (!response.ok) throw new Error("Error fetching trackings");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en getTrackings:", error);
     throw error;
@@ -175,8 +202,9 @@ export async function createTracking(data: {
       }
     );
 
-    if (!response.ok) throw new Error("Error creating tracking");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en createTracking:", error);
     throw error;
@@ -202,8 +230,9 @@ export async function updateTracking(data: {
       }
     );
 
-    if (!response.ok) throw new Error("Error updating tracking");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en updateTracking:", error);
     throw error;
@@ -220,8 +249,9 @@ export async function deleteTracking(shipmentId: string, datetime: string) {
       }
     );
 
-    if (!response.ok) throw new Error("Error deleting tracking");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en deleteTracking:", error);
     throw error;
@@ -252,8 +282,9 @@ export async function getDeliveries(filters?: {
       }
     );
 
-    if (!response.ok) throw new Error("Error fetching deliveries");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en getDeliveries:", error);
     throw error;
@@ -276,8 +307,9 @@ export async function createDelivery(data: {
       }
     );
 
-    if (!response.ok) throw new Error("Error creating delivery");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en createDelivery:", error);
     throw error;
@@ -299,8 +331,9 @@ export async function updateDelivery(data: {
       }
     );
 
-    if (!response.ok) throw new Error("Error updating delivery");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en updateDelivery:", error);
     throw error;
@@ -317,8 +350,9 @@ export async function deleteDelivery(id: string) {
       }
     );
 
-    if (!response.ok) throw new Error("Error deleting delivery");
-    return await response.json();
+    const result = await handleResponse(response);
+    if (result && result.__error) return result;
+    return result;
   } catch (error) {
     console.error("Error en deleteDelivery:", error);
     throw error;
