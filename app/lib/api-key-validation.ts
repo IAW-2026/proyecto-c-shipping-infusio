@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Valida que la API KEY proporcionada sea válida
  * Espera el header: Authorization: Bearer YOUR_API_KEY
  */
-export function validateApiKey(request: NextRequest): boolean {
+export function validateApiKey(request: NextRequest, validApiKey: string): boolean {
   const authHeader = request.headers.get("Authorization");
 
   if (!authHeader) {
@@ -17,7 +17,6 @@ export function validateApiKey(request: NextRequest): boolean {
   }
 
   const apiKey = parts[1];
-  const validApiKey = process.env.INTERNAL_API_KEY;
 
   if (!validApiKey) {
     console.error("INTERNAL_API_KEY no está configurada en variables de entorno");
@@ -31,8 +30,8 @@ export function validateApiKey(request: NextRequest): boolean {
  * Middleware para validar API KEY en rutas internas
  * Retorna una respuesta 401 si la API KEY no es válida
  */
-export function validateApiKeyMiddleware(request: NextRequest) {
-  if (!validateApiKey(request)) {
+export function validateApiKeyMiddleware(request: NextRequest, validApiKey: string) {
+  if (!validateApiKey(request, validApiKey)) {
     return NextResponse.json(
       { error: "API Key inválida o no proporcionada" },
       { status: 401 }
