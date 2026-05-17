@@ -27,7 +27,7 @@ export function LastUpdates({ recentlyUpdatedTrackings }: LastUpdatesProps) {
                   </p>
                 ) : (
                   recentlyUpdatedTrackings.map((tracking) => (
-                    <article key={tracking.shipmentId} className="rounded-xl border border-border bg-background p-3 md:p-4">
+                    <article key={tracking.shipmentId+tracking.datetime} className="rounded-xl border border-border bg-background p-3 md:p-4">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 md:gap-3">
                         <div className="min-w-0">
                           <p className="font-medium text-foreground truncate">{tracking.shipmentId}</p>

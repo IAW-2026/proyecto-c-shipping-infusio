@@ -17,6 +17,7 @@ import { LastUpdates } from "@/app/ui/logistics/last-updates"
 import { PackageAssignment } from "@/app/ui/logistics/package-assignment"
 import { WelcomeLogistics } from "@/app/ui/logistics/welcome"
 import { PendingAndDelivered } from "@/app/ui/logistics/pending-and-delivered"
+import { advanceShipmentTrackingServer } from "@/app/lib/shipment-actions"
 
 type LogisticsSnapshot = {
   trackings: LogisticsTracking[]
@@ -34,16 +35,33 @@ type LogisticsPageClientProps = {
 }
 
 type ShippingStatus = typeof TimelineStatuses[keyof typeof TimelineStatuses]
+type ShippingStatusKey = keyof typeof TimelineStatuses
 
-const SHIPPING_FLOW = Object.values(TimelineStatuses) as ShippingStatus[]
+const SHIPPING_PROGRESS_FLOW: ShippingStatus[] = [
+  TimelineStatuses.CONFIRMED,
+  TimelineStatuses.PREPARING,
+  TimelineStatuses.IN_TRANSIT,
+  TimelineStatuses.ARRIVED_CITY,
+  TimelineStatuses.OUT_FOR_DELIVERY,
+  TimelineStatuses.DELIVERED,
+]
+
+const SHIPPING_PROGRESS_KEYS: ShippingStatusKey[] = [
+  "CONFIRMED",
+  "PREPARING",
+  "IN_TRANSIT",
+  "ARRIVED_CITY",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
+]
 
 const SHIPPING_CITY_STEPS = [
   { current: "Centro de atención", next: "Centro de distribución" },
-  { current: "Centro de distribución", next: "Centro logístico" },
-  { current: "Centro logístico", next: "Ruta provincial" },
+  { current: "Centro de distribución", next: "Ruta provincial" },
   { current: "Ruta provincial", next: "Zona de reparto" },
   { current: "Zona de reparto", next: "Domicilio del cliente" },
   { current: "Domicilio del cliente", next: "Entrega finalizada" },
+  { current: "Entrega finalizada", next: "Entrega finalizada" },
 ] as const
 
 function safeParseSnapshot(rawValue: string | null): LogisticsSnapshot | null {
@@ -80,7 +98,7 @@ function getLatestTrackingByShipment(trackings: LogisticsTracking[]) {
 }
 
 function getShipmentProgress(status: string) {
-  const index = SHIPPING_FLOW.findIndex((step) => step === status)
+  const index = SHIPPING_PROGRESS_FLOW.findIndex((step) => step === status)
   return index === -1 ? 0 : index
 }
 
@@ -90,12 +108,12 @@ function getCityStage(stepIndex: number, destination: string) {
 
   return {
     currentCity: cityStep.current,
-    nextCity: stepIndex >= SHIPPING_FLOW.length - 1 ? destination : cityStep.next,
+    nextCity: stepIndex >= SHIPPING_PROGRESS_FLOW.length - 1 ? destination : cityStep.next,
   }
 }
 
 function createTrackingEvent(shipmentId: string, status: ShippingStatus, destination: string): LogisticsTracking {
-  const stepIndex = SHIPPING_FLOW.findIndex((step) => step === status)
+  const stepIndex = SHIPPING_PROGRESS_FLOW.findIndex((step) => step === status)
   const { currentCity, nextCity } = getCityStage(stepIndex === -1 ? 0 : stepIndex, destination)
 
   return {
@@ -220,7 +238,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
     setNotice(`Paquete ${selectedShipment.id} vinculado con ${selectedRider.name}.`)
   }
 
-  const advanceShipment = (shipmentId: string) => {
+  const advanceShipment = async (shipmentId: string) => {
     const shipment = shipmentSummaries.find((item) => item.id === shipmentId)
 
     if (!shipment) {
@@ -228,21 +246,48 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
       return
     }
 
-    if (shipment.latestStatus.toLowerCase().includes("entregado")) {
-      setNotice("Ese paquete ya figura como entregado.")
+    if (
+      shipment.latestStatus === TimelineStatuses.DELIVERED ||
+      shipment.latestStatus === TimelineStatuses.CANCELLED ||
+      shipment.latestStatus === TimelineStatuses.WITH_ISSUE
+    ) {
+      setNotice("Ese paquete ya no puede avanzar a otro paso.")
       return
     }
 
     const currentIndex = getShipmentProgress(shipment.latestStatus)
-    const nextIndex = Math.min(currentIndex + 1, SHIPPING_FLOW.length - 1)
-    const nextStatus = SHIPPING_FLOW[nextIndex]
+    const nextIndex = Math.min(currentIndex + 1, SHIPPING_PROGRESS_FLOW.length - 1)
+    const nextStatus = SHIPPING_PROGRESS_FLOW[nextIndex]
+    const nextStatusKey = SHIPPING_PROGRESS_KEYS[nextIndex]
 
-    setTrackings((currentTrackings) => {
-      const nextEvent = createTrackingEvent(shipment.id, nextStatus, shipment.destination)
-      return [...currentTrackings, nextEvent]
-    })
+    try {
+      const result = await advanceShipmentTrackingServer({
+        shipmentId: shipment.id,
+        status: nextStatusKey,
+      })
 
-    setNotice(`Actualizado ${shipment.id} a "${nextStatus}".`)
+      setTrackings((currentTrackings) => {
+        const persistedTracking = result.tracking
+
+        return [
+          ...currentTrackings,
+          {
+            shipmentId: persistedTracking.shipmentId,
+            status: TimelineStatuses[persistedTracking.status],
+            datetime: new Date(persistedTracking.datetime),
+            currentCity: persistedTracking.currentCity,
+            nextCity: persistedTracking.nextCity,
+            completed: persistedTracking.completed,
+            current: persistedTracking.current,
+          },
+        ]
+      })
+
+      setNotice(`Actualizado ${shipment.id} a "${nextStatus}".`)
+    } catch (error) {
+      console.error("advanceShipment: failed to persist tracking", error)
+      setNotice("No se pudo guardar el avance en la base de datos.")
+    }
   }
 
   const assignmentCount = assignments.length
@@ -264,8 +309,9 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
       <div className="mt-8 grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-[1fr_0.75fr]">
         <div className="space-y-4 md:space-y-6">
           <PackageAssignment
-            shipments={shipments}
+            shipmentSummaries={shipmentSummaries}
             riders={riders}
+            onAdvanceShipment={advanceShipment}
           />
           <PendingAndDelivered
             unassignedPendingShipments={unassignedPendingShipments}

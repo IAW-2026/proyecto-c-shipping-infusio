@@ -89,3 +89,17 @@ export const TimelineStatuses = {
   CANCELLED: "Pedido cancelado",
   WITH_ISSUE: "Pedido con incidencia"
 } as const;
+
+export type CreateShippingRequest = {
+  order_id: string
+  buyer_id: string
+  seller_id: string
+  origin_address: {
+    address: string
+    postal_code: string
+  }
+  destination_address: {
+    address: string
+    postal_code: string
+  }
+}
