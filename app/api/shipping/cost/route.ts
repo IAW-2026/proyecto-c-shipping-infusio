@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { validateAnyApiKeyMiddleware } from "@/app/lib/api-key-validation"
+import { validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
 
 type ShippingCostRequest = {
   origin_postal_code: string
