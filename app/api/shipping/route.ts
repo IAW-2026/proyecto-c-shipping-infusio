@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { validateAnyApiKeyMiddleware } from "@/app/lib/api-key-validation"
+import { validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
-
-type CreateShippingRequest = {
-  order_id: string
-  buyer_id: string
-  seller_id?: string
-  origin_address: {
-    address: string
-    postal_code: string
-  }
-  destination_address: {
-    address: string
-    postal_code: string
-  }
-}
+import { CreateShippingRequest } from "@/app/lib/definitions"
 
 function buildShippingId() {
   return `SHIP-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
@@ -22,7 +9,7 @@ function buildShippingId() {
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = validateAnyApiKeyMiddleware(request, [
+    const authError = validateApiKeysMiddleware(request, [
       process.env.INTERNAL_API_KEY,
       process.env.BUYER,
       process.env.SELLER,
@@ -57,7 +44,7 @@ export async function POST(request: NextRequest) {
           originDatetime: now,
           destinationDatetime: now,
           buyerId: body.buyer_id!,
-          sellerId: body.seller_id ?? body.buyer_id!,
+          sellerId: body.seller_id!,
         },
       })
 

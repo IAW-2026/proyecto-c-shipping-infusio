@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       include: {
         Shipment: true,
       },
-      orderBy: { datetime: "desc" },
+      orderBy: { datetime: "asc" },
     });
 
     return NextResponse.json({ trackings }, { status: 200 });

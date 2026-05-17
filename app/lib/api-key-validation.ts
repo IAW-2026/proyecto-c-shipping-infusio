@@ -41,20 +41,36 @@ export function validateApiKeyMiddleware(request: NextRequest, validApiKey: stri
 }
 
 /**
- * Permite que una request pase si coincide con cualquiera de las API keys dadas.
+ * Valida contra múltiples API keys (retorna 401 si ninguna coincide)
+ * Uso: `validateApiKeysMiddleware(request, [process.env.INTERNAL_API_KEY, process.env.BUYER])`
  */
-export function validateAnyApiKeyMiddleware(
-  request: NextRequest,
-  validApiKeys: Array<string | undefined>
-) {
-  for (const validApiKey of validApiKeys) {
-    if (validApiKey && validateApiKey(request, validApiKey)) {
-      return null;
-    }
+export function validateApiKeysMiddleware(request: NextRequest, validApiKeys: Array<string | undefined>) {
+  const authHeader = request.headers.get("Authorization");
+
+  if (!authHeader) {
+    return NextResponse.json(
+      { error: "API Key inválida o no proporcionada" },
+      { status: 401 }
+    );
   }
 
-  return NextResponse.json(
-    { error: "API Key inválida o no proporcionada" },
-    { status: 401 }
-  );
+  const parts = authHeader.split(" ");
+  if (parts.length !== 2 || parts[0] !== "Bearer") {
+    return NextResponse.json(
+      { error: "API Key inválida o no proporcionada" },
+      { status: 401 }
+    );
+  }
+
+  const apiKey = parts[1];
+
+  const hasValid = validApiKeys.some((k) => !!k && apiKey === k);
+  if (!hasValid) {
+    return NextResponse.json(
+      { error: "API Key inválida o no proporcionada" },
+      { status: 401 }
+    );
+  }
+
+  return null;
 }

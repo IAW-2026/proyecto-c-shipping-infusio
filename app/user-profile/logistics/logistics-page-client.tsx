@@ -17,6 +17,7 @@ import { LastUpdates } from "@/app/ui/logistics/last-updates"
 import { PackageAssignment } from "@/app/ui/logistics/package-assignment"
 import { WelcomeLogistics } from "@/app/ui/logistics/welcome"
 import { PendingAndDelivered } from "@/app/ui/logistics/pending-and-delivered"
+import { advanceShipmentTrackingServer } from "@/app/lib/shipment-actions"
 
 type LogisticsSnapshot = {
   trackings: LogisticsTracking[]
@@ -34,16 +35,33 @@ type LogisticsPageClientProps = {
 }
 
 type ShippingStatus = typeof TimelineStatuses[keyof typeof TimelineStatuses]
+type ShippingStatusKey = keyof typeof TimelineStatuses
 
-const SHIPPING_FLOW = Object.values(TimelineStatuses) as ShippingStatus[]
+const SHIPPING_PROGRESS_FLOW: ShippingStatus[] = [
+  TimelineStatuses.CONFIRMED,
+  TimelineStatuses.PREPARING,
+  TimelineStatuses.IN_TRANSIT,
+  TimelineStatuses.ARRIVED_CITY,
+  TimelineStatuses.OUT_FOR_DELIVERY,
+  TimelineStatuses.DELIVERED,
+]
+
+const SHIPPING_PROGRESS_KEYS: ShippingStatusKey[] = [
+  "CONFIRMED",
+  "PREPARING",
+  "IN_TRANSIT",
+  "ARRIVED_CITY",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
+]
 
 const SHIPPING_CITY_STEPS = [
   { current: "Centro de atención", next: "Centro de distribución" },
-  { current: "Centro de distribución", next: "Centro logístico" },
-  { current: "Centro logístico", next: "Ruta provincial" },
+  { current: "Centro de distribución", next: "Ruta provincial" },
   { current: "Ruta provincial", next: "Zona de reparto" },
   { current: "Zona de reparto", next: "Domicilio del cliente" },
   { current: "Domicilio del cliente", next: "Entrega finalizada" },
+  { current: "Entrega finalizada", next: "Entrega finalizada" },
 ] as const
 
 function safeParseSnapshot(rawValue: string | null): LogisticsSnapshot | null {
@@ -80,7 +98,7 @@ function getLatestTrackingByShipment(trackings: LogisticsTracking[]) {
 }
 
 function getShipmentProgress(status: string) {
-  const index = SHIPPING_FLOW.findIndex((step) => step === status)
+  const index = SHIPPING_PROGRESS_FLOW.findIndex((step) => step === status)
   return index === -1 ? 0 : index
 }
 
@@ -90,12 +108,12 @@ function getCityStage(stepIndex: number, destination: string) {
 
   return {
     currentCity: cityStep.current,
-    nextCity: stepIndex >= SHIPPING_FLOW.length - 1 ? destination : cityStep.next,
+    nextCity: stepIndex >= SHIPPING_PROGRESS_FLOW.length - 1 ? destination : cityStep.next,
   }
 }
 
 function createTrackingEvent(shipmentId: string, status: ShippingStatus, destination: string): LogisticsTracking {
-  const stepIndex = SHIPPING_FLOW.findIndex((step) => step === status)
+  const stepIndex = SHIPPING_PROGRESS_FLOW.findIndex((step) => step === status)
   const { currentCity, nextCity } = getCityStage(stepIndex === -1 ? 0 : stepIndex, destination)
 
   return {
@@ -161,7 +179,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
         origin: shipment.origin,
         destination: shipment.destination,
         latestStatus: latestTracking?.status ?? "Pedido confirmado",
-        latestDatetime: (latestTracking?.datetime ?? shipment.originDatetime).toISOString(),
+        latestDatetime: new Date(latestTracking?.datetime ?? shipment.originDatetime).toISOString(),
         assignedRiderId: assignment?.riderId ?? null,
       }
     })
@@ -177,36 +195,60 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
 
   const deliveredShipments = shipmentSummaries.filter((shipment) => shipment.latestStatus.toLowerCase().includes("entregado"))
 
-  const selectedShipment = shipmentSummaries.find((shipment) => shipment.id === selectedShipmentId) ?? null
-  const selectedRider = riderById[selectedRiderId] ?? null
-
-  const selectedShipmentCurrentAssignment = selectedShipment
-    ? assignments.find((assignment) => assignment.shipmentId === selectedShipment.id) ?? null
-    : null
-
   const recentlyUpdatedTrackings = [...trackings]
     .sort((left, right) => new Date(right.datetime).getTime() - new Date(left.datetime).getTime())
     .slice(0, 10)
 
-  const assignShipment = () => {
-    if (!selectedShipment || !selectedRider) {
+  const assignShipment = async (shipmentId: string, riderId: string) => {
+    const shipment = shipmentSummaries.find((item) => item.id === shipmentId) ?? null
+    const rider = riderById[riderId] ?? null
+
+    if (!shipment || !rider) {
       setNotice("Elegí un paquete y un rider activo antes de asignar.")
       return
     }
 
-    if (selectedRider.status !== "activo") {
+    if (shipment.latestStatus !== TimelineStatuses.ARRIVED_CITY) {
+      setNotice("Solo podés asignar cuando el paquete llegó a tu ciudad.")
+      return
+    }
+
+    if (rider.status !== "activo") {
       setNotice("Ese rider está inactivo. Elegí uno activo para continuar.")
       return
     }
 
+    const existingAssignment = assignments.find((assignment) => assignment.shipmentId === shipment.id) ?? null
+    const nextAssignment: DeliveryAssignment = {
+      id: existingAssignment?.id ?? `ASSIGN-${Date.now()}`,
+      shipmentId,
+      riderId,
+      logisticOperatorId: operatorId,
+    }
+
+    // Persist assignment via user API route (server-side)
+    let persistResult: any = null
+    try {
+      const response = await fetch("/api/user/assign-delivery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nextAssignment),
+      })
+
+      persistResult = await response.json()
+      if (!response.ok) persistResult = { __error: true, status: response.status, body: persistResult }
+    } catch (err) {
+      console.error("persist assignment failed", err)
+      persistResult = { __error: true }
+    }
+
+    if (persistResult?.__error) {
+      setNotice("No se pudo guardar la asignación en la base de datos.")
+      return
+    }
+
     setAssignments((currentAssignments) => {
-      const existingIndex = currentAssignments.findIndex((assignment) => assignment.shipmentId === selectedShipment.id)
-      const nextAssignment: DeliveryAssignment = {
-        id: existingIndex >= 0 ? currentAssignments[existingIndex].id : `ASSIGN-${Date.now()}`,
-        shipmentId: selectedShipment.id,
-        riderId: selectedRider.id,
-        logisticOperatorId: operatorId,
-      }
+      const existingIndex = currentAssignments.findIndex((assignment) => assignment.shipmentId === shipment.id)
 
       if (existingIndex >= 0) {
         const updatedAssignments = [...currentAssignments]
@@ -217,10 +259,56 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
       return [...currentAssignments, nextAssignment]
     })
 
-    setNotice(`Paquete ${selectedShipment.id} vinculado con ${selectedRider.name}.`)
+    setNotice(`Paquete ${shipment.id} vinculado con ${rider.name}.`)
   }
 
-  const advanceShipment = (shipmentId: string) => {
+  // Nueva versión para el uso desde el componente PackageAssignment
+  const assignShipmentAndAdvance = async (shipmentId: string, riderId: string) => {
+    const shipment = shipmentSummaries.find((item) => item.id === shipmentId) ?? null
+
+    if (!shipment) {
+      setNotice("Elegí un paquete y un rider activo antes de asignar.")
+      return
+    }
+
+    if (shipment.latestStatus !== TimelineStatuses.ARRIVED_CITY) {
+      setNotice("Solo podés asignar cuando el paquete llegó a tu ciudad.")
+      return
+    }
+
+    await assignShipment(shipmentId, riderId)
+
+    try {
+      const result = await advanceShipmentTrackingServer({
+        shipmentId: shipment.id,
+        status: "OUT_FOR_DELIVERY",
+      })
+
+      setTrackings((currentTrackings) => {
+        const persistedTracking = result.tracking
+
+        return [
+          ...currentTrackings,
+          {
+            shipmentId: persistedTracking.shipmentId,
+            status: TimelineStatuses[persistedTracking.status],
+            datetime: new Date(persistedTracking.datetime),
+            currentCity: persistedTracking.currentCity,
+            nextCity: persistedTracking.nextCity,
+            completed: persistedTracking.completed,
+            current: persistedTracking.current,
+          },
+        ]
+      })
+
+      setNotice(`Paquete ${shipment.id} vinculado y avanzado a "${TimelineStatuses.OUT_FOR_DELIVERY}".`)
+    } catch (error) {
+      console.error("assignShipmentAndAdvance: failed to persist tracking", error)
+      setNotice("Paquete asignado, pero no se pudo avanzar el estado en la base de datos.")
+    }
+  }
+
+  const advanceShipment = async (shipmentId: string) => {
     const shipment = shipmentSummaries.find((item) => item.id === shipmentId)
 
     if (!shipment) {
@@ -228,21 +316,48 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
       return
     }
 
-    if (shipment.latestStatus.toLowerCase().includes("entregado")) {
-      setNotice("Ese paquete ya figura como entregado.")
+    if (
+      shipment.latestStatus === TimelineStatuses.DELIVERED ||
+      shipment.latestStatus === TimelineStatuses.CANCELLED ||
+      shipment.latestStatus === TimelineStatuses.WITH_ISSUE
+    ) {
+      setNotice("Ese paquete ya no puede avanzar a otro paso.")
       return
     }
 
     const currentIndex = getShipmentProgress(shipment.latestStatus)
-    const nextIndex = Math.min(currentIndex + 1, SHIPPING_FLOW.length - 1)
-    const nextStatus = SHIPPING_FLOW[nextIndex]
+    const nextIndex = Math.min(currentIndex + 1, SHIPPING_PROGRESS_FLOW.length - 1)
+    const nextStatus = SHIPPING_PROGRESS_FLOW[nextIndex]
+    const nextStatusKey = SHIPPING_PROGRESS_KEYS[nextIndex]
 
-    setTrackings((currentTrackings) => {
-      const nextEvent = createTrackingEvent(shipment.id, nextStatus, shipment.destination)
-      return [...currentTrackings, nextEvent]
-    })
+    try {
+      const result = await advanceShipmentTrackingServer({
+        shipmentId: shipment.id,
+        status: nextStatusKey,
+      })
 
-    setNotice(`Actualizado ${shipment.id} a "${nextStatus}".`)
+      setTrackings((currentTrackings) => {
+        const persistedTracking = result.tracking
+
+        return [
+          ...currentTrackings,
+          {
+            shipmentId: persistedTracking.shipmentId,
+            status: TimelineStatuses[persistedTracking.status],
+            datetime: new Date(persistedTracking.datetime),
+            currentCity: persistedTracking.currentCity,
+            nextCity: persistedTracking.nextCity,
+            completed: persistedTracking.completed,
+            current: persistedTracking.current,
+          },
+        ]
+      })
+
+      setNotice(`Actualizado ${shipment.id} a "${nextStatus}".`)
+    } catch (error) {
+      console.error("advanceShipment: failed to persist tracking", error)
+      setNotice("No se pudo guardar el avance en la base de datos.")
+    }
   }
 
   const assignmentCount = assignments.length
@@ -264,8 +379,10 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
       <div className="mt-8 grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-[1fr_0.75fr]">
         <div className="space-y-4 md:space-y-6">
           <PackageAssignment
-            shipments={shipments}
+            shipmentSummaries={shipmentSummaries}
             riders={riders}
+            onAdvanceShipment={advanceShipment}
+            onAssignShipment={assignShipmentAndAdvance}
           />
           <PendingAndDelivered
             unassignedPendingShipments={unassignedPendingShipments}
