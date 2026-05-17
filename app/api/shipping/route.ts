@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { validateApiKeyMiddleware, validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
+import { validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
 import { CreateShippingRequest } from "@/app/lib/definitions"
 
