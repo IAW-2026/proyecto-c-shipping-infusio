@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 // POST - Crear nuevo shipment
 export async function POST(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!;
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!);
     if (authError) return authError;
 
     const body = await request.json();

@@ -5,7 +5,7 @@ import { prisma } from "@/app/lib/prisma";
 // GET - Obtener delivery assignments
 export async function GET(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!) ||;
+    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!);
     if (authError) return authError;
 
     const { searchParams } = new URL(request.url);
