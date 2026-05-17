@@ -39,7 +39,6 @@ export function PendingAndDelivered({unassignedPendingShipments, deliveredShipme
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                             <div className="min-w-0">
                               <p className="font-medium text-foreground truncate">{shipment.id}</p>
-                              <p className="mt-1 text-sm text-muted-foreground truncate">{shipment.destination}</p>
                             </div>
                             <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 whitespace-nowrap">Sin rider</span>
                           </div>
@@ -76,7 +75,6 @@ export function PendingAndDelivered({unassignedPendingShipments, deliveredShipme
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                             <div className="min-w-0">
                               <p className="font-medium text-foreground truncate">{shipment.id}</p>
-                              <p className="mt-1 text-sm text-muted-foreground truncate">{shipment.destination}</p>
                             </div>
                             <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary whitespace-nowrap">
                               <CheckCircle2 className="h-3.5 w-3.5" />
