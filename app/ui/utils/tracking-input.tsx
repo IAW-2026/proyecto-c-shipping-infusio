@@ -3,8 +3,10 @@
 import { Search, AlertCircle, Radio } from "lucide-react"
 import { useState, FormEvent, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
 import type { Tracking } from "@/app/lib/definitions"
+import { TimelineStatuses } from "@/app/lib/definitions"
+import { fetchShipmentByIdServer } from "@/app/lib/shipment-actions"
+import { fetchTrackingsByShipmentIdServer } from "@/app/lib/tracking-actions"
 import { ShipmentTimeline } from "./shipment-timeline"
 import { Card, CardHeader, CardTitle, CardContent } from "./card"
 
@@ -32,10 +34,6 @@ const destinationLngParamName =
   process.env.NEXT_PUBLIC_MICROSERVICE_DESTINATION_LNG_PARAM ??
   defaultDestinationLngParamName
 
-const modeParamName =
-  process.env.NEXT_PUBLIC_MICROSERVICE_MODE_PARAM ??
-  defaultModeParamName
-
 interface TrackingInputProps {
   redirectOnResult?: boolean
   initialCode?: string
@@ -58,7 +56,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
     }
   }, [initialCode])
 
-  const searchTracking = (code: string) => {
+  const searchTracking = async (code: string) => {
     const cleanCode = code.trim().toUpperCase()
 
     if (!cleanCode) {
@@ -66,24 +64,50 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       return
     }
 
-    const shipment = SHIPMENTS.find(s => s.id === cleanCode)
-    
-    if (!shipment) {
-      setError("El código de seguimiento no existe")
+    try {
+      setError(null)
       setResult(null)
-      return
-    }
 
-    const trackings = SHIPMENT_TRACKINGS.filter((t) => t.shipmentId === cleanCode)
-    setResult({ shipment, trackings })
-    setError(null)
-    setLiveTrackingEnabled(false)
-    setLiveLoading(false)
-    setLiveError(null)
-    setLiveEmbedUrl(null)
+      const shipment = await fetchShipmentByIdServer(cleanCode)
+
+      if (!shipment) {
+        setError("El código de seguimiento no existe")
+        setResult(null)
+        return
+      }
+
+      const trackings = await fetchTrackingsByShipmentIdServer(shipment.id)
+
+      // Normalize status values to human-readable strings using TimelineStatuses
+      const humanizeStatus = (s: any) => {
+        if (!s) return s
+        if (typeof s !== "string") return s
+        // If s is a key like 'OUT_FOR_DELIVERY', map to TimelineStatuses[...] value
+        if (s in TimelineStatuses) {
+          return (TimelineStatuses as any)[s]
+        }
+        // Otherwise assume it's already a human string
+        return s
+      }
+
+      const normalized = (trackings ?? []).map((t: any) => ({
+        ...t,
+        originalStatus: t.status,
+        status: humanizeStatus(t.status),
+      }))
+
+      setResult({ shipment, trackings: normalized })
+      setLiveTrackingEnabled(false)
+      setLiveLoading(false)
+      setLiveError(null)
+      setLiveEmbedUrl(null)
+    } catch (err: any) {
+      setError(err?.message || "Error al buscar el envío")
+      setResult(null)
+    }
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const code = trackingCode.trim().toUpperCase()
 
@@ -92,25 +116,17 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       return
     }
 
-    const shipment = SHIPMENTS.find(s => s.id === code)
-    
-    if (!shipment) {
-      setError("El código de seguimiento no existe")
-      setResult(null)
-      return
-    }
-
     if (redirectOnResult) {
       router.push(`/user-profile/tracking?code=${code}`)
       return
     }
 
-    searchTracking(code)
+    await searchTracking(code)
   }
 
   const getTimelineEvents = () => {
-    if (!result?.trackings) return []
-    
+    if (!result?.trackings || !Array.isArray(result.trackings)) return []
+
     const trackings = [...result.trackings].sort((a: Tracking, b: Tracking) => 
       new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
     )
@@ -125,9 +141,22 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
     )
 
-    const latestStatus = sorted[sorted.length - 1]?.status?.toLowerCase() || ""
-    const inRoute = latestStatus.includes("reparto") || latestStatus.includes("sal")
-    const deliveredOrCanceled = latestStatus.includes("entregado") || latestStatus.includes("cancelado")
+    const latest = sorted[sorted.length - 1]
+    const latestStatus = latest?.status?.toLowerCase() || ""
+    const latestOriginal = (latest?.originalStatus || "").toString().toUpperCase()
+
+    // Prefer checking enum codes when available for robustness
+    const inRoute =
+      latestOriginal === "OUT_FOR_DELIVERY" ||
+      latestOriginal === "IN_TRANSIT" ||
+      latestStatus.includes("reparto") ||
+      latestStatus.includes("sal")
+
+    const deliveredOrCanceled =
+      latestOriginal === "DELIVERED" ||
+      latestOriginal === "CANCELLED" ||
+      latestStatus.includes("entregado") ||
+      latestStatus.includes("cancelado")
 
     return inRoute && !deliveredOrCanceled
   }
@@ -154,7 +183,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
 
       const embeddedUrl = new URL(microserviceViewerUrl)
       embeddedUrl.searchParams.set(shipmentParamName, result.shipment.id)
-      embeddedUrl.searchParams.set(modeParamName, viewerModeValue)
+      //embeddedUrl.searchParams.set(modeParamName, viewerModeValue)
 
       const destinationAddress = result.shipment.destination?.trim()
 
@@ -230,11 +259,11 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="font-serif text-xl">Seguimiento del Envío</CardTitle>
-                <p className="text-sm text-muted-foreground mt-2"><span className="font-medium">Código:</span> {result.shipment.id}</p>
+                <p className="text-sm text-muted-foreground mt-2"><span className="font-medium">Código:</span> {result?.shipment?.id ?? result?.id ?? ''}</p>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground">
                 <span className="text-xs font-medium uppercase tracking-wide">
-                  {result.trackings[result.trackings.length - 1]?.status || 'Procesando'}
+                  {result.trackings?.[result.trackings.length - 1]?.status || 'Procesando'}
                 </span>
               </div>
             </div>
