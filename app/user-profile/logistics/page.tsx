@@ -1,11 +1,15 @@
 import { fetchAllRiders, fetchAllShipments } from "@/app/lib/data"
 import { LogisticsPageClient } from "./logistics-page-client"
+import { currentUser } from "@clerk/nextjs/server"
+
+const user = await currentUser()
+const userId = user?.id
 
 export const dynamic = "force-dynamic"
 
 const TRACKINGS_STORAGE_KEY = "logistics-trackings"
 const ASSIGNMENTS_STORAGE_KEY = "logistics-assignments"
-const OPERATOR_ID = "operator-001"
+const OPERATOR_ID = userId ?? "logistic-operator-unknown"
 
 export default async function LogisticsPage() {
   const riders = await fetchAllRiders()

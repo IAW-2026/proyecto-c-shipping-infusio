@@ -39,3 +39,38 @@ export function validateApiKeyMiddleware(request: NextRequest, validApiKey: stri
   }
   return null; // Continuar con la request
 }
+
+/**
+ * Valida contra múltiples API keys (retorna 401 si ninguna coincide)
+ * Uso: `validateApiKeysMiddleware(request, [process.env.INTERNAL_API_KEY, process.env.BUYER])`
+ */
+export function validateApiKeysMiddleware(request: NextRequest, validApiKeys: Array<string | undefined>) {
+  const authHeader = request.headers.get("Authorization");
+
+  if (!authHeader) {
+    return NextResponse.json(
+      { error: "API Key inválida o no proporcionada" },
+      { status: 401 }
+    );
+  }
+
+  const parts = authHeader.split(" ");
+  if (parts.length !== 2 || parts[0] !== "Bearer") {
+    return NextResponse.json(
+      { error: "API Key inválida o no proporcionada" },
+      { status: 401 }
+    );
+  }
+
+  const apiKey = parts[1];
+
+  const hasValid = validApiKeys.some((k) => !!k && apiKey === k);
+  if (!hasValid) {
+    return NextResponse.json(
+      { error: "API Key inválida o no proporcionada" },
+      { status: 401 }
+    );
+  }
+
+  return null;
+}

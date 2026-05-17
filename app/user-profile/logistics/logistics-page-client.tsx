@@ -18,7 +18,6 @@ import { PackageAssignment } from "@/app/ui/logistics/package-assignment"
 import { WelcomeLogistics } from "@/app/ui/logistics/welcome"
 import { PendingAndDelivered } from "@/app/ui/logistics/pending-and-delivered"
 import { advanceShipmentTrackingServer } from "@/app/lib/shipment-actions"
-import { createDelivery, updateDelivery } from "@/app/lib/crud-actions"
 
 type LogisticsSnapshot = {
   trackings: LogisticsTracking[]
@@ -227,13 +226,21 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
       logisticOperatorId: operatorId,
     }
 
-    const persistResult = existingAssignment
-      ? await updateDelivery({
-          id: nextAssignment.id,
-          riderId,
-          logisticOperatorId: operatorId,
-        })
-      : await createDelivery(nextAssignment)
+    // Persist assignment via user API route (server-side)
+    let persistResult: any = null
+    try {
+      const response = await fetch("/api/user/assign-delivery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nextAssignment),
+      })
+
+      persistResult = await response.json()
+      if (!response.ok) persistResult = { __error: true, status: response.status, body: persistResult }
+    } catch (err) {
+      console.error("persist assignment failed", err)
+      persistResult = { __error: true }
+    }
 
     if (persistResult?.__error) {
       setNotice("No se pudo guardar la asignación en la base de datos.")
@@ -253,6 +260,52 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
     })
 
     setNotice(`Paquete ${shipment.id} vinculado con ${rider.name}.`)
+  }
+
+  // Nueva versión para el uso desde el componente PackageAssignment
+  const assignShipmentAndAdvance = async (shipmentId: string, riderId: string) => {
+    const shipment = shipmentSummaries.find((item) => item.id === shipmentId) ?? null
+
+    if (!shipment) {
+      setNotice("Elegí un paquete y un rider activo antes de asignar.")
+      return
+    }
+
+    if (shipment.latestStatus !== TimelineStatuses.ARRIVED_CITY) {
+      setNotice("Solo podés asignar cuando el paquete llegó a tu ciudad.")
+      return
+    }
+
+    await assignShipment(shipmentId, riderId)
+
+    try {
+      const result = await advanceShipmentTrackingServer({
+        shipmentId: shipment.id,
+        status: "OUT_FOR_DELIVERY",
+      })
+
+      setTrackings((currentTrackings) => {
+        const persistedTracking = result.tracking
+
+        return [
+          ...currentTrackings,
+          {
+            shipmentId: persistedTracking.shipmentId,
+            status: TimelineStatuses[persistedTracking.status],
+            datetime: new Date(persistedTracking.datetime),
+            currentCity: persistedTracking.currentCity,
+            nextCity: persistedTracking.nextCity,
+            completed: persistedTracking.completed,
+            current: persistedTracking.current,
+          },
+        ]
+      })
+
+      setNotice(`Paquete ${shipment.id} vinculado y avanzado a "${TimelineStatuses.OUT_FOR_DELIVERY}".`)
+    } catch (error) {
+      console.error("assignShipmentAndAdvance: failed to persist tracking", error)
+      setNotice("Paquete asignado, pero no se pudo avanzar el estado en la base de datos.")
+    }
   }
 
   const advanceShipment = async (shipmentId: string) => {
@@ -329,7 +382,7 @@ export function LogisticsPageClient({ riders, shipments, operatorId, storageKeys
             shipmentSummaries={shipmentSummaries}
             riders={riders}
             onAdvanceShipment={advanceShipment}
-            onAssignShipment={assignShipment}
+            onAssignShipment={assignShipmentAndAdvance}
           />
           <PendingAndDelivered
             unassignedPendingShipments={unassignedPendingShipments}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { validateApiKeyMiddleware } from "@/app/lib/api-key-validation"
+import { validateApiKeyMiddleware, validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
 import { CreateShippingRequest } from "@/app/lib/definitions"
 
@@ -9,9 +9,11 @@ function buildShippingId() {
 
 export async function POST(request: NextRequest) {
   try {
-    const authError = validateApiKeyMiddleware(request, process.env.INTERNAL_API_KEY!) ||
-        validateApiKeyMiddleware(request, process.env.BUYER!) ||
-        validateApiKeyMiddleware(request, process.env.SELLER!)
+    const authError = validateApiKeysMiddleware(request, [
+      process.env.INTERNAL_API_KEY,
+      process.env.BUYER,
+      process.env.SELLER,
+    ])
     if (authError) return authError
 
     const body = (await request.json()) as Partial<CreateShippingRequest>
