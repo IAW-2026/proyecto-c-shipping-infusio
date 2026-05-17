@@ -45,28 +45,46 @@ async function seedShipments(prismaClient: PrismaClient = prisma) {
 }
 
 async function seedTrackings(prismaClient: PrismaClient = prisma) {
-  const ops = SHIPMENT_TRACKINGS.map((tracking) =>
-    prismaClient.tracking.upsert({
-      where: { shipmentId: tracking.shipmentId },
-      create: {
+  const ops = SHIPMENT_TRACKINGS.map(async (tracking) => {
+    const datetime = new Date(tracking.datetime);
+    
+    const existing = await prismaClient.tracking.findFirst({
+      where: {
         shipmentId: tracking.shipmentId,
-        status: mapStatusToPrismaEnum(tracking.status) as any,
-        datetime: new Date(tracking.datetime),
-        currentCity: tracking.currentCity,
-        nextCity: tracking.nextCity,
-        completed: tracking.completed,
-        current: tracking.current,
+        datetime: datetime,
       },
-      update: {
-        status: mapStatusToPrismaEnum(tracking.status) as any,
-        datetime: new Date(tracking.datetime),
-        currentCity: tracking.currentCity,
-        nextCity: tracking.nextCity,
-        completed: tracking.completed,
-        current: tracking.current,
-      },
-    }),
-  );
+    });
+
+    if (existing) {
+      // Update existing
+        return prismaClient.tracking.updateMany({
+          where: {
+            shipmentId: tracking.shipmentId,
+            datetime: datetime,
+          },
+        data: {
+          status: mapStatusToPrismaEnum(tracking.status) as any,
+          currentCity: tracking.currentCity,
+          nextCity: tracking.nextCity,
+          completed: tracking.completed,
+          current: tracking.current,
+        },
+      });
+    } else {
+      // Create new
+      return prismaClient.tracking.create({
+        data: {
+          shipmentId: tracking.shipmentId,
+          status: mapStatusToPrismaEnum(tracking.status) as any,
+          datetime: datetime,
+          currentCity: tracking.currentCity,
+          nextCity: tracking.nextCity,
+          completed: tracking.completed,
+          current: tracking.current,
+        },
+      });
+    }
+  });
 
   return Promise.all(ops);
 }
@@ -170,17 +188,17 @@ export async function GET(request: Request) {
     const action = searchParams.get('action') || 'sync-clerk-users';
     let result: any = null;
 
-    if (action === 'sync-clerk-users' || action === 'all') {
-      result = await seedUsersFromClerk(prisma);
+    // if (action === 'sync-clerk-users' || action === 'all') {
+    //   result = await seedUsersFromClerk(prisma);
+    // }
+
+    if (action === 'shipments' || action === 'all') {
+      await seedShipments(prisma);
     }
 
-    // if (action === 'shipments' || action === 'all') {
-    //   await seedShipments(prisma);
-    // }
-
-    // if (action === 'trackings' || action === 'all') {
-    //   await seedTrackings(prisma);
-    // }
+    if (action === 'trackings' || action === 'all') {
+      await seedTrackings(prisma);
+    }
 
     return Response.json({ message: 'Database seeded successfully', action, result });
   } catch (error: any) {
