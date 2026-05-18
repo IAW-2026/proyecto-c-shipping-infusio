@@ -22,6 +22,19 @@ type RiderAssignedShipment = {
   latestDatetime: string
 }
 
+async function fetchRiderDeliveries(): Promise<RiderAssignedShipment[]> {
+  const response = await fetch("/api/user/rider/deliveries", {
+    cache: "no-store",
+  })
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data?.error ?? "No se pudieron obtener las entregas asignadas")
+  }
+
+  return Array.isArray(data?.shipments) ? data.shipments : []
+}
+
 const defaultMicroserviceViewerUrl = "https://realtimetracker-vlmx.onrender.com/"
 const defaultShipmentParamName = "shipmentId"
 const defaultModeParamName = "mode"
@@ -48,6 +61,9 @@ export default function RiderPage() {
   const [assignedShipments, setAssignedShipments] = useState<RiderAssignedShipment[]>([])
   const [loadingDeliveries, setLoadingDeliveries] = useState(true)
   const [deliveriesError, setDeliveriesError] = useState<string | null>(null)
+  const [selectedShipmentId, setSelectedShipmentId] = useState("")
+  const [completingDelivery, setCompletingDelivery] = useState(false)
+  const [deliveryActionError, setDeliveryActionError] = useState<string | null>(null)
   const [showMap, setShowMap] = useState(false)
 
   useEffect(() => {
@@ -85,16 +101,8 @@ export default function RiderPage() {
       setDeliveriesError(null)
 
       try {
-        const response = await fetch("/api/user/rider/deliveries", {
-          cache: "no-store",
-        })
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data?.error ?? "No se pudieron obtener las entregas asignadas")
-        }
-
-        setAssignedShipments(Array.isArray(data?.shipments) ? data.shipments : [])
+        const shipments = await fetchRiderDeliveries()
+        setAssignedShipments(shipments)
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error desconocido"
         setDeliveriesError(message)
@@ -124,6 +132,12 @@ export default function RiderPage() {
     })
   }, [shipmentsWithLatest])
 
+  const selectedShipment = useMemo(() => {
+    return pendingDeliveries.find((shipment) => shipment.id === selectedShipmentId) ?? null
+  }, [pendingDeliveries, selectedShipmentId])
+
+  const canCompleteSelectedShipment = selectedShipment?.latestStatus === "OUT_FOR_DELIVERY"
+
   const deliveredLastWeek = useMemo(() => {
     const now = Date.now()
     const oneWeekMs = 7 * 24 * 60 * 60 * 1000
@@ -136,6 +150,21 @@ export default function RiderPage() {
       return now - deliveredAt <= oneWeekMs
     })
   }, [shipmentsWithLatest])
+
+  useEffect(() => {
+    if (pendingDeliveries.length === 0) {
+      setSelectedShipmentId("")
+      return
+    }
+
+    setSelectedShipmentId((currentShipmentId) => {
+      if (pendingDeliveries.some((shipment) => shipment.id === currentShipmentId)) {
+        return currentShipmentId
+      }
+
+      return pendingDeliveries[0]?.id ?? ""
+    })
+  }, [pendingDeliveries])
 
   const persistStatusToggle = async () => {
     if (savingStatus || loadingStatus) {
@@ -166,6 +195,38 @@ export default function RiderPage() {
       setStatusError(message)
     } finally {
       setSavingStatus(false)
+    }
+  }
+
+  const completeSelectedDelivery = async () => {
+    if (!selectedShipmentId || completingDelivery) {
+      return
+    }
+
+    setCompletingDelivery(true)
+    setDeliveryActionError(null)
+
+    try {
+      const response = await fetch("/api/user/rider/deliveries/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ shipmentId: selectedShipmentId }),
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error ?? "No se pudo marcar la entrega como finalizada")
+      }
+
+      const shipments = await fetchRiderDeliveries()
+      setAssignedShipments(shipments)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error desconocido"
+      setDeliveryActionError(message)
+    } finally {
+      setCompletingDelivery(false)
     }
   }
 
@@ -215,6 +276,46 @@ export default function RiderPage() {
             <h2 className="font-serif text-xl text-foreground">Pedidos por entregar</h2>
           </div>
 
+          {pendingDeliveries.length > 0 ? (
+            <div className="mb-5 rounded-xl border border-border bg-background p-4">
+              <label htmlFor="delivery-complete-select" className="text-sm font-medium text-foreground">
+                Elegí un pedido asignado para finalizarlo
+              </label>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <select
+                  id="delivery-complete-select"
+                  value={selectedShipmentId}
+                  onChange={(event) => setSelectedShipmentId(event.target.value)}
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary"
+                >
+                  {pendingDeliveries.map((shipment) => (
+                    <option key={shipment.id} value={shipment.id}>
+                      {shipment.id} - {shipment.destination}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={completeSelectedDelivery}
+                  disabled={!selectedShipmentId || !canCompleteSelectedShipment || completingDelivery}
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {completingDelivery ? "Marcando..." : "Marcar como entregado"}
+                </button>
+              </div>
+
+              {deliveryActionError ? <p className="mt-3 text-sm text-red-500">{deliveryActionError}</p> : null}
+              {selectedShipmentId ? (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {canCompleteSelectedShipment
+                    ? `Se finalizará el pedido ${selectedShipmentId} como entregado.`
+                    : `El pedido ${selectedShipmentId} debe estar en reparto para poder finalizarlo.`}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           {loadingDeliveries ? (
             <p className="text-sm text-muted-foreground">Cargando pedidos asignados...</p>
           ) : deliveriesError ? (
@@ -227,7 +328,6 @@ export default function RiderPage() {
                 <li key={shipment.id} className="rounded-xl border border-border bg-background p-4">
                   <p className="text-sm font-semibold text-foreground">{shipment.id}</p>
                   <p className="mt-1 text-sm text-muted-foreground">Destino: {shipment.destination}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Estado: {shipment.latestStatus}</p>
                 </li>
               ))}
             </ul>
