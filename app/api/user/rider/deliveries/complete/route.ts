@@ -50,11 +50,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No se encontró tracking para el pedido" }, { status: 400 })
     }
 
-    if (latestTracking.status === TimelineStatuses.DELIVERED) {
+    if (latestTracking.status === "DELIVERED") {
       return NextResponse.json({ error: "Ese pedido ya fue entregado" }, { status: 409 })
     }
 
-    if (latestTracking.status !== TimelineStatuses.OUT_FOR_DELIVERY) {
+    if (latestTracking.status !== "OUT_FOR_DELIVERY") {
       return NextResponse.json(
         { error: "Solo podés finalizar pedidos que estén en reparto" },
         { status: 400 }
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         data: {
           shipmentId,
           datetime: now,
-          status: TimelineStatuses.DELIVERED,
+          status: "DELIVERED",
           currentCity: latestTracking.nextCity ?? latestTracking.currentCity ?? assignment.Shipment.destination,
           nextCity: assignment.Shipment.destination,
           completed: true,
