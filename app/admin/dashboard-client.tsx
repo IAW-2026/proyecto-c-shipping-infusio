@@ -109,25 +109,50 @@ export default function DashboardClient({
         </ChartCard>
       </section>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-3">
-        <ChartCard title="Estado de envíos">
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={4}>
-                {statusData.map((_, index) => (
-                  <Cell key={index} fill={COLORS[index]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </ChartCard>
+      <section className="mt-8 grid min-w-0 gap-6 lg:grid-cols-3">
+        <div className="min-w-0">
+          <ChartCard title="Estado de envíos">
+            <div className="h-[240px] w-full min-w-0 sm:h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius="45%"
+                    outerRadius="70%"
+                    paddingAngle={4}
+                  >
+                    {statusData.map((_, index) => (
+                      <Cell key={index} fill={COLORS[index]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartCard>
+        </div>
 
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm lg:col-span-2">
-          <h2 className="mb-4 font-serif text-xl font-medium text-foreground">Últimos envíos</h2>
+        <div className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:col-span-2">
+          <h2 className="mb-4 font-serif text-xl font-medium text-foreground">
+            Últimos envíos
+          </h2>
 
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="min-w-full text-left text-sm">
+          {/* Mobile */}
+          <div className="space-y-3 md:hidden">
+            {latestShipments.map(({ code, status, date }) => (
+              <div key={code} className="rounded-xl border border-border p-4">
+                <p className="font-medium text-foreground">{code}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{status}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{date}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop / tablet */}
+          <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
+            <table className="w-full min-w-[420px] text-left text-sm">
               <thead className="bg-secondary/50 text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 font-medium">Código</th>
@@ -136,7 +161,7 @@ export default function DashboardClient({
                 </tr>
               </thead>
               <tbody>
-                {latestShipments.map(({ code, destination, status, date }) => (
+                {latestShipments.map(({ code, status, date }) => (
                   <tr key={code} className="border-t border-border">
                     <td className="px-4 py-3 font-medium">{code}</td>
                     <td className="px-4 py-3">{status}</td>
