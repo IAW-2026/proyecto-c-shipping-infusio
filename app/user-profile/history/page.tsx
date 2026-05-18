@@ -25,6 +25,14 @@ type TrackingRow = {
   nextCity: string
 }
 
+type TrackingDbRow = {
+  shipmentId: string
+  datetime: Date | string
+  status: string
+  currentCity: string
+  nextCity: string
+}
+
 type OrderHistoryRow = Shipment & {
   status: string
   datetime: Date
@@ -71,6 +79,16 @@ function buildFilterHref(role: FilterRole) {
   return role === "all" ? "/user-profile/history" : `/user-profile/history?role=${role}`
 }
 
+function normalizeTrackingRow(row: TrackingDbRow): TrackingRow {
+  return {
+    shipmentId: row.shipmentId,
+    datetime: new Date(row.datetime),
+    status: row.status,
+    currentCity: row.currentCity,
+    nextCity: row.nextCity,
+  }
+}
+
 function getLatestTrackingByShipment(trackings: TrackingRow[]) {
   const latestTrackings = new Map<string, TrackingRow>()
 
@@ -94,10 +112,11 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
     return <NotAuth />
   }
 
-  const [shipments, trackings] = await Promise.all([fetchAllShipments(), fetchAllTrackings()])
-  const latestTrackings = getLatestTrackingByShipment(trackings as TrackingRow[])
+  const [shipments, rawTrackings] = await Promise.all([fetchAllShipments(), fetchAllTrackings()])
+  const trackings = (rawTrackings as unknown as TrackingDbRow[]).map(normalizeTrackingRow)
+  const latestTrackings = getLatestTrackingByShipment(trackings)
 
-  const orders = shipments
+  const orders: OrderHistoryRow[] = shipments
     .map((shipment) => {
       const tracking = latestTrackings.get(shipment.id)
 
@@ -126,7 +145,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
       }
 
       return true
-    }) satisfies OrderHistoryRow[]
+    })
 
   const buyerOrders = orders.filter((order) => order.buyerId === user.id)
   const sellerOrders = orders.filter((order) => order.sellerId === user.id)
