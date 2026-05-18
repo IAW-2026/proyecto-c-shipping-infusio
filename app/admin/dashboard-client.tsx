@@ -77,10 +77,10 @@ export default function DashboardClient({
       </div>
 
       <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Envíos totales" value={String(stats.total.toLocaleString())} detail="" icon={<Package className="h-8 w-8" />} onClick={() => fetchFiltered('total','Envíos totales')} />
-        <StatCard title="En tránsito" value={String(stats.inTransit.toLocaleString())} detail="" icon={<Truck className="h-8 w-8" />} onClick={() => fetchFiltered('inTransit','En tránsito')} />
-        <StatCard title="Entregados" value={String(stats.delivered.toLocaleString())} detail="" icon={<CheckCircle className="h-8 w-8" />} onClick={() => fetchFiltered('delivered','Entregados')} />
-        <StatCard title="Incidencias" value={String(stats.incidents.toLocaleString())} detail="" icon={<AlertTriangle className="h-8 w-8" />} onClick={() => fetchFiltered('incidents','Incidencias')} />
+        <StatCard title="Envíos totales" value={String(stats.total.toLocaleString())} detail="" icon={<Package className="h-8 w-8" />} />
+        <StatCard title="En tránsito" value={String(stats.inTransit.toLocaleString())} detail="" icon={<Truck className="h-8 w-8" />}/>
+        <StatCard title="Entregados" value={String(stats.delivered.toLocaleString())} detail="" icon={<CheckCircle className="h-8 w-8" />}/>
+        <StatCard title="Incidencias" value={String(stats.incidents.toLocaleString())} detail="" icon={<AlertTriangle className="h-8 w-8" />}/>
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
