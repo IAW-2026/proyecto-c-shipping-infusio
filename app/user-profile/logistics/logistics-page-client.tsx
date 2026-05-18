@@ -190,15 +190,21 @@ export function LogisticsPageClient({ riders, shipments, initialTrackings, opera
     })
   }, [assignments, latestTrackingByShipment, shipments])
 
-  const pendingShipments = shipmentSummaries.filter((shipment) => {
+  const nonDeliveredShipments = shipmentSummaries.filter((shipment) => {
+    return shipment.latestStatus !== TimelineStatuses.DELIVERED
+  })
+
+  const deliveredShipments = shipmentSummaries.filter((shipment) => {
+    return shipment.latestStatus === TimelineStatuses.DELIVERED
+  })
+
+  const pendingShipments = nonDeliveredShipments.filter((shipment) => {
     const statusText = shipment.latestStatus.toLowerCase()
     return !statusText.includes("entregado") && !statusText.includes("cancelado")
   })
 
   const assignedPendingShipments = pendingShipments.filter((shipment) => shipment.assignedRiderId)
   const unassignedPendingShipments = pendingShipments.filter((shipment) => !shipment.assignedRiderId)
-
-  const deliveredShipments = shipmentSummaries.filter((shipment) => shipment.latestStatus.toLowerCase().includes("entregado"))
 
   const recentlyUpdatedTrackings = [...trackings]
     .sort((left, right) => new Date(right.datetime).getTime() - new Date(left.datetime).getTime())
@@ -381,10 +387,10 @@ export function LogisticsPageClient({ riders, shipments, initialTrackings, opera
         </div>
       )}
 
-      <div className="mt-8 grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-[1fr_0.75fr]">
+      <div className="mt-8 grid gap-4 md:gap-6 grid-rows-1 lg:grid-cols-[1fr_0.75fr]">
         <div className="space-y-4 md:space-y-6">
           <PackageAssignment
-            shipmentSummaries={shipmentSummaries}
+            shipmentSummaries={nonDeliveredShipments}
             riders={riders}
             onAdvanceShipment={advanceShipment}
             onAssignShipment={assignShipmentAndAdvance}
