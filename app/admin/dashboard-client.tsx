@@ -136,7 +136,7 @@ export default function DashboardClient({
 
         <div className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:col-span-2">
           <h2 className="mb-4 font-serif text-xl font-medium text-foreground">
-            Últimos envíos
+            Últimos estados
           </h2>
 
           {/* Mobile */}
