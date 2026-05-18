@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Archive, ArrowRightLeft, Package, Route, UserRound } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/ui/utils/card"
 import { TimelineStatuses } from "@/app/lib/definitions"
@@ -9,6 +9,8 @@ import type { Rider, ShipmentSummary } from "@/app/lib/definitions"
 type PackageAssignmentProps = {
   shipmentSummaries: ShipmentSummary[]
   riders: Rider[]
+  selectedShipmentId: string
+  setSelectedShipmentId: (id: string) => void
   onAdvanceShipment?: (shipmentId: string) => void
   onAssignShipment: (shipmentId: string, riderId: string) => Promise<void>
 }
@@ -22,21 +24,56 @@ const SHIPPING_FLOW = [
   TimelineStatuses.DELIVERED,
 ] as const
 
+const SHIPPING_FLOW_KEYS = SHIPPING_FLOW.map((status) => {
+  return Object.entries(TimelineStatuses).find(([, label]) => label === status)?.[0] ?? null
+}) as Array<keyof typeof TimelineStatuses | null>
+
+function normalizeShipmentStatusKey(status: string) {
+  const trimmedStatus = status.trim()
+  const upperStatus = trimmedStatus.toUpperCase()
+
+  if (upperStatus in TimelineStatuses) {
+    return upperStatus as keyof typeof TimelineStatuses
+  }
+
+  const matchedEntry = Object.entries(TimelineStatuses).find(
+    ([, label]) => label.toLowerCase() === trimmedStatus.toLowerCase(),
+  )
+
+  return (matchedEntry?.[0] as keyof typeof TimelineStatuses | undefined) ?? null
+}
+
 function getShipmentProgress(status: string) {
-  const index = SHIPPING_FLOW.findIndex((step) => step === status)
+  const normalizedStatus = normalizeShipmentStatusKey(status)
+
+  if (!normalizedStatus) {
+    return 0
+  }
+
+  const index = SHIPPING_FLOW_KEYS.findIndex((step) => step === normalizedStatus)
   return index === -1 ? 0 : index
 }
 
 function isTerminalStatus(status: string) {
+  const normalizedStatus = normalizeShipmentStatusKey(status)
+
   return (
-    status === TimelineStatuses.DELIVERED ||
-    status === TimelineStatuses.CANCELLED ||
-    status === TimelineStatuses.WITH_ISSUE
+    normalizedStatus === "ARRIVED_CITY" ||
+    normalizedStatus === "DELIVERED" ||
+    normalizedStatus === "OUT_FOR_DELIVERY" ||
+    normalizedStatus === "CANCELLED" ||
+    normalizedStatus === "WITH_ISSUE"
   )
 }
 
-export function PackageAssignment({ shipmentSummaries, riders, onAdvanceShipment, onAssignShipment }: PackageAssignmentProps) {
-  const [selectedShipmentId, setSelectedShipmentId] = useState(shipmentSummaries[0]?.id ?? "")
+export function PackageAssignment({
+  shipmentSummaries,
+  riders,
+  selectedShipmentId,
+  setSelectedShipmentId,
+  onAdvanceShipment,
+  onAssignShipment,
+}: PackageAssignmentProps) {
   const [selectedRiderId, setSelectedRiderId] = useState("")
 
   const riderById = useMemo<Record<string, Rider>>(() => {
@@ -45,6 +82,16 @@ export function PackageAssignment({ shipmentSummaries, riders, onAdvanceShipment
       return accumulator
     }, {})
   }, [riders])
+
+  useEffect(() => {
+    if (shipmentSummaries.length === 0) return
+
+    const selectedExists = shipmentSummaries.some((shipment) => shipment.id === selectedShipmentId)
+
+    if (!selectedExists) {
+      setSelectedShipmentId(shipmentSummaries[0].id)
+    }
+  }, [selectedShipmentId, setSelectedShipmentId, shipmentSummaries])
 
   const pendingShipments = shipmentSummaries.filter((shipment) => {
     const statusText = shipment.latestStatus.toLowerCase()

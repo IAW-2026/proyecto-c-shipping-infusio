@@ -6,7 +6,7 @@ import { ShipmentSummary } from "../../lib/definitions"
 export function WelcomeLogistics({pendingShipments, deliveredShipments, assignmentCount}: 
     {
         pendingShipments: ShipmentSummary[], 
-        deliveredShipments: ShipmentSummary[], 
+  deliveredShipments: ShipmentSummary[], 
         assignmentCount: number}) 
 {
     return (
