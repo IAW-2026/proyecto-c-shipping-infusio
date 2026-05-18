@@ -1,31 +1,54 @@
-"use client"
-
-import { Suspense } from "react"
 import Link from "next/link"
-import { useMemo } from "react"
-import { useSearchParams } from "next/navigation"
-import { useUser } from "@clerk/nextjs"
+import { currentUser } from "@clerk/nextjs/server"
 import { ArrowRight, BadgeCheck, Filter, PackageSearch, ShoppingCart, Store } from "lucide-react"
 import NotAuth from "@/app/ui/not-auth"
-import { SHIPMENTS, SHIPMENT_TRACKINGS } from "@/app/lib/placeholder-data"
+import { fetchAllShipments, fetchAllTrackings } from "@/app/lib/data"
+import { TimelineStatuses, type Shipment } from "@/app/lib/definitions"
+
+export const dynamic = "force-dynamic"
 
 type FilterRole = "all" | "buyer" | "seller"
 
-type OrderHistoryRow = {
-  id: string
-  origin: string
-  destination: string
-  originDatetime: Date
-  destinationDatetime: Date | null
+type SearchParams = {
+  role?: string | string[]
+}
+
+type HistoryPageProps = {
+  searchParams?: Promise<SearchParams>
+}
+
+type TrackingRow = {
+  shipmentId: string
+  datetime: Date
+  status: string
+  currentCity: string
+  nextCity: string
+}
+
+type TrackingDbRow = {
+  shipmentId: string
+  datetime: Date | string
+  status: string
+  currentCity: string
+  nextCity: string
+}
+
+type OrderHistoryRow = Shipment & {
   status: string
   datetime: Date
   currentCity: string
   nextCity: string
-  buyerId: string | null
-  sellerId: string | null
 }
 
-function normalizeFilterRole(value: string | null): FilterRole {
+function firstParamValue(value?: string | string[]) {
+  if (Array.isArray(value)) {
+    return value[0]?.trim() ?? ""
+  }
+
+  return value?.trim() ?? ""
+}
+
+function normalizeFilterRole(value: string): FilterRole {
   if (value === "buyer" || value === "seller") {
     return value
   }
@@ -44,14 +67,32 @@ function formatDateTime(value: Date | null) {
   }).format(value)
 }
 
+function formatTrackingStatus(status: string | null | undefined) {
+  if (!status) {
+    return TimelineStatuses.CONFIRMED
+  }
+
+  return TimelineStatuses[status as keyof typeof TimelineStatuses] ?? status
+}
+
 function buildFilterHref(role: FilterRole) {
   return role === "all" ? "/user-profile/history" : `/user-profile/history?role=${role}`
 }
 
-function getLatestTrackingByShipment() {
-  const latestTrackings = new Map<string, (typeof SHIPMENT_TRACKINGS)[number]>()
+function normalizeTrackingRow(row: TrackingDbRow): TrackingRow {
+  return {
+    shipmentId: row.shipmentId,
+    datetime: new Date(row.datetime),
+    status: row.status,
+    currentCity: row.currentCity,
+    nextCity: row.nextCity,
+  }
+}
 
-  for (const tracking of SHIPMENT_TRACKINGS) {
+function getLatestTrackingByShipment(trackings: TrackingRow[]) {
+  const latestTrackings = new Map<string, TrackingRow>()
+
+  for (const tracking of trackings) {
     const current = latestTrackings.get(tracking.shipmentId)
 
     if (!current || new Date(tracking.datetime).getTime() > new Date(current.datetime).getTime()) {
@@ -62,35 +103,32 @@ function getLatestTrackingByShipment() {
   return latestTrackings
 }
 
-function HistoryPageContent() {
-  const { user, isLoaded } = useUser()
-  const searchParams = useSearchParams()
-  const activeRole = normalizeFilterRole(searchParams.get("role"))
+export default async function HistoryPage({ searchParams }: HistoryPageProps) {
+  const resolvedSearchParams = await searchParams
+  const activeRole = normalizeFilterRole(firstParamValue(resolvedSearchParams?.role))
+  const user = await currentUser()
 
-  const orders = useMemo<OrderHistoryRow[]>(() => {
-    if (!user) {
-      return []
-    }
+  if (!user) {
+    return <NotAuth />
+  }
 
-    const latestTrackings = getLatestTrackingByShipment()
+  const [shipments, rawTrackings] = await Promise.all([fetchAllShipments(), fetchAllTrackings()])
+  const trackings = (rawTrackings as unknown as TrackingDbRow[]).map(normalizeTrackingRow)
+  const latestTrackings = getLatestTrackingByShipment(trackings)
 
-    return SHIPMENTS.map((shipment) => {
+  const orders: OrderHistoryRow[] = shipments
+    .map((shipment) => {
       const tracking = latestTrackings.get(shipment.id)
 
       return {
-        id: shipment.id,
-        origin: shipment.origin,
-        destination: shipment.destination,
-        originDatetime: shipment.originDatetime,
-        destinationDatetime: shipment.destinationDatetime,
-        status: tracking?.status ?? "Pedido confirmado",
+        ...shipment,
+        status: formatTrackingStatus(tracking?.status),
         datetime: tracking?.datetime ?? shipment.originDatetime,
         currentCity: tracking?.currentCity ?? shipment.origin,
         nextCity: tracking?.nextCity ?? shipment.destination,
-        buyerId: shipment.buyerId ?? null,
-        sellerId: shipment.sellerId ?? null,
       }
-    }).filter((order) => {
+    })
+    .filter((order) => {
       const isBuyer = order.buyerId === user.id
       const isSeller = order.sellerId === user.id
 
@@ -108,22 +146,9 @@ function HistoryPageContent() {
 
       return true
     })
-  }, [activeRole, user])
 
-  const buyerOrders = orders.filter((order) => order.buyerId === user?.id)
-  const sellerOrders = orders.filter((order) => order.sellerId === user?.id)
-
-  if (!isLoaded) {
-    return (
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-6 py-10 lg:px-8">
-        <p className="text-sm text-muted-foreground">Cargando historial...</p>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return <NotAuth />
-  }
+  const buyerOrders = orders.filter((order) => order.buyerId === user.id)
+  const sellerOrders = orders.filter((order) => order.sellerId === user.id)
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
@@ -135,7 +160,7 @@ function HistoryPageContent() {
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-primary">Tu cuenta</p>
             <h1 className="font-serif text-3xl font-medium text-foreground sm:text-4xl">Historial de pedidos</h1>
             <p className="mt-3 text-muted-foreground">
-              La vista solo toma pedidos asociados al usuario autenticado y te deja alternar entre tu participación como comprador o vendedor.
+              La vista toma pedidos reales de la base de datos y te deja alternar entre tu participación como comprador o vendedor.
             </p>
           </div>
 
@@ -204,7 +229,7 @@ function HistoryPageContent() {
             <PackageSearch className="mx-auto h-10 w-10 text-primary" />
             <h2 className="mt-4 font-serif text-2xl font-medium text-foreground">No hay pedidos para mostrar</h2>
             <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              Ahora la pantalla queda lista a nivel visual. Cuando conectemos los datos reales, vas a ver acá los pedidos del usuario autenticado.
+              No encontramos pedidos en la base de datos asociados al usuario autenticado.
             </p>
           </div>
         ) : (
@@ -279,19 +304,5 @@ function HistoryPageContent() {
         )}
       </section>
     </div>
-  )
-}
-
-export default function HistoryPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-6 py-10 lg:px-8">
-          <p className="text-sm text-muted-foreground">Cargando historial...</p>
-        </div>
-      }
-    >
-      <HistoryPageContent />
-    </Suspense>
   )
 }
