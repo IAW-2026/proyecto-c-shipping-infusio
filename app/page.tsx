@@ -5,7 +5,13 @@ import { ShipmentTimeline } from "./ui/utils/shipment-timeline"
 import { QuickActions } from "./ui/utils/quick-actions"
 import { timelineEvents } from "@/app/lib/timeline-data"
 
-export default function ShippingApp() {
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export default async function ShippingApp() {
+  await sleep(5000)
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -69,3 +75,4 @@ export default function ShippingApp() {
     </div>
   )
 }
+
