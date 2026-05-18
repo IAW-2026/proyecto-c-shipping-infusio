@@ -11,7 +11,8 @@ const isPublicRoute = createRouteMatcher([
   "/privacy",
   "/terms",
   "/help",
-  "/shipping-policies"
+  "/shipping-policies",
+  "/sitemap.xml"
 ])
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"])
