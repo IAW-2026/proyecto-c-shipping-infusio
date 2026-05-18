@@ -117,7 +117,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
     }
 
     if (redirectOnResult) {
-      router.push(`/user-profile/tracking?code=${code}`)
+      router.push(`/tracking?code=${code}`)
       return
     }
 
