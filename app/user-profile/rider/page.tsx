@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Bike, CheckCircle2, CircleDot, Clock3, Map } from "lucide-react"
+import { TimelineStatuses } from "@/app/lib/definitions"
 
 type RiderStatus = "activo" | "inactivo"
 
@@ -33,6 +34,23 @@ async function fetchRiderDeliveries(): Promise<RiderAssignedShipment[]> {
   }
 
   return Array.isArray(data?.shipments) ? data.shipments : []
+}
+
+function normalizeShipmentStatus(status: string) {
+  return status.trim().toUpperCase()
+}
+
+function isDeliveredShipment(status: string) {
+  const normalizedStatus = normalizeShipmentStatus(status)
+  return normalizedStatus === "DELIVERED" || status.trim().toLowerCase() === TimelineStatuses.DELIVERED.toLowerCase()
+}
+
+function isOutForDeliveryShipment(status: string) {
+  const normalizedStatus = normalizeShipmentStatus(status)
+  return (
+    normalizedStatus === "OUT_FOR_DELIVERY" ||
+    status.trim().toLowerCase() === TimelineStatuses.OUT_FOR_DELIVERY.toLowerCase()
+  )
 }
 
 const defaultMicroserviceViewerUrl = "https://realtimetracker-vlmx.onrender.com/"
@@ -127,8 +145,8 @@ export default function RiderPage() {
 
   const pendingDeliveries = useMemo(() => {
     return shipmentsWithLatest.filter((shipment) => {
-      const statusText = shipment.latestStatus.toLowerCase()
-      return !statusText.includes("entregado") && !statusText.includes("cancelado")
+      const normalizedStatus = normalizeShipmentStatus(shipment.latestStatus)
+      return normalizedStatus !== "DELIVERED" && normalizedStatus !== "CANCELLED"
     })
   }, [shipmentsWithLatest])
 
@@ -136,15 +154,14 @@ export default function RiderPage() {
     return pendingDeliveries.find((shipment) => shipment.id === selectedShipmentId) ?? null
   }, [pendingDeliveries, selectedShipmentId])
 
-  const canCompleteSelectedShipment = selectedShipment?.latestStatus === "OUT_FOR_DELIVERY"
+  const canCompleteSelectedShipment = selectedShipment ? isOutForDeliveryShipment(selectedShipment.latestStatus) : false
 
   const deliveredLastWeek = useMemo(() => {
     const now = Date.now()
     const oneWeekMs = 7 * 24 * 60 * 60 * 1000
 
     return shipmentsWithLatest.filter((shipment) => {
-      const statusText = shipment.latestStatus.toLowerCase()
-      if (!statusText.includes("entregado")) return false
+      if (!isDeliveredShipment(shipment.latestStatus)) return false
 
       const deliveredAt = new Date(shipment.latestDatetime).getTime()
       return now - deliveredAt <= oneWeekMs
