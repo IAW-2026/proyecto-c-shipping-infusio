@@ -126,12 +126,11 @@ export default function DashboardClient({
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm lg:col-span-2">
           <h2 className="mb-4 font-serif text-xl font-medium text-foreground">Últimos envíos</h2>
 
-          <div className="overflow-hidden rounded-xl border border-border">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="min-w-full text-left text-sm">
               <thead className="bg-secondary/50 text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 font-medium">Código</th>
-                  <th className="px-4 py-3 font-medium">Destino</th>
                   <th className="px-4 py-3 font-medium">Estado</th>
                   <th className="px-4 py-3 font-medium">Fecha</th>
                 </tr>
@@ -140,7 +139,6 @@ export default function DashboardClient({
                 {latestShipments.map(({ code, destination, status, date }) => (
                   <tr key={code} className="border-t border-border">
                     <td className="px-4 py-3 font-medium">{code}</td>
-                    <td className="px-4 py-3">{destination}</td>
                     <td className="px-4 py-3">{status}</td>
                     <td className="px-4 py-3 text-muted-foreground">{date}</td>
                   </tr>
@@ -150,52 +148,6 @@ export default function DashboardClient({
           </div>
         </div>
       </section>
-
-      {/* Modal */}
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-6">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="relative z-10 w-full max-w-4xl rounded-lg bg-card p-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">{filterLabel}</h3>
-              <button className="ml-4 rounded bg-muted px-3 py-1" onClick={() => setOpen(false)}>Cerrar</button>
-            </div>
-            <div className="mt-4">
-              {loading ? (
-                <p>Cargando...</p>
-              ) : (
-                <div className="overflow-auto max-h-96 rounded border border-border">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-secondary/50 text-muted-foreground">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Código</th>
-                        <th className="px-4 py-3 font-medium">Origen</th>
-                        <th className="px-4 py-3 font-medium">Destino</th>
-                        <th className="px-4 py-3 font-medium">Estado</th>
-                        <th className="px-4 py-3 font-medium">Fecha</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredShipments.map((s) => {
-                        const latest = s.Tracking && s.Tracking.length ? s.Tracking.sort((a: any, b: any) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime())[0] : null
-                        return (
-                          <tr key={s.id} className="border-t border-border">
-                            <td className="px-4 py-3 font-medium">{s.id}</td>
-                            <td className="px-4 py-3">{s.origin}</td>
-                            <td className="px-4 py-3">{s.destination}</td>
-                            <td className="px-4 py-3">{latest ? latest.status : 'Pendiente'}</td>
-                            <td className="px-4 py-3 text-muted-foreground">{new Date(s.originDatetime).toLocaleString('es-AR')}</td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
