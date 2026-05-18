@@ -6,7 +6,7 @@ export const viewerMenuItems = [
     title: "Hacer seguimiento",
     description: "Rastrear tu envío en tiempo real",
     icon: Truck,
-    href: "/user-profile/tracking",
+    href: "/tracking",
     color: "text-primary",
     bgColor: "bg-primary/10",
   },
