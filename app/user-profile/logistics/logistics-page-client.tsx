@@ -65,6 +65,21 @@ const SHIPPING_CITY_STEPS = [
   { current: "Entrega finalizada", next: "Entrega finalizada" },
 ] as const
 
+function normalizeShipmentStatusKey(status: string) {
+  const trimmedStatus = status.trim()
+  const upperStatus = trimmedStatus.toUpperCase()
+
+  if (upperStatus in TimelineStatuses) {
+    return upperStatus as ShippingStatusKey
+  }
+
+  const matchedEntry = Object.entries(TimelineStatuses).find(
+    ([, label]) => label.toLowerCase() === trimmedStatus.toLowerCase(),
+  )
+
+  return (matchedEntry?.[0] as ShippingStatusKey | undefined) ?? null
+}
+
 function safeParseSnapshot(rawValue: string | null): LogisticsSnapshot | null {
   if (!rawValue) return null
 
@@ -99,7 +114,13 @@ function getLatestTrackingByShipment(trackings: LogisticsTracking[]) {
 }
 
 function getShipmentProgress(status: string) {
-  const index = SHIPPING_PROGRESS_FLOW.findIndex((step) => step === status)
+  const normalizedStatus = normalizeShipmentStatusKey(status)
+
+  if (!normalizedStatus) {
+    return 0
+  }
+
+  const index = SHIPPING_PROGRESS_KEYS.findIndex((step) => step === normalizedStatus)
   return index === -1 ? 0 : index
 }
 
@@ -321,6 +342,7 @@ export function LogisticsPageClient({ riders, shipments, initialTrackings, opera
 
   const advanceShipment = async (shipmentId: string) => {
     const shipment = shipmentSummaries.find((item) => item.id === shipmentId)
+    const currentStatusKey = shipment ? normalizeShipmentStatusKey(shipment.latestStatus) : null
 
     if (!shipment) {
       setNotice("No encontré el paquete seleccionado.")
@@ -328,15 +350,17 @@ export function LogisticsPageClient({ riders, shipments, initialTrackings, opera
     }
 
     if (
-      shipment.latestStatus === TimelineStatuses.DELIVERED ||
-      shipment.latestStatus === TimelineStatuses.CANCELLED ||
-      shipment.latestStatus === TimelineStatuses.WITH_ISSUE
+      currentStatusKey === "ARRIVED_CITY" ||
+      currentStatusKey === "DELIVERED" ||
+      currentStatusKey === "OUT_FOR_DELIVERY" ||
+      currentStatusKey === "CANCELLED" ||
+      currentStatusKey === "WITH_ISSUE"
     ) {
-      setNotice("Ese paquete ya no puede avanzar a otro paso.")
+      setNotice("Ese paquete ya llegó al punto de entrega; desde aquí lo completa el rider.")
       return
     }
 
-    const currentIndex = getShipmentProgress(shipment.latestStatus)
+    const currentIndex = currentStatusKey ? SHIPPING_PROGRESS_KEYS.findIndex((step) => step === currentStatusKey) : getShipmentProgress(shipment.latestStatus)
     const nextIndex = Math.min(currentIndex + 1, SHIPPING_PROGRESS_FLOW.length - 1)
     const nextStatus = SHIPPING_PROGRESS_FLOW[nextIndex]
     const nextStatusKey = SHIPPING_PROGRESS_KEYS[nextIndex]
@@ -387,11 +411,13 @@ export function LogisticsPageClient({ riders, shipments, initialTrackings, opera
         </div>
       )}
 
-      <div className="mt-8 grid gap-4 md:gap-6 grid-rows-1 lg:grid-cols-[1fr_0.75fr]">
+      <div className="mt-8 grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-[1fr_0.75fr]">
         <div className="space-y-4 md:space-y-6">
           <PackageAssignment
             shipmentSummaries={nonDeliveredShipments}
             riders={riders}
+            selectedShipmentId={selectedShipmentId}
+            setSelectedShipmentId={setSelectedShipmentId}
             onAdvanceShipment={advanceShipment}
             onAssignShipment={assignShipmentAndAdvance}
           />
