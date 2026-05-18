@@ -3,9 +3,9 @@ import { Truck } from "lucide-react"
 
 export default function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
-      <div className="flex flex-col items-center gap-8">
-        <div className="relative h-full w-full max-w-md">
+    <div className="flex min-h-screen flex-col items-center justify-start bg-background overflow-hidden">
+      <div className="relative h-screen w-screen">
+        <div className="relative h-screen w-screen">
           {/* Mapa */}
           <Image
             src="/argentina.svg"
