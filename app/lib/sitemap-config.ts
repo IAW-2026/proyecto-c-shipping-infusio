@@ -15,7 +15,7 @@ export const SITEMAP: SitemapSection[] = [
     links: [
       { label: 'Mi Perfil', href: '/user-profile', icon: 'user' },
       { label: 'Mis Envíos', href: '/user-profile/history', icon: 'package' },
-      { label: 'Mis suscripciones', href: '/user-profile/subscriptions', icon: 'bell' },
+      { label: 'Mis suscripciones', href: '/user-profile/subscription', icon: 'bell' },
     ],
   },
   {
