@@ -341,3 +341,43 @@
   scrollbar-color: var(--primary) var(--background);
   scrollbar-width: thin;
 }
+
+/* Loading */
+
+@keyframes truck-route {
+  0% {
+    transform: translateY(0) translateX(0) rotate(10deg);
+  }
+
+  15% {
+    transform: translateY(78px) translateX(-30px) rotate(-9deg);
+  }
+
+  30% {
+    transform: translateY(156px) translateX(38px) rotate(8deg);
+  }
+
+  45% {
+    transform: translateY(238px) translateX(-44px) rotate(-10deg);
+  }
+
+  60% {
+    transform: translateY(322px) translateX(50px) rotate(7deg);
+  }
+
+  75% {
+    transform: translateY(408px) translateX(-28px) rotate(-8deg);
+  }
+
+  90% {
+    transform: translateY(496px) translateX(34px) rotate(7deg);
+  }
+
+  100% {
+    transform: translateY(570px) translateX(0) rotate(10deg);
+  }
+}
+
+.animate-truck-route {
+  animation: truck-route 4.8s ease-in-out infinite;
+}

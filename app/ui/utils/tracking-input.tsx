@@ -231,7 +231,7 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 text-muted-foreground w-5" />
             <input
               type="text"
-              placeholder="Ingresá tu código de seguimiento..."
+              placeholder="Ingresá tu código"
               value={trackingCode}
               onChange={(e) => setTrackingCode(e.target.value)}
               className="h-14 w-full rounded-full border border-border/50 bg-card pl-12 text-base focus-visible:ring-primary"
