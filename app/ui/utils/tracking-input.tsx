@@ -39,6 +39,23 @@ interface TrackingInputProps {
   initialCode?: string
 }
 
+// Function to remove postal codes and extra info from address
+function cleanAddressForGeocoding(address: string): string {
+  if (!address) return address
+  
+  // Remove postal codes in parentheses like (1234), (B1636), (CP 1234)
+  let cleaned = address
+    .replace(/\s*\(\s*(?:CP\s*)?\d{4,5}\s*\)/gi, "") // Removes (1234), (CP 1234), (B1636)
+    .replace(/\b(?:CP\s*)?\d{4,5}\b(?!\s*\()/g, "") // Removes standalone CP/codes not in parentheses
+    .replace(/,\s*Argentina\s*$/i, "") // Remove trailing Argentina
+    .trim()
+  
+  // Remove multiple spaces
+  cleaned = cleaned.replace(/\s+/g, " ")
+  
+  return cleaned
+}
+
 export function TrackingInput({ redirectOnResult = false, initialCode }: TrackingInputProps) {
   const router = useRouter()
   const [trackingCode, setTrackingCode] = useState(initialCode || "")
@@ -185,9 +202,12 @@ export function TrackingInput({ redirectOnResult = false, initialCode }: Trackin
       embeddedUrl.searchParams.set(shipmentParamName, result.shipment.id)
       //embeddedUrl.searchParams.set(modeParamName, viewerModeValue)
 
-      const destinationAddress = result.shipment.destination?.trim()
-
+      let destinationAddress = result.shipment.destination?.trim()
+      
       if (destinationAddress) {
+        // Clean the address before geocoding (remove postal codes, etc.)
+        destinationAddress = cleanAddressForGeocoding(destinationAddress)
+        
         const geocodingUrl = new URL("https://nominatim.openstreetmap.org/search")
         geocodingUrl.searchParams.set("q", destinationAddress)
         geocodingUrl.searchParams.set("format", "json")
