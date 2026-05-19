@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
 import { TimelineStatuses } from "@/app/lib/definitions"
+import { notifyBuyerShipmentStepByEmail } from "@/app/lib/notification-actions"
 
 type StatusUpdateRequest = {
   status: keyof typeof TimelineStatuses
@@ -63,6 +64,15 @@ export async function PATCH(
         },
       })
     })
+
+    try {
+      await notifyBuyerShipmentStepByEmail({
+        shipmentId: shipping_id,
+        status: body.status,
+      })
+    } catch (notificationError) {
+      console.error("No se pudo enviar la notificación por email:", notificationError)
+    }
 
     return NextResponse.json(
       {
