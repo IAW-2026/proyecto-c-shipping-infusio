@@ -2,6 +2,7 @@
 
 import { prisma } from "@/app/lib/prisma"
 import { TimelineStatuses } from "@/app/lib/definitions"
+import { notifyBuyerShipmentStepByEmail } from "@/app/lib/notification-actions"
 
 type AdvanceShipmentTrackingInput = {
   shipmentId: string
@@ -105,6 +106,15 @@ export async function advanceShipmentTrackingServer({ shipmentId, status }: Adva
     nextCity: tracking.nextCity,
     completed: tracking.completed,
     current: tracking.current,
+  }
+
+  try {
+    await notifyBuyerShipmentStepByEmail({
+      shipmentId,
+      status,
+    })
+  } catch (notificationError) {
+    console.error("No se pudo enviar la notificación por email:", notificationError)
   }
 
   return { tracking: persistedTracking }

@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import { prisma } from "@/app/lib/prisma"
-import { TimelineStatuses } from "@/app/lib/definitions"
+import { notifyBuyerShipmentStepByEmail } from "@/app/lib/notification-actions"
 
 type CompleteDeliveryRequest = {
   shipmentId?: string
@@ -81,6 +81,15 @@ export async function POST(request: Request) {
         },
       })
     })
+
+    try {
+      await notifyBuyerShipmentStepByEmail({
+        shipmentId: tracking.shipmentId,
+        status: "DELIVERED",
+      })
+    } catch (notificationError) {
+      console.error("No se pudo enviar la notificación por email:", notificationError)
+    }
 
     return NextResponse.json(
       {
