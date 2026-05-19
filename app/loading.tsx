@@ -21,7 +21,7 @@ export default function Loading() {
           </div>
         </div>
 
-        <div className="absolute inset-x-0 top-6 flex flex-col items-center z-20 pointer-events-none">
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center z-20 pointer-events-none">
           <div className="relative h-14 w-44">
             <Image
               src="/logo_infusio.png"
