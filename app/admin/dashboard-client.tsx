@@ -26,23 +26,17 @@ import { useState } from "react"
 type Monthly = { month: string; envios: number }
 type Latest = { code: string; destination: string; status: string; date: string }
 type RoleCount = { role: string; count: number }
-
-const statusData = [
-  { name: "Entregados", value: 64 },
-  { name: "En tránsito", value: 22 },
-  { name: "Pendientes", value: 10 },
-  { name: "Incidencias", value: 4 },
-]
+type DashboardUser = { id: string; name: string; email: string }
 
 export default function DashboardClient({
   monthlyShipments,
   latestShipments,
-  rolesCount,
+  users,
   stats,
 }: {
   monthlyShipments: Monthly[]
   latestShipments: Latest[]
-  rolesCount: RoleCount[]
+  users: DashboardUser[]
   stats: { total: number; inTransit: number; delivered: number; incidents: number }
 }) {
   const [open, setOpen] = useState(false)
@@ -50,20 +44,13 @@ export default function DashboardClient({
   const [filteredShipments, setFilteredShipments] = useState<any[]>([])
   const [filterLabel, setFilterLabel] = useState("")
 
-  async function fetchFiltered(filter: string, label: string) {
-    setLoading(true)
-    setFilterLabel(label)
-    try {
-      const res = await fetch(`/api/shipments/filter?filter=${encodeURIComponent(filter)}`)
-      const json = await res.json()
-      setFilteredShipments(json.shipments ?? [])
-      setOpen(true)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const statusData = [
+  { name: "Entregados", value: stats.delivered },
+  { name: "En tránsito", value: stats.inTransit },
+  { name: "Pendientes", value: stats.total - stats.delivered - stats.inTransit - stats.incidents },
+  { name: "Incidencias", value: stats.incidents },
+]
+
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
       <div className="mb-10">
@@ -95,24 +82,26 @@ export default function DashboardClient({
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
-        {/* Usuarios por rol */}
-        <ChartCard title="Usuarios por rol">
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={rolesCount}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="role" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" radius={[8, 8, 0, 0]} fill={COLORS[2]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
+        {/* Listado de usuarios */}
+        <div className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+          <h2 className="mb-4 font-serif text-xl font-medium text-foreground">
+            Usuarios registrados
+          </h2>
+          <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
+            {users.map(({ id, name, email }) => (
+              <div key={id} className="rounded-xl border border-border p-4">
+                <p className="font-medium text-foreground">{name}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{email}</p>
+              </div>
+            ))}
+          </div>
+        </div>  
       </section>
 
       <section className="mt-8 grid min-w-0 gap-6 lg:grid-cols-3">
         <div className="min-w-0">
           <ChartCard title="Estado de envíos">
-            <div className="h-[240px] w-full min-w-0 sm:h-[260px]">
+            <div className="h-60 w-full min-w-0 sm:h-65">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -139,37 +128,39 @@ export default function DashboardClient({
             Últimos estados
           </h2>
 
-          {/* Mobile */}
-          <div className="space-y-3 md:hidden">
-            {latestShipments.map(({ code, status, date }) => (
-              <div key={code} className="rounded-xl border border-border p-4">
-                <p className="font-medium text-foreground">{code}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{status}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{date}</p>
-              </div>
-            ))}
-          </div>
+          <div className="h-60 sm:h-65">
+            {/* Mobile */}
+            <div className="h-full space-y-3 overflow-y-auto pr-1 md:hidden">
+              {latestShipments.map(({ code, status, date }) => (
+                <div key={code} className="rounded-xl border border-border p-4">
+                  <p className="font-medium text-foreground">{code}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{status}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{date}</p>
+                </div>
+              ))}
+            </div>
 
-          {/* Desktop / tablet */}
-          <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
-            <table className="w-full min-w-[420px] text-left text-sm">
-              <thead className="bg-secondary/50 text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Código</th>
-                  <th className="px-4 py-3 font-medium">Estado</th>
-                  <th className="px-4 py-3 font-medium">Fecha</th>
-                </tr>
-              </thead>
-              <tbody>
-                {latestShipments.map(({ code, status, date }) => (
-                  <tr key={code} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium">{code}</td>
-                    <td className="px-4 py-3">{status}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{date}</td>
+            {/* Desktop / tablet */}
+            <div className="hidden h-full overflow-auto rounded-xl border border-border md:block">
+              <table className="w-full min-w-105 text-left text-sm">
+                <thead className="sticky top-0 bg-secondary/90 text-muted-foreground backdrop-blur">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Código</th>
+                    <th className="px-4 py-3 font-medium">Estado</th>
+                    <th className="px-4 py-3 font-medium">Fecha</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {latestShipments.map(({ code, status, date }) => (
+                    <tr key={code} className="border-t border-border">
+                      <td className="px-4 py-3 font-medium">{code}</td>
+                      <td className="px-4 py-3">{status}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
