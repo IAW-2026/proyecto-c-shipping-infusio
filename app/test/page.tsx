@@ -9,7 +9,7 @@ export default async function TestPage({ searchParams }: TestPageProps) {
     return (
         <div className="w-full h-screen">
             <iframe
-                src={`http://localhost:3000/tracking/embed?code=${encodeURIComponent(shipmentId)}`}
+                src={`${process.env.NEXT_PUBLIC_API_URL}/tracking/embed?code=${encodeURIComponent(shipmentId)}`}
                 title="Seguimiento"
                 className="w-full h-full border-0"
                 loading="lazy"
