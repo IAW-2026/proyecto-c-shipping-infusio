@@ -65,6 +65,8 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const userRoles = await getUserRoles(userId, sessionClaims as Record<string, unknown> | null | undefined)
+  console.log(`User ${userId} has roles: ${userRoles.join(", ")}`)
+
 
   if (isAdminRoute(req)) {
     if (!hasAnyRole(userRoles, ["admin", "adminShipping"])) {
