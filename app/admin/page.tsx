@@ -42,7 +42,7 @@ export default async function AdminPage() {
   const monthlyShipments = months.map((m) => ({ month: formatMonthLabel(m.year, m.monthIndex), envios: m.envios }))
 
   // Últimos 4 envíos para la tabla
-  const latest = shipments.slice(0, 4).map((s) => {
+  const latest = shipments.slice(0, 25).map((s) => {
     const latestTracking = s.Tracking && s.Tracking.length > 0 ? s.Tracking.sort((a, b) => (b.datetime as unknown as number) - (a.datetime as unknown as number))[0] : null
     return {
       code: s.id,
@@ -52,24 +52,24 @@ export default async function AdminPage() {
     }
   })
 
-  // Contar usuarios por rol (OL = logistic_operator)
-  const logisticOperatorsCount = await prisma.userRole.count({ where: { role: "logistic_operator" } })
-  const buyersCount = await prisma.userRole.count({ where: { role: "buyer" } })
-  const ridersCount = await prisma.userRole.count({ where: { role: "rider" } })
-  const sellersCount = await prisma.userRole.count({ where: { role: "seller" } })
-
-  const rolesCount = [
-    { role: "OL", count: logisticOperatorsCount },
-    { role: "Buyer", count: buyersCount },
-    { role: "Rider", count: ridersCount },
-    { role: "Seller", count: sellersCount },
-  ]
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    }
+  })
 
   // Estadísticas principales desde la DB
   const totalShipmentsCount = await prisma.shipment.count()
-  const inTransitCount = await prisma.shipment.count({ where: { Tracking: { some: { status: "IN_TRANSIT" } } } })
-  const deliveredCount = await prisma.shipment.count({ where: { Tracking: { some: { status: "DELIVERED" } } } })
-  const incidentsCount = await prisma.shipment.count({ where: { Tracking: { some: { status: { in: ["WITH_ISSUE", "CANCELLED"] } } } } })
+  const latestTrackingStatuses = await prisma.$queryRaw<{ status: string }[]>`
+    SELECT DISTINCT ON ("shipmentId") "status"
+    FROM "Tracking"
+    ORDER BY "shipmentId", "datetime" DESC
+  `
+  const inTransitCount = latestTrackingStatuses.filter((t) => t.status === "IN_TRANSIT" || t.status === "OUT_FOR_DELIVERY").length
+  const deliveredCount = latestTrackingStatuses.filter((t) => t.status === "DELIVERED").length
+  const incidentsCount = latestTrackingStatuses.filter((t) => t.status === "WITH_ISSUE" || t.status === "CANCELLED").length
 
   const stats = {
     total: totalShipmentsCount,
@@ -82,7 +82,7 @@ export default async function AdminPage() {
     <DashboardClient 
       monthlyShipments={monthlyShipments} 
       latestShipments={latest} 
-      rolesCount={rolesCount}
+      users={users}
       stats={stats}
     />
   )
