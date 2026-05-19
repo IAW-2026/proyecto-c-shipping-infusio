@@ -21,8 +21,8 @@ export default function Loading() {
           </div>
         </div>
 
-        <div className="text-center">
-          <div className="relative mx-auto mt-3 w-15 h-15">
+        <div className="absolute inset-x-0 top-6 flex flex-col items-center z-20 pointer-events-none">
+          <div className="relative h-14 w-44">
             <Image
               src="/logo_infusio.png"
               alt="Logo Infusio"
@@ -31,7 +31,7 @@ export default function Loading() {
               priority
             />
           </div>
-          <h1 className="font-serif text-3xl font-medium text-foreground">
+          <h1 className="font-serif text-3xl font-medium text-foreground mt-3">
             Cargando
           </h1>
         </div>
