@@ -6,11 +6,15 @@ type ResolvedDestination = {
 }
 
 export async function resolveSingleDestination(address?: string): Promise<ResolvedDestination | null> {
-  const query = address?.trim()
+  const raw = address?.trim() ?? ""
 
-  if (!query) {
-    return null
-  }
+  if (!raw) return null
+
+  // Sanitize common noisy patterns (content in parentheses like '(CP XXXX)')
+  // and stray 'CP' tokens that may break the geocoder.
+  let query = raw.replace(/\(.*?\)/g, "")
+  query = query.replace(/\bCP\b[:\s-]*/gi, "")
+  query = query.replace(/\s+/g, " ").replace(/\s+,/g, ",").trim()
 
   const endpoint = new URL("https://nominatim.openstreetmap.org/search")
   endpoint.searchParams.set("q", query)

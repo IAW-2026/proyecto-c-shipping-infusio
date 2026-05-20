@@ -84,6 +84,24 @@ export function PackageAssignment({
   }, [riders])
 
   useEffect(() => {
+    if (riders.length === 0) {
+      setSelectedRiderId("")
+      return
+    }
+
+    const activeRider = riders.find((rider) => rider.status === "activo")
+    const nextSelectedRiderId = activeRider?.id ?? riders[0]?.id ?? ""
+
+    setSelectedRiderId((currentSelectedRiderId) => {
+      if (currentSelectedRiderId && riderById[currentSelectedRiderId]) {
+        return currentSelectedRiderId
+      }
+
+      return nextSelectedRiderId
+    })
+  }, [riderById, riders])
+
+  useEffect(() => {
     if (shipmentSummaries.length === 0) return
 
     const selectedExists = shipmentSummaries.some((shipment) => shipment.id === selectedShipmentId)
