@@ -66,6 +66,15 @@ model User {
   pushSub  Boolean    @default(false)
   emailSub Boolean    @default(false)
   UserRole UserRole[]
+  PushSubscription PushSubscription?
+}
+
+model PushSubscription {
+  userId       String  @id
+  subscription Json
+  createdAt    DateTime @default(now())
+
+  User User @relation(fields: [userId], references: [id])
 }
 
 model UserRole {
