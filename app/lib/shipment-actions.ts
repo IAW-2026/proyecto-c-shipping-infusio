@@ -3,6 +3,7 @@
 import { prisma } from "@/app/lib/prisma"
 import { TimelineStatuses } from "@/app/lib/definitions"
 import { notifyBuyerShipmentStepByEmail } from "@/app/lib/notification-actions"
+import { sendPushToUsers } from "@/app/lib/push"
 
 type AdvanceShipmentTrackingInput = {
   shipmentId: string
@@ -115,6 +116,21 @@ export async function advanceShipmentTrackingServer({ shipmentId, status }: Adva
     })
   } catch (notificationError) {
     console.error("No se pudo enviar la notificación por email:", notificationError)
+  }
+
+  try {
+    const shipment = await prisma.shipment.findUnique({ where: { id: shipmentId } })
+    const userIds: string[] = []
+    if (shipment?.buyerId) userIds.push(shipment.buyerId)
+    if (shipment?.sellerId) userIds.push(shipment.sellerId)
+
+    const title = `Actualización de envío ${shipmentId}`
+    const message = `Estado: ${status}`
+    const url = `/user-profile/tracking?shipmentId=${shipmentId}`
+
+    await sendPushToUsers(userIds.length ? userIds : undefined, title, message, url)
+  } catch (pushErr) {
+    console.error('Error enviando push desde shipment-actions:', pushErr)
   }
 
   return { tracking: persistedTracking }

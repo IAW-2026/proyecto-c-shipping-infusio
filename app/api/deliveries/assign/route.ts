@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/app/lib/prisma";
+import { sendPushToUsers } from "@/app/lib/push";
 
 // Prisma enum values for Tracking.status (match schema TimelineStatuses)
 const LINKABLE_STATUS = "ARRIVED_CITY";
@@ -58,6 +59,24 @@ export async function POST(request: NextRequest) {
 
       return { delivery, tracking };
     });
+
+    // Enviar push a buyer y seller del shipment si existen
+    try {
+      const userIds: string[] = []
+      if (result.tracking && result.delivery && result.delivery.Shipment) {
+        const ship = result.delivery.Shipment
+        if (ship.buyerId) userIds.push(ship.buyerId)
+        if (ship.sellerId) userIds.push(ship.sellerId)
+      }
+
+      const title = `Actualización de envío ${result.tracking?.shipmentId}`
+      const message = `Estado: ${result.tracking?.status}`
+      const url = `/user-profile/tracking?shipmentId=${result.tracking?.shipmentId}`
+
+      await sendPushToUsers(userIds.length ? userIds : undefined, title, message, url)
+    } catch (e) {
+      console.error('Error enviando notificaciones push en assign:', e)
+    }
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

@@ -4,6 +4,7 @@ import { prisma } from "@/app/lib/prisma"
 
 type UpdateSubscriptionBody = {
   emailSub?: boolean
+  pushSub?: boolean
 }
 
 export async function GET() {
@@ -43,13 +44,18 @@ export async function PATCH(request: Request) {
 
     const body = (await request.json()) as UpdateSubscriptionBody
 
-    if (typeof body.emailSub !== "boolean") {
-      return NextResponse.json({ error: "emailSub inválido" }, { status: 400 })
+    if (typeof body.emailSub !== "boolean" && typeof body.pushSub !== "boolean") {
+      return NextResponse.json({ error: "Payload inválido" }, { status: 400 })
     }
+
+    const dataToUpdate: Record<string, unknown> = {}
+
+    if (typeof body.emailSub === "boolean") dataToUpdate.emailSub = body.emailSub
+    if (typeof body.pushSub === "boolean") dataToUpdate.pushSub = body.pushSub
 
     const updated = await prisma.user.update({
       where: { id: userId },
-      data: { emailSub: body.emailSub },
+      data: dataToUpdate,
       select: { emailSub: true, pushSub: true },
     })
 

@@ -21,8 +21,10 @@ const channels = [
 
 export default function SubscriptionPage() {
   const [emailSub, setEmailSub] = useState(false)
+  const [pushSub, setPushSub] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingPush, setSavingPush] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export default function SubscriptionPage() {
         }
 
         setEmailSub(Boolean(data?.emailSub))
+        setPushSub(Boolean(data?.pushSub))
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido")
       } finally {
@@ -76,6 +79,89 @@ export default function SubscriptionPage() {
     }
   }
 
+  const togglePushSub = async () => {
+    if (loading || savingPush) return
+
+    setSavingPush(true)
+    setError(null)
+    const nextValue = !pushSub
+
+    try {
+      if (!('Notification' in window)) throw new Error('Notificaciones no soportadas en este navegador')
+
+      if (nextValue) {
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') throw new Error('Permiso de notificaciones denegado')
+
+        if (!('serviceWorker' in navigator)) throw new Error('Service worker no soportado')
+
+        const registration = await navigator.serviceWorker.register('/sw.js')
+
+        const vapidResp = await fetch('/api/push/vapid')
+        const vapidData = await vapidResp.json()
+        if (!vapidResp.ok) throw new Error(vapidData?.error ?? 'No se pudo obtener VAPID key')
+
+        const applicationServerKey = urlBase64ToUint8Array(vapidData.publicKey)
+
+        const sub = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey,
+        })
+
+        // enviar la suscripción al backend
+        const resp = await fetch('/api/user/push-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sub),
+        })
+        const respData = await resp.json()
+        if (!resp.ok) throw new Error(respData?.error ?? 'No se pudo guardar la suscripción')
+
+        // marcar en el usuario que tiene push activado
+        await fetch('/api/user/subscription', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pushSub: true }),
+        })
+
+        setPushSub(true)
+      } else {
+        // desuscribir
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.ready
+          const existingSub = await registration.pushManager.getSubscription()
+          if (existingSub) await existingSub.unsubscribe()
+        }
+
+        await fetch('/api/user/push-subscription', { method: 'DELETE' })
+        await fetch('/api/user/subscription', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pushSub: false }),
+        })
+
+        setPushSub(false)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido')
+    } finally {
+      setSavingPush(false)
+    }
+  }
+
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+
+    const rawData = window.atob(base64)
+    const outputArray = new Uint8Array(rawData.length)
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i)
+    }
+    return outputArray
+  }
+
   return (
     <div className="mr-auto w-full max-w-7xl px-6 py-10 lg:px-8">
       <div className="mb-12">
@@ -103,24 +189,33 @@ export default function SubscriptionPage() {
                     </div>
                   </div>
 
-                  {isEmail ? (
-                    <button
-                      type="button"
-                      onClick={toggleEmailSub}
-                      disabled={loading || saving}
-                      className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-                        emailSub
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                          : "bg-secondary text-foreground hover:bg-secondary/80"
-                      }`}
-                    >
-                      {loading ? "Cargando..." : saving ? "Guardando..." : emailSub ? "Activado" : "Desactivado"}
-                    </button>
-                  ) : (
-                    <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                      Próximamente
-                    </span>
-                  )}
+                          {isEmail ? (
+                            <button
+                              type="button"
+                              onClick={toggleEmailSub}
+                              disabled={loading || saving}
+                              className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                                emailSub
+                                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                  : 'bg-secondary text-foreground hover:bg-secondary/80'
+                              }`}
+                            >
+                              {loading ? 'Cargando...' : saving ? 'Guardando...' : emailSub ? 'Activado' : 'Desactivado'}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={togglePushSub}
+                              disabled={loading || savingPush}
+                              className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                                pushSub
+                                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                  : 'bg-secondary text-foreground hover:bg-secondary/80'
+                              }`}
+                            >
+                              {loading ? 'Cargando...' : savingPush ? 'Guardando...' : pushSub ? 'Activado' : 'Desactivado'}
+                            </button>
+                          )}
                 </div>
               </CardContent>
             </Card>

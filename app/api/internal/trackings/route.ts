@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKeyMiddleware } from "@/app/lib/api-key-validation";
 import { prisma } from "@/app/lib/prisma";
+import { sendPushToUsers } from "@/app/lib/push";
 
 // GET - Obtener trackings
 export async function GET(request: NextRequest) {
@@ -78,6 +79,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Enviar notificación push a buyer y seller del shipment
+    try {
+      const userIds: string[] = []
+      if (tracking.Shipment?.buyerId) userIds.push(tracking.Shipment.buyerId)
+      if (tracking.Shipment?.sellerId) userIds.push(tracking.Shipment.sellerId)
+
+      const title = `Actualización de envío ${tracking.shipmentId}`
+      const message = `Estado: ${tracking.status}`
+      const url = `/user-profile/tracking?shipmentId=${tracking.shipmentId}`
+
+      await sendPushToUsers(userIds, title, message, url)
+    } catch (e) {
+      console.error('Error enviando notificaciones push tras crear tracking:', e)
+    }
+
     return NextResponse.json({ tracking }, { status: 201 });
   } catch (error) {
     console.error("Error creando tracking:", error);
@@ -142,6 +158,21 @@ export async function PUT(request: NextRequest) {
         Shipment: true,
       },
     });
+
+    // Enviar notificación push a buyer y seller del shipment tras actualizar
+    try {
+      const userIds: string[] = []
+      if (tracking?.Shipment?.buyerId) userIds.push(tracking.Shipment.buyerId)
+      if (tracking?.Shipment?.sellerId) userIds.push(tracking.Shipment.sellerId)
+
+      const title = `Actualización de envío ${tracking?.shipmentId}`
+      const message = `Estado: ${tracking?.status}`
+      const url = `/user-profile/tracking?shipmentId=${tracking?.shipmentId}`
+
+      await sendPushToUsers(userIds, title, message, url)
+    } catch (e) {
+      console.error('Error enviando notificaciones push tras actualizar tracking:', e)
+    }
 
     return NextResponse.json({ tracking }, { status: 200 });
   } catch (error) {

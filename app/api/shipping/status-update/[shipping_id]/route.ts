@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { validateApiKeysMiddleware } from "@/app/lib/api-key-validation"
 import { prisma } from "@/app/lib/prisma"
+import { sendPushToUsers } from "@/app/lib/push"
 import { TimelineStatuses } from "@/app/lib/definitions"
 import { notifyBuyerShipmentStepByEmail } from "@/app/lib/notification-actions"
 
@@ -72,6 +73,22 @@ export async function PATCH(
       })
     } catch (notificationError) {
       console.error("No se pudo enviar la notificación por email:", notificationError)
+    }
+
+    // Enviar push a buyer y seller
+    try {
+      const shipment = await prisma.shipment.findUnique({ where: { id: shipping_id } })
+      const userIds: string[] = []
+      if (shipment?.buyerId) userIds.push(shipment.buyerId)
+      if (shipment?.sellerId) userIds.push(shipment.sellerId)
+
+      const title = `Actualización de envío ${shipping_id}`
+      const message = `Estado: ${body.status}`
+      const url = `/user-profile/tracking?shipmentId=${shipping_id}`
+
+      await sendPushToUsers(userIds.length ? userIds : undefined, title, message, url)
+    } catch (pushErr) {
+      console.error('Error enviando push en status-update:', pushErr)
     }
 
     return NextResponse.json(
