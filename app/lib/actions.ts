@@ -10,8 +10,10 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 const DEFAULT_USER_ROLES = ["viewer"] as const;
 const EXTRA_USER_ROLES = ["rider", "logistic_operator", "admin", "shipping_admin", "buyer", "seller"] as const;
 const ALL_USER_ROLES = [...DEFAULT_USER_ROLES, ...EXTRA_USER_ROLES] as const;
+const ROLE_PROFILE_DEFAULT_LOCATION = "CABA";
 
 type UserRole = (typeof ALL_USER_ROLES)[number];
+type SyncableProfileRole = "rider" | "logistic_operator";
 
 type ClerkMetadata = {
   roles?: unknown;
@@ -55,6 +57,12 @@ function withDefaultRoles(roles: UserRole[]) {
 
 function getRolesFromMetadata(metadata?: ClerkMetadata | null) {
   return parseRoles(metadata?.roles);
+}
+
+function getDisplayName(firstName: string, lastName: string, email: string) {
+  const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
+
+  return fullName || email;
 }
 
 async function getClerkClientInstance() {
@@ -115,6 +123,40 @@ async function syncDatabaseRoles(userId: string, roles: UserRole[]) {
   }
 }
 
+async function syncRiderProfile(userId: string, name: string, email: string) {
+  await sql`
+    INSERT INTO "Rider" (id, name, email, status, location)
+    VALUES (${userId}, ${name}, ${email}, 'inactivo', ${ROLE_PROFILE_DEFAULT_LOCATION})
+    ON CONFLICT (id) DO UPDATE
+    SET name = EXCLUDED.name,
+        email = EXCLUDED.email
+    RETURNING *
+  `;
+}
+
+async function syncLogisticOperatorProfile(userId: string, name: string, email: string) {
+  await sql`
+    INSERT INTO "LogisticOperator" (id, name, email)
+    VALUES (${userId}, ${name}, ${email})
+    ON CONFLICT (id) DO UPDATE
+    SET name = EXCLUDED.name,
+        email = EXCLUDED.email
+    RETURNING *
+  `;
+}
+
+async function syncRoleProfiles(userId: string, roles: UserRole[], name: string, email: string) {
+  const roleSet = new Set(roles);
+
+  if (roleSet.has("rider")) {
+    await syncRiderProfile(userId, name, email);
+  }
+
+  if (roleSet.has("logistic_operator")) {
+    await syncLogisticOperatorProfile(userId, name, email);
+  }
+}
+
 async function getCanonicalRoles(userId: string): Promise<UserRole[]> {
   const clerkRoles = await getClerkUserRoles(userId);
 
@@ -155,6 +197,7 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
 
     const firstName = clerkUser.first_name ?? clerkUser.firstName ?? "";
     const lastName = clerkUser.last_name ?? clerkUser.lastName ?? "";
+    const displayName = getDisplayName(firstName, lastName, email);
 
     console.log("Syncing user:", { ...clerkUser, email });
 
@@ -211,13 +254,14 @@ export async function syncUserFromClerk(clerkUser: ClerkUserLike) {
     const clerkMetadataRoles = getRolesFromMetadata(
       clerkUser.publicMetadata ?? clerkUser.public_metadata
     );
+    const effectiveRoles = clerkMetadataRoles.length > 0 ? clerkMetadataRoles : await ensureDefaultUserRoles(user.id);
 
     if (clerkMetadataRoles.length > 0) {
       await setClerkUserRoles(user.id, clerkMetadataRoles);
       await syncDatabaseRoles(user.id, clerkMetadataRoles);
-    } else {
-      await ensureDefaultUserRoles(user.id);
     }
+
+    await syncRoleProfiles(user.id, effectiveRoles, displayName, email);
 
     return user;
   } catch (error) {
