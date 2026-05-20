@@ -58,6 +58,9 @@ const defaultShipmentParamName = "shipmentId"
 const defaultModeParamName = "mode"
 const viewerModeValue = "driver"
 
+const defaultDestinationLatParamName = "destinationLat"
+const defaultDestinationLngParamName = "destinationLng"
+
 const microserviceViewerUrl =
   process.env.NEXT_PUBLIC_MICROSERVICE_VIEWER_URL ??
   process.env.NEXT_PUBLIC_MICROSERVICE_URL ??
@@ -66,6 +69,14 @@ const microserviceViewerUrl =
 const shipmentParamName =
   process.env.NEXT_PUBLIC_MICROSERVICE_SHIPMENT_PARAM ??
   defaultShipmentParamName
+
+const destinationLatParamName =
+  process.env.NEXT_PUBLIC_MICROSERVICE_DESTINATION_LAT_PARAM ??
+  defaultDestinationLatParamName
+
+const destinationLngParamName =
+  process.env.NEXT_PUBLIC_MICROSERVICE_DESTINATION_LNG_PARAM ??
+  defaultDestinationLngParamName
 
 const modeParamName =
   process.env.NEXT_PUBLIC_MICROSERVICE_MODE_PARAM ??
@@ -247,18 +258,48 @@ export default function RiderPage() {
     }
   }
 
-  const getMapUrl = useMemo(() => {
-    if (pendingDeliveries.length === 0) return null
+  const [mapUrl, setMapUrl] = useState<string | null>(null)
 
-    const embeddedUrl = new URL(microserviceViewerUrl)
+  useEffect(() => {
+    let mounted = true
 
-    if (pendingDeliveries[0]) {
-      embeddedUrl.searchParams.set(shipmentParamName, pendingDeliveries[0].id)
+    const buildMapUrl = async () => {
+      if (pendingDeliveries.length === 0) {
+        if (mounted) setMapUrl(null)
+        return
+      }
+
+      const shipment = pendingDeliveries[0]
+      const embeddedUrl = new URL(microserviceViewerUrl)
+
+      if (shipment) embeddedUrl.searchParams.set(shipmentParamName, shipment.id)
+
+      try {
+        const resp = await fetch(`/api/geocoding/resolve?address=${encodeURIComponent(shipment.destination)}`)
+        const data = await resp.json()
+
+        if (resp.ok && data?.latitude && data?.longitude) {
+          embeddedUrl.searchParams.set(destinationLatParamName, data.latitude)
+          embeddedUrl.searchParams.set(destinationLngParamName, data.longitude)
+        } else {
+          // Fallback: pass destination address so microservice may attempt to resolve it
+          embeddedUrl.searchParams.set("destinationAddress", shipment.destination)
+        }
+      } catch (e) {
+        embeddedUrl.searchParams.set("destinationAddress", shipment.destination)
+      }
+
+      embeddedUrl.searchParams.set(modeParamName, viewerModeValue)
+
+      const url = embeddedUrl.toString().replace(/%2C/gi, ",")
+      if (mounted) setMapUrl(url)
     }
 
-    embeddedUrl.searchParams.set(modeParamName, viewerModeValue)
+    buildMapUrl()
 
-    return embeddedUrl.toString().replace(/%2C/gi, ",")
+    return () => {
+      mounted = false
+    }
   }, [pendingDeliveries])
 
   return (
@@ -382,7 +423,7 @@ export default function RiderPage() {
         </section>
       </div>
 
-      {pendingDeliveries.length > 0 && getMapUrl && (
+      {pendingDeliveries.length > 0 && mapUrl && (
         <section className="mt-8 rounded-2xl border border-border bg-card p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -406,7 +447,7 @@ export default function RiderPage() {
             <div className="h-105 overflow-hidden rounded-lg border border-border bg-background">
               <iframe
                 title="Mapa de entregas activas"
-                src={getMapUrl}
+                src={mapUrl ?? undefined}
                 className="h-full w-full"
                 loading="lazy"
                 allow="geolocation *"
