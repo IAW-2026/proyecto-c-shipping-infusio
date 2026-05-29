@@ -88,7 +88,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    "/admin(.*)",
-    "/user-profile(.*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|png|jpg|jpeg|gif|svg|ico|woff2?|ttf)).*)",
+    "/(api|trpc)(.*)",
   ],
 }

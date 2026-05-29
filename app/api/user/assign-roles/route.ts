@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { assignRoleToUser } from "@/app/lib/actions";
+import { currentUser } from "@clerk/nextjs/server";
+import { assignRoleToUser, syncUserFromClerk } from "@/app/lib/actions";
 
 const SELF_REGISTRABLE_ROLES = new Set([
   "rider",
@@ -9,14 +9,26 @@ const SELF_REGISTRABLE_ROLES = new Set([
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    const clerkUser = await currentUser();
 
-    if (!userId) {
+    if (!clerkUser) {
       return NextResponse.json(
         { error: "No autenticado" },
         { status: 401 }
       );
     }
+
+    await syncUserFromClerk({
+      id: clerkUser.id,
+      first_name: clerkUser.firstName,
+      last_name: clerkUser.lastName,
+      emailAddresses: clerkUser.emailAddresses.map((email) => ({
+        emailAddress: email.emailAddress,
+      })),
+      publicMetadata: clerkUser.publicMetadata as { roles?: unknown } | undefined,
+    });
+
+    const userId = clerkUser.id;
 
     const { roles } = await req.json();
 
