@@ -50,6 +50,7 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 - `app/lib/`: lógica compartida (Prisma, geocoding, push, notificaciones).
 - `prisma/`: esquema y migraciones de la base de datos.
 - `public/` y `ui/`: activos estáticos y componentes de interfaz.
+- `docs/`: documentación de uso de la aplicación.
 
 **APIs / servicios externos utilizados**
 - Clerk — autenticación y gestión de usuarios.

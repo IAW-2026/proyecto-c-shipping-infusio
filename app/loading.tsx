@@ -12,7 +12,7 @@ export default function Loading() {
             alt="Mapa Argentina"
             fill
             className="object-contain opacity-25"
-            priority
+            fetchPriority="high"
           />
 
           {/* Camión */}
@@ -28,7 +28,7 @@ export default function Loading() {
               alt="Logo Infusio"
               fill
               className="object-contain opacity-90"
-              priority
+              fetchPriority="high"
             />
           </div>
           <h1 className="font-serif text-3xl font-medium text-foreground mt-3">
