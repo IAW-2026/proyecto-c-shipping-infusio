@@ -2,12 +2,12 @@
 
 ### Desktop
 
-![Lighthouse scores](./lighthouseD.png)
+![Lighthouse scores](./images/lighthouse/lighthouseD.png)
 
 Captura de pantalla de los resultados de Lighthouse. El puntaje obtenido se corresponde con penalidad obtenidad por Clerk.
 
 ### Mobile
 
-![Lighthouse scores](./lighthouseM.png)
+![Lighthouse scores](./images/lighthouse/lighthouseM.png)
 
 Captura de pantalla de los resultados de Lighthouse. El puntaje obtenido se corresponde con penalidad obtenidad por Clerk.
