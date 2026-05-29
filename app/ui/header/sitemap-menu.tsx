@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Map, Package, User, ChevronDown, Bell, Phone } from "lucide-react"
+import { Map, Package, User, ChevronDown, Bell, Phone, Sparkles } from "lucide-react"
 import type { Dispatch, SetStateAction } from "react"
 import { SITEMAP } from "@/app/lib/sitemap-config"
 import { Button } from "../utils/button"
@@ -14,14 +14,17 @@ type SitemapMenuProps = {
 export function SitemapMenuContent({ sitemapMenuOpen, setSitemapMenuOpen }: SitemapMenuProps) {
   if (!sitemapMenuOpen) return null
 
-  const getIcon = (iconType: "user" | "package" | "bell" | "phone") => {
+  const getIcon = (iconType: "user" | "package" | "bell" | "sparkles" | "phone") => {
     return iconType === 'user'
       ? <User className="h-4 w-4 text-primary shrink-0" />
       : iconType === 'package'
       ? <Package className="h-4 w-4 text-primary shrink-0" />
       : iconType === 'bell'
       ? <Bell className="h-4 w-4 text-primary shrink-0" />
+      : iconType === 'sparkles'
+      ? <Sparkles className="h-4 w-4 text-primary shrink-0" />
       : <Phone className="h-4 w-4 text-primary shrink-0" />
+    
   }
 
   return (

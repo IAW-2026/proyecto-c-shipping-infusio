@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Menu, X, ChevronDown, Map } from "lucide-react"
+import { Menu, X, ChevronDown, Map, Sparkles } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "../utils/button"
 import ClerkInit from "./clerk-init"
@@ -41,6 +41,14 @@ export function Header() {
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
             <span className="infusio">Infusio</span>
+          </Link>
+          <Link
+            href="/help"
+            aria-label="Centro de ayuda"
+            title="Centro de ayuda"
+            className="btn btn-outline btn-icon-sm rounded-full border-foreground/20 hover:bg-secondary"
+          >
+            <Sparkles className="h-4 w-4" />
           </Link>
         </div>
 
