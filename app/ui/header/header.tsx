@@ -74,6 +74,8 @@ export function Header() {
 
         {/* Mobile Menu Button */}
         <button
+          id="mobile-menu-button" 
+          aria-label="Mobile Menu Button"
           className="md:hidden p-2 rounded-full hover:bg-secondary transition-colors"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
