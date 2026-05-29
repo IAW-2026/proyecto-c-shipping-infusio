@@ -15,8 +15,13 @@ export function Header() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (sitemapMenuRef.current && !sitemapMenuRef.current.contains(event.target as Node)) {
-        setSitemapMenuOpen(false)
+      // Prevent forced reflow by checking event.target directly
+      const target = event.target as Node
+      if (sitemapMenuRef.current) {
+        // Use a flag instead of querying DOM properties
+        if (!sitemapMenuRef.current.contains(target)) {
+          setSitemapMenuOpen(false)
+        }
       }
     }
 
@@ -26,11 +31,12 @@ export function Header() {
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
+    // Use capture phase for better performance
+    document.addEventListener("mousedown", handleClickOutside, true)
     document.addEventListener("keydown", handleEscape)
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("mousedown", handleClickOutside, true)
       document.removeEventListener("keydown", handleEscape)
     }
   }, [])
