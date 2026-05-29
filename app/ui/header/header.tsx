@@ -7,6 +7,7 @@ import { Button } from "../utils/button"
 import ClerkInit from "./clerk-init"
 import { MobileSitemapMenu, SitemapMenuContent } from "./sitemap-menu"
 import { ProfileMenu } from "./profile-menu"
+import styles from "./header.module.css"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -89,16 +90,14 @@ export function Header() {
         </button>
       </nav>
 
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-background px-6 py-4 space-y-4">
-          <div className="grid grid-cols-1 gap-3">
-            <ProfileMenu/>
-            <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
-          </div>
-          <ClerkInit />
+      {/* Mobile Navigation - Always rendered to prevent reflows, hidden with CSS */}
+      <div className={`${styles.mobileNav} ${mobileMenuOpen ? styles.mobileNavOpen : ""}`}>
+        <div className="grid grid-cols-1 gap-3">
+          <ProfileMenu/>
+          <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
         </div>
-      )}
+        <ClerkInit />
+      </div>
     </header>
   )
 }
