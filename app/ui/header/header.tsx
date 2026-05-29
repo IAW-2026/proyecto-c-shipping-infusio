@@ -9,10 +9,32 @@ import { MobileSitemapMenu, SitemapMenuContent } from "./sitemap-menu"
 import { ProfileMenu } from "./profile-menu"
 import styles from "./header.module.css"
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px)")
+
+    const updateMatch = () => {
+      setIsDesktop(mediaQuery.matches)
+    }
+
+    updateMatch()
+    mediaQuery.addEventListener("change", updateMatch)
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateMatch)
+    }
+  }, [])
+
+  return isDesktop
+}
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [sitemapMenuOpen, setSitemapMenuOpen] = useState(false)
   const sitemapMenuRef = useRef<HTMLDivElement | null>(null)
+  const isDesktop = useIsDesktop()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -60,25 +82,27 @@ export function Header() {
             </Link>
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
-            <div className="relative flex items-center gap-2" ref={sitemapMenuRef}>
-              <ProfileMenu />
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full border-foreground/20 hover:bg-secondary"
-                onClick={() => setSitemapMenuOpen((value) => !value)}
-                aria-haspopup="menu"
-                aria-expanded={sitemapMenuOpen}
-              >
-                <Map className="h-4 w-4 mr-2" />
-                Mapa del Sitio
-                <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
-              </Button>
-              <SitemapMenuContent sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
+          {isDesktop ? (
+            <div className="flex items-center gap-3">
+              <div className="relative flex items-center gap-2" ref={sitemapMenuRef}>
+                <ProfileMenu />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-foreground/20 hover:bg-secondary"
+                  onClick={() => setSitemapMenuOpen((value) => !value)}
+                  aria-haspopup="menu"
+                  aria-expanded={sitemapMenuOpen}
+                >
+                  <Map className="h-4 w-4 mr-2" />
+                  Mapa del Sitio
+                  <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
+                </Button>
+                <SitemapMenuContent sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
+              </div>
+              <ClerkInit />
             </div>
-            <ClerkInit />
-          </div>
+          ) : null}
 
           {/* Mobile Menu Button */}
           <button
@@ -91,16 +115,17 @@ export function Header() {
           </button>
         </nav>
 
-        <div
-          className={`${styles.mobileNav} ${mobileMenuOpen ? styles.mobileNavOpen : ""}`}
-          aria-hidden={!mobileMenuOpen}
-        >
-          <div className="grid grid-cols-1 gap-3">
-            <ProfileMenu />
-            <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
+        {mobileMenuOpen ? (
+          <div className={`${styles.mobileNav} ${styles.mobileNavOpen}`} aria-hidden={!mobileMenuOpen}>
+            <div className="grid grid-cols-1 gap-3">
+              <ProfileMenu />
+              <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
+            </div>
+            <ClerkInit />
           </div>
-          <ClerkInit />
-        </div>
+        ) : (
+          <div className={styles.mobileNav} aria-hidden="true" />
+        )}
       </div>
     </header>
   )
