@@ -13,7 +13,6 @@ export default function Loading() {
             fill
             className="object-contain opacity-25"
             fetchPriority="high"
-            lazyLoad
           />
 
           {/* Camión */}
@@ -30,7 +29,6 @@ export default function Loading() {
               fill
               className="object-contain opacity-90"
               fetchPriority="high"
-              lazyLoad
             />
           </div>
           <h1 className="font-serif text-3xl font-medium text-foreground mt-3">
