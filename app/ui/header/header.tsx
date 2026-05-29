@@ -44,59 +44,63 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="infusio">Infusio</span>
-          </Link>
-          <Link
-            href="/help"
-            aria-label="Centro de ayuda"
-            title="Centro de ayuda"
-            className="btn btn-outline btn-icon-sm rounded-full border-foreground/20 hover:bg-secondary"
-          >
-            <Sparkles className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="hidden md:flex items-center gap-3">
-          <div className="relative flex items-center gap-2" ref={sitemapMenuRef}>
-            <ProfileMenu />
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full border-foreground/20 hover:bg-secondary"
-              onClick={() => setSitemapMenuOpen((value) => !value)}
-              aria-haspopup="menu"
-              aria-expanded={sitemapMenuOpen}
+      <div className="relative">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="infusio">Infusio</span>
+            </Link>
+            <Link
+              href="/help"
+              aria-label="Centro de ayuda"
+              title="Centro de ayuda"
+              className="btn btn-outline btn-icon-sm rounded-full border-foreground/20 hover:bg-secondary"
             >
-              <Map className="h-4 w-4 mr-2" />
-              Mapa del Sitio
-              <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
-            </Button>
-            <SitemapMenuContent sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
+              <Sparkles className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="hidden md:flex items-center gap-3">
+            <div className="relative flex items-center gap-2" ref={sitemapMenuRef}>
+              <ProfileMenu />
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full border-foreground/20 hover:bg-secondary"
+                onClick={() => setSitemapMenuOpen((value) => !value)}
+                aria-haspopup="menu"
+                aria-expanded={sitemapMenuOpen}
+              >
+                <Map className="h-4 w-4 mr-2" />
+                Mapa del Sitio
+                <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${sitemapMenuOpen ? "rotate-180" : ""}`} />
+              </Button>
+              <SitemapMenuContent sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
+            </div>
+            <ClerkInit />
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            id="mobile-menu-button"
+            aria-label="Mobile Menu Button"
+            className="md:hidden p-2 rounded-full hover:bg-secondary transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </nav>
+
+        <div
+          className={`${styles.mobileNav} ${mobileMenuOpen ? styles.mobileNavOpen : ""}`}
+          aria-hidden={!mobileMenuOpen}
+        >
+          <div className="grid grid-cols-1 gap-3">
+            <ProfileMenu />
+            <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
           </div>
           <ClerkInit />
         </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          id="mobile-menu-button" 
-          aria-label="Mobile Menu Button"
-          className="md:hidden p-2 rounded-full hover:bg-secondary transition-colors"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-      </nav>
-
-      {/* Mobile Navigation - Always rendered to prevent reflows, hidden with CSS */}
-      <div className={`${styles.mobileNav} ${mobileMenuOpen ? styles.mobileNavOpen : ""}`}>
-        <div className="grid grid-cols-1 gap-3">
-          <ProfileMenu/>
-          <MobileSitemapMenu sitemapMenuOpen={sitemapMenuOpen} setSitemapMenuOpen={setSitemapMenuOpen} />
-        </div>
-        <ClerkInit />
       </div>
     </header>
   )
