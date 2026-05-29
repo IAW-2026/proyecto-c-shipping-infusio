@@ -4,6 +4,26 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Explicitly allow indexing on public pages.
+        source: "/",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "index, follow",
+          },
+        ],
+      },
+      {
+        // Explicitly allow indexing on all non-API routes.
+        source: "/((?!api/).*)",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "index, follow",
+          },
+        ],
+      },
+      {
         source: "/tracking/:path*",
         headers: [
           {
