@@ -60,4 +60,12 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 - Postgres / Prisma — base de datos y ORM.
 
 ---
+
+Casos de prueba relevantes ya cargados:
+- Pedido asignado a rider: ingresar con rider2@infusio.com
+- Paginación y búsqueda por parámetros URL: ingresar con cliente@infusio.com
+- Para vincular un paquete a un rider: ingresar con cualquier operador logístico y seleccionar paquete `SHIP-E9124761`
+
+---
+
 Más documentación: <https://github.com/IAW-2026/proyecto-c-shipping-infusio/tree/main/docs>
