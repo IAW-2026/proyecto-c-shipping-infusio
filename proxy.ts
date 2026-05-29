@@ -54,18 +54,17 @@ function hasAnyRole(userRoles: string[], allowedRoles: string[]) {
 }
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims, redirectToSignIn } = await auth()
-
   if (isPublicRoute(req)) {
     return
   }
+
+  const { userId, sessionClaims, redirectToSignIn } = await auth()
 
   if (!userId) {
     return redirectToSignIn()
   }
 
   const userRoles = await getUserRoles(userId, sessionClaims as Record<string, unknown> | null | undefined)
-  console.log(`User ${userId} has roles: ${userRoles.join(", ")}`)
 
 
   if (isAdminRoute(req)) {
