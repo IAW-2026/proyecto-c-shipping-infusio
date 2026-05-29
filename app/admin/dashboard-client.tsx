@@ -17,15 +17,16 @@ import {
   Truck,
   AlertTriangle,
   CheckCircle,
+  Download,
 } from "lucide-react"
 import ChartCard from "@/app/ui/admin/chart-card"
 import StatCard from "@/app/ui/admin/stat-card"
+import { Button } from "@/app/ui/utils/button"
 import { CHART_COLORS as COLORS } from "@/app/lib/definitions"
 import { useState } from "react"
 
 type Monthly = { month: string; envios: number }
 type Latest = { code: string; destination: string; status: string; date: string }
-type RoleCount = { role: string; count: number }
 type DashboardUser = { id: string; name: string; email: string }
 
 export default function DashboardClient({
@@ -51,16 +52,81 @@ export default function DashboardClient({
   { name: "Incidencias", value: stats.incidents },
 ]
 
+  function handleDownloadReport() {
+    const generatedAt = new Date()
+    const lines: string[] = []
+
+    lines.push("REPORTE ADMINISTRATIVO")
+    lines.push(`Generado: ${generatedAt.toLocaleString("es-AR")}`)
+    lines.push("")
+
+    lines.push("ESTADISTICAS GENERALES")
+    lines.push(`- Envíos totales: ${stats.total}`)
+    lines.push(`- En tránsito: ${stats.inTransit}`)
+    lines.push(`- Entregados: ${stats.delivered}`)
+    lines.push(`- Incidencias: ${stats.incidents}`)
+    lines.push("")
+
+    lines.push("ENVIOS MENSUALES")
+    for (const item of monthlyShipments) {
+      lines.push(`- ${item.month}: ${item.envios}`)
+    }
+    lines.push("")
+
+    lines.push("ESTADO DE ENVIOS")
+    for (const item of statusData) {
+      lines.push(`- ${item.name}: ${item.value}`)
+    }
+    lines.push("")
+
+    lines.push("ULTIMOS ESTADOS")
+    for (const item of latestShipments) {
+      lines.push(`- ${item.code} | ${item.status} | ${item.date}`)
+    }
+    lines.push("")
+
+    lines.push("USUARIOS REGISTRADOS")
+    for (const user of users) {
+      lines.push(`- ${user.name} | ${user.email}`)
+    }
+
+    const reportText = lines.join("\n")
+    const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+
+    link.href = url
+    link.download = `reporte-admin-${generatedAt.toISOString().slice(0, 10)}.txt`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
       <div className="mb-10">
-        <p className="mb-2 text-sm font-medium uppercase tracking-widest text-primary">
-          Administración
-        </p>
-        <h1 className="font-serif text-3xl font-medium text-foreground">Panel de control</h1>
-        <p className="mt-2 text-muted-foreground">
-          Resumen general de envíos, ingresos, incidencias y actividad logística.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-primary">
+              Administración
+            </p>
+            <h1 className="font-serif text-3xl font-medium text-foreground">Panel de control</h1>
+            <p className="mt-2 text-muted-foreground">
+              Resumen general de envíos, ingresos, incidencias y actividad logística.
+            </p>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="inline-flex items-center gap-2"
+            onClick={handleDownloadReport}
+          >
+            <Download className="h-4 w-4" />
+            Descargar reporte
+          </Button>
+        </div>
       </div>
 
       <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
