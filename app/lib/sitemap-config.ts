@@ -1,7 +1,7 @@
 export interface SitemapLink {
   label: string
   href: string
-  icon: 'user' | 'package' | 'bell' | 'phone'
+  icon: 'user' | 'package' | 'bell' | 'sparkles' | 'phone'
 }
 
 export interface SitemapSection {
@@ -27,7 +27,7 @@ export const SITEMAP: SitemapSection[] = [
   {
     title: 'Soporte',
     links: [
-      { label: 'Centro de Ayuda', href: '/help', icon: 'user' },
+      { label: 'Centro de Ayuda', href: '/help', icon: 'sparkles' },
       { label: 'Contacto', href: '/contact', icon: 'phone' },
     ],
   },
