@@ -7,10 +7,14 @@ import { TimelineStatuses, type Shipment } from "@/app/lib/definitions"
 
 export const dynamic = "force-dynamic"
 
+const PAGE_SIZE = 5
+
 type FilterRole = "all" | "buyer" | "seller"
 
 type SearchParams = {
   role?: string | string[]
+  page?: string | string[]
+  shippingNumber?: string | string[]
 }
 
 type HistoryPageProps = {
@@ -56,6 +60,20 @@ function normalizeFilterRole(value: string): FilterRole {
   return "all"
 }
 
+function normalizePage(value: string) {
+  const parsedPage = Number.parseInt(value, 10)
+
+  if (Number.isNaN(parsedPage) || parsedPage < 1) {
+    return 1
+  }
+
+  return parsedPage
+}
+
+function normalizeShippingNumber(value: string) {
+  return value.trim()
+}
+
 function formatDateTime(value: Date | null) {
   if (!value) {
     return "Sin fecha"
@@ -75,8 +93,24 @@ function formatTrackingStatus(status: string | null | undefined) {
   return TimelineStatuses[status as keyof typeof TimelineStatuses] ?? status
 }
 
-function buildFilterHref(role: FilterRole) {
-  return role === "all" ? "/user-profile/history" : `/user-profile/history?role=${role}`
+function buildHistoryHref(params: { role?: FilterRole; page?: number; shippingNumber?: string }) {
+  const query = new URLSearchParams()
+
+  if (params.role && params.role !== "all") {
+    query.set("role", params.role)
+  }
+
+  if (params.page && params.page > 1) {
+    query.set("page", String(params.page))
+  }
+
+  if (params.shippingNumber) {
+    query.set("shippingNumber", params.shippingNumber)
+  }
+
+  const search = query.toString()
+
+  return search ? `/user-profile/history?${search}` : "/user-profile/history"
 }
 
 function normalizeTrackingRow(row: TrackingDbRow): TrackingRow {
@@ -106,6 +140,8 @@ function getLatestTrackingByShipment(trackings: TrackingRow[]) {
 export default async function HistoryPage({ searchParams }: HistoryPageProps) {
   const resolvedSearchParams = await searchParams
   const activeRole = normalizeFilterRole(firstParamValue(resolvedSearchParams?.role))
+  const activePage = normalizePage(firstParamValue(resolvedSearchParams?.page))
+  const activeShippingNumber = normalizeShippingNumber(firstParamValue(resolvedSearchParams?.shippingNumber))
   const user = await currentUser()
 
   if (!user) {
@@ -147,8 +183,21 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
       return true
     })
 
-  const buyerOrders = orders.filter((order) => order.buyerId === user.id)
-  const sellerOrders = orders.filter((order) => order.sellerId === user.id)
+  const filteredOrders = orders.filter((order) => {
+    if (!activeShippingNumber) {
+      return true
+    }
+
+    return order.id.toLowerCase().includes(activeShippingNumber.toLowerCase())
+  })
+
+  const buyerOrders = filteredOrders.filter((order) => order.buyerId === user.id)
+  const sellerOrders = filteredOrders.filter((order) => order.sellerId === user.id)
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE))
+  const currentPage = Math.min(activePage, totalPages)
+  const startIndex = (currentPage - 1) * PAGE_SIZE
+  const visibleOrders = filteredOrders.slice(startIndex, startIndex + PAGE_SIZE)
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
@@ -167,7 +216,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-border bg-background/80 p-4 shadow-sm">
               <p className="text-sm text-muted-foreground">Total visible</p>
-              <p className="mt-2 text-2xl font-semibold text-foreground">{orders.length}</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">{filteredOrders.length}</p>
             </div>
             <div className="rounded-2xl border border-border bg-background/80 p-4 shadow-sm">
               <p className="text-sm text-muted-foreground">Como comprador</p>
@@ -179,13 +228,47 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
             </div>
           </div>
 
+          <form action="/user-profile/history" method="get" className="grid gap-3 rounded-2xl border border-border bg-background/80 p-4 shadow-sm sm:grid-cols-[auto_1fr_auto] sm:items-end">
+            <div className="text-sm font-medium text-muted-foreground">
+              <p className="mb-2 inline-flex items-center gap-2">
+                <PackageSearch className="h-4 w-4" />
+                Buscar por shipping number
+              </p>
+              {activeRole !== "all" ? <input type="hidden" name="role" value={activeRole} /> : null}
+              <input type="hidden" name="page" value="1" />
+            </div>
+            <label className="block">
+              <span className="sr-only">Shipping number</span>
+              <input
+                name="shippingNumber"
+                defaultValue={activeShippingNumber}
+                placeholder="Ej: SHIP-1001"
+                className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2 sm:justify-end">
+              <button
+                type="submit"
+                className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+              >
+                Buscar
+              </button>
+              <Link
+                href={buildHistoryHref({ role: activeRole })}
+                className="rounded-full bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary/80"
+              >
+                Limpiar
+              </Link>
+            </div>
+          </form>
+
           <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-background/80 p-2 shadow-sm">
             <div className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
               <Filter className="h-4 w-4" />
               Filtrar por rol
             </div>
             <Link
-              href={buildFilterHref("all")}
+              href={buildHistoryHref({ page: 1, shippingNumber: activeShippingNumber })}
               aria-current={activeRole === "all" ? "page" : undefined}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 activeRole === "all"
@@ -196,7 +279,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
               Todos
             </Link>
             <Link
-              href={buildFilterHref("buyer")}
+              href={buildHistoryHref({ role: "buyer", page: 1, shippingNumber: activeShippingNumber })}
               aria-current={activeRole === "buyer" ? "page" : undefined}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 activeRole === "buyer"
@@ -208,7 +291,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
               Comprador
             </Link>
             <Link
-              href={buildFilterHref("seller")}
+              href={buildHistoryHref({ role: "seller", page: 1, shippingNumber: activeShippingNumber })}
               aria-current={activeRole === "seller" ? "page" : undefined}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 activeRole === "seller"
@@ -224,17 +307,17 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
       </div>
 
       <section className="mt-8">
-        {orders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-card px-6 py-12 text-center shadow-sm">
             <PackageSearch className="mx-auto h-10 w-10 text-primary" />
             <h2 className="mt-4 font-serif text-2xl font-medium text-foreground">No hay pedidos para mostrar</h2>
             <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              No encontramos pedidos en la base de datos asociados al usuario autenticado.
+              No encontramos pedidos en la base de datos asociados al usuario autenticado con los filtros actuales.
             </p>
           </div>
         ) : (
           <div className="grid gap-4">
-            {orders.map((order) => {
+            {visibleOrders.map((order) => {
               const isBuyer = order.buyerId === user.id
               const isSeller = order.sellerId === user.id
 
@@ -300,6 +383,38 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                 </article>
               )
             })}
+
+            {totalPages > 1 ? (
+              <div className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Página {currentPage} de {totalPages} · Mostrando {startIndex + 1}-{Math.min(startIndex + PAGE_SIZE, filteredOrders.length)} de {filteredOrders.length}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={buildHistoryHref({ role: activeRole, page: Math.max(1, currentPage - 1), shippingNumber: activeShippingNumber })}
+                    aria-disabled={currentPage === 1}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                      currentPage === 1
+                        ? "pointer-events-none bg-secondary/50 text-muted-foreground"
+                        : "bg-secondary text-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    Anterior
+                  </Link>
+                  <Link
+                    href={buildHistoryHref({ role: activeRole, page: Math.min(totalPages, currentPage + 1), shippingNumber: activeShippingNumber })}
+                    aria-disabled={currentPage === totalPages}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                      currentPage === totalPages
+                        ? "pointer-events-none bg-secondary/50 text-muted-foreground"
+                        : "bg-secondary text-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    Siguiente
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </section>
