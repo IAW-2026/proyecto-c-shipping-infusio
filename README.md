@@ -58,3 +58,6 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 - Nominatim (OpenStreetMap) — geocoding (https://nominatim.openstreetmap.org).
 - Web Push (VAPID) — notificaciones push vía la librería `web-push`.
 - Postgres / Prisma — base de datos y ORM.
+
+---
+Más documentación: <https://github.com/IAW-2026/proyecto-c-shipping-infusio/tree/main/docs>
