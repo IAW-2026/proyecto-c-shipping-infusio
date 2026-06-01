@@ -38,14 +38,12 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 
 | Rol | Email | Contraseña |
 |------|--------|------------|
-| Viewer | cliente@infusio.com | Infusio2024! |
 | Rider | rider1@infusio.com | ridernumero1 |
 | Rider | rider2@infusio.com | ridernumero2 |
 | Rider | rider3@infusio.com | ridernumero3 |
 | Rider | rider4@infusio.com | ridernumero4 |
 | Operador Logístico | ol1@infusio.com | operadorlogistico1 |
 | Operador Logístico | ol2@infusio.com | operadorlogistico2 |
-| Shipping Admin | shipping_admin@infusio.com | shipping_admin |
 | Admin | admin@infusio.com | Infusio2024! |
 
 ---
