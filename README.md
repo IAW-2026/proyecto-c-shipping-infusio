@@ -69,6 +69,7 @@ Casos de prueba relevantes ya cargados:
 - Pedido asignado a rider: ingresar con rider2@infusio.com
 - Paginación y búsqueda por parámetros URL: ingresar con cliente@infusio.com
 - Para vincular un paquete a un rider: ingresar con cualquier operador logístico y seleccionar paquete `SHIP-E9124761`
+- Para controlar validación de formularios: ingresar en /contact.
 **Todos los casos mencionados son reproducibles con las credenciales solicitadas por la cátedra.**
 
 ---
