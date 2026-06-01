@@ -1,4 +1,26 @@
+import ContactFormClient from './ContactFormClient'
+import { contactSchema, type ContactInput } from '@/app/lib/schemas'
+
 export default function ContactPage() {
+  async function sendContact(data: ContactInput) {
+    'use server'
+    // Validación server-side con zod
+    const parsed = contactSchema.safeParse(data)
+    if (!parsed.success) {
+      const issues: Record<string, string> = {}
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0] as string
+        issues[key] = issue.message
+      }
+      return { ok: false, errors: issues }
+    }
+
+    // Aquí integrar envío de mail o persistencia. Por ahora: log
+    console.log('Contacto (server action):', parsed.data)
+
+    return { ok: true, message: 'Consulta recibida. Te responderemos pronto.' }
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8 w-full">
       <div className="mb-12">
@@ -19,96 +41,17 @@ export default function ContactPage() {
 
       <div className="grid gap-10 lg:grid-cols-[1fr_420px]">
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <form className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <label
-                  htmlFor="name"
-                  className="text-sm font-medium text-foreground"
-                >
-                  Nombre
-                </label>
 
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Ingresá tu nombre"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
-                />
-              </div>
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="lastname"
-                  className="text-sm font-medium text-foreground"
-                >
-                  Apellido
-                </label>
 
-                <input
-                  id="lastname"
-                  type="text"
-                  placeholder="Ingresá tu apellido"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
-                />
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-foreground"
-              >
-                Correo electrónico
-              </label>
 
-              <input
-                id="email"
-                type="email"
-                placeholder="ejemplo@email.com"
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
-              />
-            </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="subject"
-                className="text-sm font-medium text-foreground"
-              >
-                Asunto
-              </label>
 
-              <input
-                id="subject"
-                type="text"
-                placeholder="Motivo de la consulta"
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
-              />
-            </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="message"
-                className="text-sm font-medium text-foreground"
-              >
-                Mensaje
-              </label>
 
-              <textarea
-                id="message"
-                rows={6}
-                placeholder="Escribí tu consulta..."
-                className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
-              />
-            </div>
 
-            <button
-              type="submit"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              Enviar consulta
-            </button>
-          </form>
+            <ContactFormClient action={sendContact} />
         </div>
 
         <div className="h-fit rounded-2xl border border-border bg-secondary/30 p-8">
