@@ -67,7 +67,7 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 
 Casos de prueba relevantes ya cargados:
 - Pedido asignado a rider: ingresar con rider2@infusio.com
-- Paginación y búsqueda por parámetros URL: ingresar con cliente@infusio.com
+- Paginación y búsqueda por parámetros URL: ingresar con shipping+clerk_test@iaw.com
 - Para vincular un paquete a un rider: ingresar con cualquier operador logístico y seleccionar paquete `SHIP-E9124761`
 - Para controlar validación de formularios: ingresar en /contact.
 
