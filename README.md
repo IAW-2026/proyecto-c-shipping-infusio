@@ -31,6 +31,11 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 **Credenciales de acceso**
 
 | Rol | Email | Contraseña |
+| Todos (viewer, rider, operador logístico, administrador) | shipping+clerktest@iaw.com | iawuser# |
+
+**Credenciales de acceso extra**
+
+| Rol | Email | Contraseña |
 |------|--------|------------|
 | Viewer | cliente@infusio.com | Infusio2024! |
 | Rider | rider1@infusio.com | ridernumero1 |
@@ -69,3 +74,4 @@ Casos de prueba relevantes ya cargados:
 ---
 
 Más documentación: <https://github.com/IAW-2026/proyecto-c-shipping-infusio/tree/main/docs>
+Link al deploy: <https://proyecto-c-shipping-infusio.vercel.app/>
