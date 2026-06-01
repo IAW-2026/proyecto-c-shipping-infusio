@@ -73,4 +73,3 @@ Casos de prueba relevantes ya cargados:
 ---
 
 Más documentación: <https://github.com/IAW-2026/proyecto-c-shipping-infusio/tree/main/docs>
-Link al deploy: <https://proyecto-c-shipping-infusio.vercel.app/>
