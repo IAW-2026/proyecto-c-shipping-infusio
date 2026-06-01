@@ -32,14 +32,18 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 
 | Rol | Email | Contraseña |
 |------|--------|------------|
-| Viewer | cliente@infusio.com | Infusio2024! |
+| Todos (viewer, rider, operador logístico, administrador) | shipping+clerk_test@iaw.com | iawuser# |
+
+**Credenciales de acceso extra**
+
+| Rol | Email | Contraseña |
+|------|--------|------------|
 | Rider | rider1@infusio.com | ridernumero1 |
 | Rider | rider2@infusio.com | ridernumero2 |
 | Rider | rider3@infusio.com | ridernumero3 |
 | Rider | rider4@infusio.com | ridernumero4 |
 | Operador Logístico | ol1@infusio.com | operadorlogistico1 |
 | Operador Logístico | ol2@infusio.com | operadorlogistico2 |
-| Shipping Admin | shipping_admin@infusio.com | shipping_admin |
 | Admin | admin@infusio.com | Infusio2024! |
 
 ---
@@ -65,6 +69,7 @@ Casos de prueba relevantes ya cargados:
 - Pedido asignado a rider: ingresar con rider2@infusio.com
 - Paginación y búsqueda por parámetros URL: ingresar con cliente@infusio.com
 - Para vincular un paquete a un rider: ingresar con cualquier operador logístico y seleccionar paquete `SHIP-E9124761`
+**Todos los casos mencionados son reproducibles con las credenciales solicitadas por la cátedra.**
 
 ---
 
