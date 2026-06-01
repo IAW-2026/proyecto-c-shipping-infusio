@@ -32,7 +32,7 @@ Link a la aplicación: <https://proyecto-c-shipping-infusio.vercel.app/>
 
 | Rol | Email | Contraseña |
 |------|--------|------------|
-| Todos (viewer, rider, operador logístico, administrador) | shipping+clerktest@iaw.com | iawuser# |
+| Todos (viewer, rider, operador logístico, administrador) | shipping+clerk_test@iaw.com | iawuser# |
 
 **Credenciales de acceso extra**
 
