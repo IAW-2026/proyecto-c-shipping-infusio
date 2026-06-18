@@ -41,16 +41,6 @@ export default function ContactPage() {
 
       <div className="grid gap-10 lg:grid-cols-[1fr_420px]">
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-
-
-
-
-
-
-
-
-
-
             <ContactFormClient action={sendContact} />
         </div>
 
