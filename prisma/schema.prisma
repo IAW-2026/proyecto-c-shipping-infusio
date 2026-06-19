@@ -54,6 +54,8 @@ model Shipment {
   destinationDatetime DateTime
   buyerId             String
   sellerId            String
+  active              Boolean  @default(true)
+  deletedAt           DateTime?
 
   DeliveryAssignment  DeliveryAssignment[]
   Tracking            Tracking[]
@@ -67,6 +69,8 @@ model Tracking {
   nextCity    String
   completed   Boolean  @default(false)
   current     Boolean  @default(false)
+  active      Boolean  @default(true)
+  deletedAt   DateTime?
 
   Shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
 
