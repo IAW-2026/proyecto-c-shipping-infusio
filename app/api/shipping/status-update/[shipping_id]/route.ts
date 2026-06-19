@@ -19,6 +19,7 @@ export async function PATCH(
     const authError = validateApiKeysMiddleware(request, [
       process.env.INTERNAL_API_KEY,
       process.env.SELLER,
+      process.env.BUYER
     ])
     if (authError) return authError
 
