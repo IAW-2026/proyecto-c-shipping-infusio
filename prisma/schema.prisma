@@ -8,39 +8,53 @@ datasource db {
 }
 
 model DeliveryAssignment {
-  id                 String            @id
+  id                 String  @id
   shipmentId         String
   riderId            String?
   logisticOperatorId String?
-  LogisticOperator   LogisticOperator? @relation(fields: [logisticOperatorId], references: [id])
-  Rider              Rider?            @relation(fields: [riderId], references: [id])
-  Shipment           Shipment          @relation(fields: [shipmentId], references: [id])
+
+  LogisticOperator   LogisticOperator? @relation(fields: [logisticOperatorId], references: [id], onDelete: SetNull)
+  Rider              Rider?            @relation(fields: [riderId], references: [id], onDelete: SetNull)
+  Shipment           Shipment          @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
 }
 
 model LogisticOperator {
-  id                 String               @id
-  name               String
-  email              String               @unique
+  id        String    @id
+  userId    String?   @unique
+  name      String
+  email     String    @unique
+  active    Boolean   @default(true)
+  deletedAt DateTime?
+
+  User      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   DeliveryAssignment DeliveryAssignment[]
 }
 
 model Rider {
-  id                 String               @id
-  name               String
-  email              String               @unique
-  status             RiderStatus
-  location           String
+  id        String      @id
+  userId    String?     @unique
+  name      String
+  email     String      @unique
+  status    RiderStatus @default(activo)
+  location  String
+  active    Boolean     @default(true)
+  deletedAt DateTime?
+
+  User      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   DeliveryAssignment DeliveryAssignment[]
 }
 
 model Shipment {
-  id                  String               @id
+  id                  String   @id
   origin              String
   destination         String
   originDatetime      DateTime
   destinationDatetime DateTime
   buyerId             String
   sellerId            String
+
   DeliveryAssignment  DeliveryAssignment[]
   Tracking            Tracking[]
 }
@@ -53,34 +67,41 @@ model Tracking {
   nextCity    String
   completed   Boolean  @default(false)
   current     Boolean  @default(false)
-  Shipment    Shipment @relation(fields: [shipmentId], references: [id])
+
+  Shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
 
   @@id([shipmentId, datetime])
 }
 
 model User {
-  id       String     @id
-  name     String
-  surname  String
-  email    String     @unique
-  pushSub  Boolean    @default(false)
-  emailSub Boolean    @default(false)
-  UserRole UserRole[]
+  id        String    @id
+  name      String
+  surname   String
+  email     String    @unique
+  pushSub   Boolean   @default(false)
+  emailSub  Boolean   @default(false)
+  active    Boolean   @default(true)
+  deletedAt DateTime?
+
+  UserRole  UserRole[]
+  Rider     Rider?
+  LogisticOperator LogisticOperator?
   PushSubscription PushSubscription?
 }
 
 model PushSubscription {
-  userId       String  @id
+  userId       String   @id
   subscription Json
   createdAt    DateTime @default(now())
 
-  User User @relation(fields: [userId], references: [id])
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserRole {
   userId String
   role   UserRoleType
-  User   User   @relation(fields: [userId], references: [id])
+
+  User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, role])
 }

@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
     const authError = validateApiKeysMiddleware(request, [
       process.env.INTERNAL_API_KEY,
       process.env.BUYER,
+      process.env.SELLER,
     ])
     if (authError) return authError
 
