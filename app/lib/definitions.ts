@@ -26,6 +26,7 @@ export type Rider = {
 
 export type Tracking = {
   shipmentId: string;
+  orderId?: string;
   status: typeof TimelineStatuses[keyof typeof TimelineStatuses];
   datetime: Date;
   currentCity: string;

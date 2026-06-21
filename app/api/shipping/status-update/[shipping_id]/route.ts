@@ -57,6 +57,7 @@ export async function PATCH(
       await tx.tracking.create({
         data: {
           shipmentId: shipping_id,
+          orderId: latestTracking?.orderId,
           datetime: now,
           status: body.status!,
           currentCity: latestTracking?.nextCity ?? latestTracking?.currentCity ?? shipment.origin,

@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (authError) return authError;
 
     const body = await request.json();
-    const { shipmentId, datetime, status, currentCity, nextCity, completed, current } =
+    const { shipmentId, orderId, datetime, status, currentCity, nextCity, completed, current } =
       body;
 
     if (!shipmentId || !datetime || !status) {
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
     const tracking = await prisma.tracking.create({
       data: {
         shipmentId,
+        ...(orderId && { orderId }),
         datetime: new Date(datetime),
         status,
         currentCity: currentCity || "",
@@ -111,7 +112,7 @@ export async function PUT(request: NextRequest) {
     if (authError) return authError;
 
     const body = await request.json();
-    const { shipmentId, datetime, status, currentCity, nextCity, completed, current } =
+    const { shipmentId, orderId, datetime, status, currentCity, nextCity, completed, current } =
       body;
 
     if (!shipmentId || !datetime) {
@@ -142,6 +143,7 @@ export async function PUT(request: NextRequest) {
       },
       data: {
         ...(status && { status }),
+        ...(orderId !== undefined && { orderId }),
         ...(currentCity !== undefined && { currentCity }),
         ...(nextCity !== undefined && { nextCity }),
         ...(completed !== undefined && { completed }),

@@ -65,14 +65,41 @@ export async function POST(request: Request) {
     const now = new Date()
 
     const tracking = await prisma.$transaction(async (tx) => {
+      const orderId = (latestTracking as typeof latestTracking & {
+        orderId?: string | null
+      }).orderId
+
+      if (!orderId) {
+        throw new Error("No se encontró orderId asociado al tracking")
+      }
+
       await tx.tracking.updateMany({
         where: { shipmentId, current: true },
         data: { current: false, completed: true },
       })
 
+      // Avisar al Seller Service que la orden fue entregada
+      const response = await fetch(
+        `${process.env.SELLER_URL}/api/seller/orders/${orderId}/delivered`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.SELLER_HIT!}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(
+          `Error notificando entrega al Seller Service: ${response.status}`
+        )
+      }
+
       return tx.tracking.create({
         data: {
           shipmentId,
+          orderId,
           datetime: now,
           status: "DELIVERED",
           currentCity: latestTracking.nextCity ?? latestTracking.currentCity ?? assignment.Shipment.destination,
