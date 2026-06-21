@@ -63,6 +63,7 @@ model Shipment {
 
 model Tracking {
   shipmentId  String
+  orderId     String?
   datetime    DateTime
   status      TimelineStatuses
   currentCity String
@@ -73,6 +74,8 @@ model Tracking {
   deletedAt   DateTime?
 
   Shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
 
   @@id([shipmentId, datetime])
 }

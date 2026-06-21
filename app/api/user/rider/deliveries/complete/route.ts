@@ -62,6 +62,15 @@ export async function POST(request: Request) {
       )
     }
 
+    const orderId = latestTracking.orderId
+
+    if (!orderId) {
+      return NextResponse.json(
+        { error: "No se encontró orderId asociado al tracking" },
+        { status: 400 }
+      )
+    }
+
     const now = new Date()
 
     const tracking = await prisma.$transaction(async (tx) => {
@@ -70,6 +79,8 @@ export async function POST(request: Request) {
         data: { current: false, completed: true },
       })
 
+      //TODO
+      
       // Avisar al Seller Service que la orden fue entregada
       const response = await fetch(
         `${process.env.SELLER_URL}/api/seller/orders/${orderId}/delivered`,
@@ -91,6 +102,7 @@ export async function POST(request: Request) {
       return tx.tracking.create({
         data: {
           shipmentId,
+          orderId,
           datetime: now,
           status: "DELIVERED",
           currentCity: latestTracking.nextCity ?? latestTracking.currentCity ?? assignment.Shipment.destination,
