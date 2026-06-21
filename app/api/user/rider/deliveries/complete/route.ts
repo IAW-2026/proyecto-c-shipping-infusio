@@ -85,7 +85,7 @@ export async function POST(request: Request) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-api-key": process.env.SELLER_HIT!,
+            Authorization: `Bearer ${process.env.SELLER_HIT!}`,
           },
         }
       )
