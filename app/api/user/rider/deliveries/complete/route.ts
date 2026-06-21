@@ -70,6 +70,24 @@ export async function POST(request: Request) {
         data: { current: false, completed: true },
       })
 
+      // Avisar al Seller Service que la orden fue entregada
+      const response = await fetch(
+        `${process.env.SELLER_URL}/api/seller/orders/${orderId}/delivered`,
+        {
+          method: "POST", // o PATCH según cómo implementes el endpoint
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.INTERNAL_API_KEY!,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Error notificando entrega al Seller Service: ${response.status}`
+        );
+      }
+
       return tx.tracking.create({
         data: {
           shipmentId,
