@@ -1,0 +1,113 @@
+/* DATABASE SCHEMA DEFINITIONS */
+
+export type Shipment = {
+  id: string;
+  origin: string;
+  destination: string;
+  originDatetime: Date;
+  destinationDatetime: Date | null;
+  buyerId: string;
+  sellerId: string;
+};
+
+export type LogisticOperator = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export type Rider = {
+  id: string;
+  name: string;
+  email: string;
+  status: 'activo' | 'inactivo';
+  location: string;
+};
+
+export type Tracking = {
+  shipmentId: string;
+  orderId?: string;
+  status: typeof TimelineStatuses[keyof typeof TimelineStatuses];
+  datetime: Date;
+  currentCity: string;
+  nextCity: string;
+  completed: boolean;
+  current: boolean;
+};
+
+export type User = {
+  id: string;
+  name: string;
+  surname: string;
+  email: string;
+  emailSub: boolean;
+  pushSub: boolean;
+};
+
+export type UserRole = {
+  userId: string;
+  //role: 'rider' | 'logistic_operator' | 'admin' | 'buyer' | 'seller' | 'shipping_admin' | 'viewer';
+  role: typeof Roles[keyof typeof Roles];
+};
+
+export type DeliveryAssignment = {
+  id: string;
+  shipmentId: string;
+  riderId: string;
+  logisticOperatorId: string;
+};
+
+/* ROLES DEFINITIONS */
+
+export const Roles = {
+  ADMIN: "admin",
+  BUYER: "buyer",
+  SELLER: "seller",
+  LOGISTIC_OPERATOR: "logistic_operator",
+  RIDER: "rider",
+  SHIPPING_ADMIN: "shipping_admin",
+  VIEWER: "viewer",
+} as const;
+
+/* UTILS */
+
+export type ShipmentSummary = {
+  id: string
+  origin: string
+  destination: string
+  latestStatus: string
+  latestDatetime: string
+  assignedRiderId: string | null
+};
+
+export const TimelineStatuses = {
+  CONFIRMED: "Pedido confirmado",
+  PREPARING: "Preparando tu pedido",
+  IN_TRANSIT: "En tránsito hacia tu ciudad",
+  ARRIVED_CITY: "El envió llegó a tu ciudad",
+  OUT_FOR_DELIVERY: "En reparto",
+  DELIVERED: "Entregado",
+  CANCELLED: "Pedido cancelado",
+  WITH_ISSUE: "Pedido con incidencia"
+} as const;
+
+export type CreateShippingRequest = {
+  order_id: string
+  buyer_id: string
+  seller_id: string
+  origin_address: {
+    address: string
+    postal_code: string
+  }
+  destination_address: {
+    address: string
+    postal_code: string
+  }
+}
+
+export const CHART_COLORS = [
+  "#6b7056", // olive / primary
+  "#b86f4c", // terracotta / accent
+  "#d4cfc5", // tan / secondary
+  "#2d2926", // brown / foreground
+]

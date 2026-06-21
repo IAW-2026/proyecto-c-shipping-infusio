@@ -1,0 +1,58 @@
+import { TimelineStatuses, type Tracking } from "./definitions";
+
+export const timelineEvents: Tracking[] = [
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.CONFIRMED,
+    datetime: new Date("2026-04-24T10:30:00Z"),
+    currentCity: "Tienda Online Infusio",
+    nextCity: "Centro de Distribución - Palermo",
+    completed: true,
+    current: false,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.PREPARING,
+    datetime: new Date("2026-04-24T14:15:00Z"),
+    currentCity: "Centro de Distribución - Palermo",
+    nextCity: "Centro Logístico - Bahía Blanca",
+    completed: true,
+    current: false,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.IN_TRANSIT,
+    datetime: new Date("2026-04-26T08:45:00Z"),
+    currentCity: "En ruta",
+    nextCity: "Centro Logístico - Bahía Blanca",
+    completed: true,
+    current: false,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.ARRIVED_CITY,
+    datetime: new Date("2026-04-26T12:00:00Z"),
+    currentCity: "Centro Logístico - Bahía Blanca",
+    nextCity: "Tu zona",
+    completed: true,
+    current: true,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.OUT_FOR_DELIVERY,
+    datetime: new Date("2026-04-26T16:00:00Z"),
+    currentCity: "Tu zona",
+    nextCity: "Tu dirección",
+    completed: false,
+    current: false,
+  },
+  {
+    shipmentId: "SHIP_DEMO",
+    status: TimelineStatuses.DELIVERED,
+    datetime: new Date("2026-04-26T20:00:00Z"),
+    currentCity: "Tu dirección",
+    nextCity: "Entrega finalizada",
+    completed: false,
+    current: false,
+  },
+]
