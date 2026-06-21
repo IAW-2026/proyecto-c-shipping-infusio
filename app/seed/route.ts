@@ -75,6 +75,7 @@ async function seedTrackings(prismaClient: PrismaClient = prisma) {
       return prismaClient.tracking.create({
         data: {
           shipmentId: tracking.shipmentId,
+          orderId: tracking.orderId,
           status: mapStatusToPrismaEnum(tracking.status) as any,
           datetime: datetime,
           currentCity: tracking.currentCity,

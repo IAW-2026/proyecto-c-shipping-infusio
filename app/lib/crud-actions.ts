@@ -185,6 +185,7 @@ export async function getTrackings(filters?: {
 
 export async function createTracking(data: {
   shipmentId: string;
+  orderId?: string;
   datetime: string;
   status: string;
   currentCity?: string;
@@ -213,6 +214,7 @@ export async function createTracking(data: {
 
 export async function updateTracking(data: {
   shipmentId: string;
+  orderId?: string;
   datetime: string;
   status?: string;
   currentCity?: string;

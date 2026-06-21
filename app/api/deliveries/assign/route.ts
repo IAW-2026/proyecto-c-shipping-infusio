@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
       const tracking = await tx.tracking.create({
         data: {
           shipmentId,
+          orderId: latestTracking.orderId,
           datetime: now,
           status: NEXT_STATUS,
           currentCity: latestTracking.nextCity || latestTracking.currentCity || shipment.origin,

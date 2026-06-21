@@ -12,6 +12,7 @@ type AdvanceShipmentTrackingInput = {
 
 type PersistedTracking = {
   shipmentId: string
+  orderId?: string
   datetime: string
   status: keyof typeof TimelineStatuses
   currentCity: string
@@ -89,6 +90,7 @@ export async function advanceShipmentTrackingServer({ shipmentId, status }: Adva
     return tx.tracking.create({
       data: {
         shipmentId,
+        orderId: latestTracking?.orderId,
         datetime: now,
         status,
         currentCity: latestTracking?.nextCity ?? latestTracking?.currentCity ?? shipment.origin,
@@ -101,6 +103,7 @@ export async function advanceShipmentTrackingServer({ shipmentId, status }: Adva
 
   const persistedTracking: PersistedTracking = {
     shipmentId: tracking.shipmentId,
+    orderId: tracking.orderId ?? undefined,
     datetime: tracking.datetime.toISOString(),
     status: tracking.status,
     currentCity: tracking.currentCity,

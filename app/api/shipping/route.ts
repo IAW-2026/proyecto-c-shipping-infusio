@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
       await tx.tracking.create({
         data: {
           shipmentId: shippingId,
+          orderId: body.order_id,
           datetime: now,
           status: "CONFIRMED",
           currentCity: body.origin_address!.address,
